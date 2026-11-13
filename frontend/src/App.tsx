@@ -46,7 +46,7 @@ function newManualLine(): ExtractedLine {
   };
 }
 const menu: { page: keyof typeof pagePaths; label: string; icon: typeof House }[] = [
-  { page: 'home', label: 'Главная', icon: House },
+  { page: 'home', label: 'Обзор демо', icon: House },
   { page: 'request', label: 'Создать КП', icon: ListChecks },
   { page: 'review', label: 'Проверка КП', icon: ClipboardCheck },
   { page: 'prices', label: 'Прайс-лист', icon: FileSpreadsheet },
@@ -81,6 +81,9 @@ export function App() {
   const [confirmedRules, setConfirmedRules] = useState<ConfirmedInstructions | null>(null);
   const [draft, setDraft] = useState<AutoDraft | null>(null);
   const [tourActive, setTourActive] = useState(false);
+  const [automaticTourPending, setAutomaticTourPending] = useState(() => /^\/demo\/?$/.test(window.location.pathname));
+  const mounted = useRef(true);
+  const tourPreparation = useRef(0);
   const tourSnapshot = useRef<TourSnapshot | null>(null);
   const tourExample = useRef<{ extracted: ExtractedRequest; draft: AutoDraft;
     resolved: ExtractedRequest; resolvedDraft: AutoDraft } | null>(null);
@@ -104,6 +107,7 @@ export function App() {
   }, []);
 
   useEffect(() => {
+    mounted.current = true;
     let active = true;
     async function initialize() {
       const status = await Promise.allSettled([api.catalog(), api.items(), api.capabilities()]);
@@ -121,17 +125,23 @@ export function App() {
       setBusy(null);
     }
     void initialize();
-    return () => { active = false; };
+    return () => { active = false; mounted.current = false; tourPreparation.current++; };
   }, []);
 
   useEffect(() => {
-    const onPopState = () => setPage(pageFromPath(window.location.pathname));
+    const onPopState = () => {
+      tourPreparation.current++;
+      setAutomaticTourPending(false);
+      setPage(pageFromPath(window.location.pathname));
+    };
     window.addEventListener('popstate', onPopState);
     return () => window.removeEventListener('popstate', onPopState);
   }, []);
   useEffect(() => { applyDocumentSeo(page === 'home' ? 'demo' : 'app', pageTitle(page)); }, [page]);
 
   const go = useCallback((target: keyof typeof pagePaths) => {
+    tourPreparation.current++;
+    setAutomaticTourPending(false);
     if (window.location.pathname !== pagePaths[target]) {
       window.history.pushState({}, '', pagePaths[target]);
     }
@@ -156,20 +166,25 @@ export function App() {
     setTourActive(false);
     requestAnimationFrame(() => document.querySelector<HTMLButtonElement>('[data-demo-tour-start]')?.focus({ preventScroll: true }));
   }, [go]);
-  const startTour = async () => {
+  const startTour = useCallback(async () => {
     if (busy !== null || tourActive) return;
+    const preparation = ++tourPreparation.current;
+    const isCurrent = () => mounted.current && tourPreparation.current === preparation;
     const saved: TourSnapshot = { page, catalog, items, requestText, model, extracted, rulesText,
       rulesProposal, confirmedRules, draft, query, file, error, notice, connectionError };
     setBusy('tour');
     try {
       await activateSampleCatalog();
+      if (!isCurrent()) return;
       const [sampleCatalog, sampleItems, parsed] = await Promise.all([
         api.catalog(), api.items(), api.extract(exampleRequestText, MODELS[0].value),
       ]);
+      if (!isCurrent()) return;
       const resolved: ExtractedRequest = { lines: parsed.lines.slice(0, 2) };
       const [sampleDraft, resolvedDraft] = await Promise.all([
         api.draft(sampleCatalog.id, parsed), api.draft(sampleCatalog.id, resolved),
       ]);
+      if (!isCurrent()) return;
       tourSnapshot.current = saved;
       tourExample.current = { extracted: parsed, draft: sampleDraft, resolved, resolvedDraft };
       setCatalog(sampleCatalog); setItems(sampleItems.items); setQuery(''); setFile(null);
@@ -177,10 +192,17 @@ export function App() {
       setRulesText(''); setRulesProposal(null); setConfirmedRules(null); setDraft(null);
       setConnectionError(null); go(demoTourSteps[0]!.page); setTourActive(true);
     } catch (cause) {
+      if (!isCurrent()) return;
       if (!saved.catalog) resetDemoCatalog();
       setError(errorMessage(cause));
-    } finally { setBusy(null); }
-  };
+    } finally { if (mounted.current) setBusy(null); }
+  }, [busy, tourActive, page, catalog, items, requestText, model, extracted, rulesText,
+    rulesProposal, confirmedRules, draft, query, file, error, notice, connectionError, go]);
+  useEffect(() => {
+    if (!automaticTourPending || busy !== null) return;
+    setAutomaticTourPending(false);
+    if (/^\/demo\/?$/.test(window.location.pathname)) void startTour();
+  }, [automaticTourPending, busy, startTour]);
   const changeTourStep = (index: number) => {
     const example = tourExample.current;
     const step = demoTourSteps[index];
@@ -344,7 +366,7 @@ export function App() {
   return (
     <div className={'app-layout' + (tourActive ? ' demo-tour-running' : '')}>
       <aside className="sidebar" aria-label="Главная навигация">
-        <div className="brand"><img src={designAssets.logo} alt="KPDesk" width={203} height={52} /></div>
+        <a className="brand" href="/" aria-label="KPDesk — на главную"><img src={designAssets.logo} alt="KPDesk" width={203} height={52} /></a>
         <nav aria-label="Разделы">
           {menu.map(({ page: target, label, icon: Icon }) =>
             <a key={target} href={pagePaths[target]}
@@ -370,7 +392,7 @@ export function App() {
 
       <div className="workspace">
         <header className="topbar">
-          <a href="/demo" className="app-mobile-logo" aria-label="KPDesk — главная"><img src={designAssets.logo} alt="KPDesk" width={203} height={52}/></a>
+          <a href="/" className="app-mobile-logo" aria-label="KPDesk — на главную"><img src={designAssets.logo} alt="KPDesk" width={203} height={52}/></a>
           <div className="global-search">
             <Search size={19} aria-hidden="true" />
             <label htmlFor={inputId} className="sr-only">Поиск товаров</label>
@@ -385,6 +407,7 @@ export function App() {
             const target = menu.find(item => pagePaths[item.page] === href);
             if (target) go(target.page);
           }}/>
+          <a className="demo-exit-link" href="/">На главную</a>
           <div className="topbar-right">
             <span className="topbar-support"><CircleHelp size={17} /> Демо KPDesk</span>
             <span className="topbar-separator" />
@@ -398,7 +421,9 @@ export function App() {
             Учебное демо: готовый прайс и пример заявки. Разбор и текст подготовлены заранее, ИИ здесь не вызывается.
             Работа сбросится при обновлении страницы. <a href="/app">Открыть личный кабинет</a>.
           </div>
-          {tourActive ? <DemoTour page={page} busy={busy !== null} onStepChange={changeTourStep} onClose={closeTour}/> : <section className="panel demo-guide" aria-labelledby="demo-guide-title">
+          {tourActive ? <DemoTour page={page} busy={busy !== null} onStepChange={changeTourStep} onClose={closeTour}/> : automaticTourPending || busy === 'tour'
+            ? <section className="panel demo-guide" role="status">Открываем пошаговую инструкцию…</section>
+            : <section className="panel demo-guide" aria-labelledby="demo-guide-title">
             <div className="demo-guide-heading">
               <div><h2 id="demo-guide-title">От прайса до КП в PDF</h2>
                 <p>Посмотрите, как из заявки с бумагой и ручками получается предложение с товарами и ценами.</p></div>
@@ -423,8 +448,7 @@ export function App() {
                     : 'Прайс готов. Перейдите к заявке, откройте позиции примера и проверьте их перед подбором.'}</p>
             <div className="demo-guide-actions">
               <button className="button button-primary" type="button" data-demo-tour-start disabled={busy !== null} onClick={() => void startTour()}>
-                {busy === 'tour' ? 'Открываем пример…' : 'Пройти с подсказками'} <ArrowRight size={17} aria-hidden="true"/></button>
-              {!catalog && page !== 'import' && <button className="button button-primary" type="button" onClick={() => go('import')}>Начать с учебного прайса</button>}
+                Показать инструкцию <ArrowRight size={17} aria-hidden="true"/></button>
               {catalog && !draft && page !== 'request' && <button className="button button-primary" type="button" onClick={() => go('request')}>Продолжить с учебной заявкой</button>}
               {draft && page === 'home' && <button className="button button-primary" type="button" onClick={() => go('review')}>Продолжить проверку</button>}
               <a className="button button-white" href="/app">Создать КП из своего прайса</a>

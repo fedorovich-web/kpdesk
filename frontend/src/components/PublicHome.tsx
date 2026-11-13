@@ -6,12 +6,13 @@ import { PublicHeader, PublicFooter } from './PublicChrome';
 import { designAssets } from '../design-assets';
 import { PublicPricingCards } from './PublicPricingCards';
 import { launchPlans, rubles } from '../content/pricing';
+import { FaqAccordion } from './FaqAccordion';
 
 const advantages = [
-  { icon: designAssets.icon.speed, title: 'Товары и цены без копирования', text: 'Загрузите прайс в CSV или Excel. Товары и цены будут подставляться в КП из каталога.' },
-  { icon: designAssets.icon.success, title: 'Автоматический подбор по заявке', text: 'ИИ разберёт требования клиента, KPDesk предложит товары из прайса. Сравните позиции и подтвердите выбор.' },
-  { icon: designAssets.icon.analytics, title: 'Расчёт без ручных формул', text: 'Подтвердите товары и количество — KPDesk рассчитает стоимость позиций и итог предложения.' },
-  { icon: designAssets.icon.team, title: 'Текст по вашей задаче и товарам', text: 'ИИ подготовит предложение по выбранным позициям и условиям компании. Проверьте текст и скачайте утверждённое КП с логотипом.' },
+  { icon: designAssets.icon.speed, title: 'Товары и цены без копирования', text: 'Загрузите прайс один раз и используйте каталог в следующих КП. Обновляйте его, когда меняются цены.' },
+  { icon: designAssets.icon.success, title: 'Из письма — в список товаров', text: 'ИИ выделит позиции и требования из заявки. KPDesk предложит товары из вашего прайса для проверки и выбора.' },
+  { icon: designAssets.icon.analytics, title: 'Расчёт без ручных формул', text: 'Выберите товары и количество. Стоимость каждой позиции и общая сумма рассчитаются автоматически.' },
+  { icon: designAssets.icon.team, title: 'Предложение от вашей компании', text: 'Получите текст с помощью ИИ, добавьте реквизиты и логотип. Проверьте документ и скачайте готовое КП в PDF.' },
 ] as const;
 
 const steps = [
@@ -30,7 +31,7 @@ export function PublicHome() {
           <h1 id="public-h1">{publicSeo.h1}</h1>
           <p>{publicSeo.lead}</p>
           <div className="public-hero-cta">
-            <a className="button button-primary" href="/demo">Попробовать на примере <ArrowRight size={18} aria-hidden="true"/></a>
+            <a className="button button-primary" href="/demo">Посмотреть демо <ArrowRight size={18} aria-hidden="true"/></a>
             <a className="button button-white" href="#how">Как это работает</a>
           </div>
           <ul className="public-proof">
@@ -110,25 +111,19 @@ export function PublicHome() {
       <section className="public-section public-faq-section" id="faq" aria-labelledby="home-faq-title">
         <h2 id="home-faq-title">Вопросы о работе с KPDesk</h2>
         <p className="public-section-lead">Как подготовить прайс, проверить подбор и текст ИИ, утвердить предложение и скачать PDF.</p>
-        <div className="public-faq-list">
-          {homeFaqs.map(({q,a}) =>
-            <details className="public-faq-item" key={q}>
-              <summary>{q}</summary>
-              <p>{a}</p>
-            </details>)}
-        </div>
+        <FaqAccordion items={homeFaqs} className="public-faq-list" itemClassName="public-faq-item" />
         <p><a href="/faq">Все вопросы и ответы</a></p>
       </section>
 
       <section className="public-end-cta">
-        <div><h2>Попробуйте подготовить КП на учебной заявке</h2>
-          <p>Сравните товары для учебной заявки и посмотрите, как меняется сумма при выборе позиций. Демо открывается без регистрации и внешнего ИИ. Для своих прайсов, генерации текста и сохранения КП нужен настроенный кабинет компании.</p></div>
+        <div><h2>Подготовьте КП для своего клиента</h2>
+          <p>Загрузите прайс и заявку, проверьте товары и суммы — сохраните предложение в PDF.</p></div>
         <div className="marketing-cta-next"><div className="marketing-cta-actions">
-          <a href="/demo" className="button button-white">Открыть демо <ArrowRight size={18} aria-hidden="true"/></a>
-          <a href="/faq" className="button button-outline-light">Ответы на вопросы</a>
+          <a href="/app" className="button button-white">Создать КП <ArrowRight size={18} aria-hidden="true"/></a>
+          <a href="/demo" className="button button-outline-light">Посмотреть демо</a>
         </div><ul className="public-cta-proof">
-          <li><Check size={15} aria-hidden="true"/>Учебный сценарий</li>
-          <li><Check size={15} aria-hidden="true"/>Без внешнего ИИ</li>
+          <li><Check size={15} aria-hidden="true"/>Цены из вашего прайса</li>
+          <li><Check size={15} aria-hidden="true"/>Расчёт и PDF</li>
         </ul></div>
       </section>
     </main>

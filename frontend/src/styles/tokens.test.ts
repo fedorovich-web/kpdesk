@@ -19,6 +19,10 @@ const tokens = readFileSync(resolve(root, 'src/styles/tokens.css'), 'utf8');
 const faces = readFileSync(resolve(root, 'src/styles/fonts.css'), 'utf8');
 
 describe('self-hosted KPDesk design system', () => {
+  it('uses white labels on primary green buttons', () => {
+    expect(styles.match(/\.button-primary\s*\{[^}]*?\bcolor:\s*var\((--[\w-]+)\)/)?.[1])
+      .toBe('--color-surface');
+  });
   it('keeps ordinary text and button labels at WCAG AA contrast on their actual surfaces', () => {
     const colors = (block: string): Record<string, string> => Object.fromEntries([...block.matchAll(/(--[\w-]+):\s*(#[\da-f]{6})\s*;/gi)]
       .map(match => [match[1], match[2]]));

@@ -1,9 +1,9 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { App } from './App';
-import { resetDemoCatalog } from './demo/api';
+import { demoApi, resetDemoCatalog } from './demo/api';
 
 const csv = readFileSync(resolve(process.cwd(),
   'public/templates/kpdesk-portfolio-synthetic-v1.csv'), 'utf8');
@@ -88,11 +88,12 @@ describe('isolated demo reuses the existing workspace components', () => {
     vi.stubGlobal('fetch', fetch);
     render(<App/>);
     fireEvent.change(screen.getByRole('textbox', { name: /Текст заявки/ }), { target: { value: 'Моя незаконченная заявка' } });
-    const start = screen.getByRole('button', { name: 'Пройти с подсказками' });
+    const start = screen.getByRole('button', { name: 'Показать инструкцию' });
     await waitFor(() => expect(start).toBeEnabled());
     fireEvent.click(start);
     const tour = await screen.findByRole('region', { name: 'Пошаговое знакомство с демо' });
     expect(tour).toHaveTextContent('Шаг 1 из 15');
+    expect(within(tour).getByRole('link', { name: 'Выйти из демо' })).toHaveAttribute('href', '/');
     expect(within(tour).getByRole('button', { name: 'Назад' })).toBeDisabled();
     for (let step = 2; step <= 15; step++) {
       const next = within(tour).getByRole('button', { name: 'Далее' });
@@ -117,8 +118,8 @@ describe('isolated demo reuses the existing workspace components', () => {
     expect(window.location.pathname).toBe('/demo/requests/new');
     expect(screen.getByRole('textbox', { name: /Текст заявки/ })).toHaveValue('Моя незаконченная заявка');
     expect(screen.queryByRole('textbox', { name: 'Наименование' })).not.toBeInTheDocument();
-    await waitFor(() => expect(screen.getByRole('button', { name: 'Пройти с подсказками' })).toHaveFocus());
-    fireEvent.click(screen.getByRole('button', { name: 'Пройти с подсказками' }));
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Показать инструкцию' })).toHaveFocus());
+    fireEvent.click(screen.getByRole('button', { name: 'Показать инструкцию' }));
     const reopenedTour = await screen.findByRole('region', { name: 'Пошаговое знакомство с демо' });
     await waitFor(() => expect(reopenedTour).toHaveFocus());
     fireEvent.keyDown(window, { key: 'Escape' });
@@ -128,4 +129,82 @@ describe('isolated demo reuses the existing workspace components', () => {
     expect(fetch.mock.calls.every(([url]) => url === '/templates/kpdesk-portfolio-synthetic-v1.csv')).toBe(true);
     expect(fetch.mock.calls.length).toBeLessThanOrEqual(1);
   });
+  it.each(['/demo', '/demo/'])('automatically highlights the first tutorial step on entry at %s and stays closed after dismissal', async (path) => {
+    window.history.replaceState({}, '', path);
+    const fetch = vi.fn(async (url: string) => {
+      if (url !== '/templates/kpdesk-portfolio-synthetic-v1.csv') throw Error('Unexpected demo request');
+      return { ok: true, text: async () => csv };
+    });
+    vi.stubGlobal('fetch', fetch);
+    render(<App/>);
+    expect(screen.queryByRole('button', { name: 'Начать с учебного прайса' })).not.toBeInTheDocument();
+    const tour = await screen.findByRole('region', { name: 'Пошаговое знакомство с демо' });
+    expect(tour).toHaveTextContent('Шаг 1 из 15');
+    expect(document.querySelector('[data-demo-target="activate"]')).toHaveAttribute('data-demo-spotlight', 'true');
+    expect(within(screen.getByRole('banner')).getByRole('link', { name: 'На главную' })).toHaveAttribute('href', '/');
+    fireEvent.click(within(tour).getByRole('button', { name: 'Закрыть подсказки' }));
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Показать инструкцию' })).toHaveFocus());
+    expect(window.location.pathname).toBe('/demo');
+    expect(screen.queryByRole('region', { name: 'Пошаговое знакомство с демо' })).not.toBeInTheDocument();
+    expect(screen.getAllByRole('button', { name: 'Показать инструкцию' })).toHaveLength(1);
+    fireEvent.click(screen.getByRole('link', { name: 'Создать КП' }));
+    fireEvent.click(screen.getByRole('link', { name: 'Обзор демо' }));
+    expect(screen.queryByRole('region', { name: 'Пошаговое знакомство с демо' })).not.toBeInTheDocument();
+    expect(fetch.mock.calls.every(([url]) => url === '/templates/kpdesk-portfolio-synthetic-v1.csv')).toBe(true);
+  });
+
+  it.each(['/demo/prices', '/demo/prices/import', '/demo/requests/new', '/demo/quotes/review', '/demo/quotes/preview', '/demo/unknown'])('provides a public-home exit while preserving manual route %s', async (path) => {
+    window.history.replaceState({}, '', path);
+    const fetch = vi.fn(async () => { throw Error('Unexpected network call'); });
+    vi.stubGlobal('fetch', fetch);
+    render(<App/>);
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Показать инструкцию' })).toBeEnabled());
+    const exit = within(screen.getByRole('banner')).getByRole('link', { name: 'На главную' });
+    expect(exit).toHaveAttribute('href', '/');
+    expect(exit).toHaveClass('demo-exit-link');
+    expect(window.location.pathname).toBe(path);
+    expect(screen.queryByRole('region', { name: 'Пошаговое знакомство с демо' })).not.toBeInTheDocument();
+    expect(fetch).not.toHaveBeenCalled();
+  });
+
+  it('does not redirect a user who navigates while the automatic tutorial is preparing', async () => {
+    window.history.replaceState({}, '', '/demo');
+    vi.stubGlobal('fetch', vi.fn(async () => ({ ok: true, text: async () => csv })));
+    const originalExtract = demoApi.extract;
+    let finishExtraction!: () => void;
+    const pending = new Promise<void>(resolve => { finishExtraction = resolve; });
+    const extraction = vi.spyOn(demoApi, 'extract').mockImplementation(async (...args) => {
+      await pending;
+      return originalExtract(...args);
+    });
+    render(<App/>);
+    await waitFor(() => expect(extraction).toHaveBeenCalled());
+    fireEvent.click(screen.getByRole('link', { name: 'Создать КП' }));
+    fireEvent.change(screen.getByRole('textbox', { name: /Текст заявки/ }), { target: { value: 'Моя новая заявка' } });
+    await act(async () => { finishExtraction(); await pending; });
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Показать инструкцию' })).toBeEnabled());
+    expect(window.location.pathname).toBe('/demo/requests/new');
+    expect(screen.getByRole('textbox', { name: /Текст заявки/ })).toHaveValue('Моя новая заявка');
+    expect(screen.queryByRole('region', { name: 'Пошаговое знакомство с демо' })).not.toBeInTheDocument();
+  });
+
+  it('discards tutorial preparation after unmount', async () => {
+    window.history.replaceState({}, '', '/demo');
+    vi.stubGlobal('fetch', vi.fn(async () => ({ ok: true, text: async () => csv })));
+    const originalExtract = demoApi.extract;
+    let finishExtraction!: () => void;
+    const pending = new Promise<void>(resolve => { finishExtraction = resolve; });
+    const extraction = vi.spyOn(demoApi, 'extract').mockImplementation(async (...args) => {
+      await pending;
+      return originalExtract(...args);
+    });
+    const { unmount } = render(<App/>);
+    await waitFor(() => expect(extraction).toHaveBeenCalled());
+    unmount();
+    window.history.replaceState({}, '', '/');
+    await act(async () => { finishExtraction(); await pending; });
+    expect(window.location.pathname).toBe('/');
+    expect(document.querySelector('[data-demo-spotlight]')).toBeNull();
+  });
+
 });

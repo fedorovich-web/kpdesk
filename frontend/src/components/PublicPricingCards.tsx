@@ -17,7 +17,7 @@ export function PublicPricingCards() {
         'Подбор, расчёт и текст КП', 'Реквизиты, логотип и PDF', 'История предложений'].map(feature =>
         <li key={feature}><Check size={18} aria-hidden="true"/>{feature}</li>)}</ul>
       <a className={'button ' + (index === 1 ? 'button-primary' : 'button-white')}
-        href="/demo">Попробовать демо</a>
+        href="/app">Начать работу</a>
     </article>)}
   </div>;
 }

@@ -45,7 +45,7 @@
 .faq-resource > svg { flex: none; margin-inline-start: auto; color: var(--color-accent-dark); }
 .faq-questions details { border-block-start: var(--border-width) solid var(--color-border-soft); }
 .faq-questions summary { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3);
-  padding-block: var(--space-5); list-style: none; cursor: pointer; color: var(--color-text); font-size: var(--text-base); }
+  padding-block: var(--space-3); list-style: none; cursor: pointer; color: var(--color-text); font-size: var(--text-base); }
 .faq-questions summary::-webkit-details-marker { display: none; }
 .faq-questions summary::after { content: '›'; font-size: var(--text-h3); color: var(--color-muted); flex: none;
   transition: var(--transition-interactive); }

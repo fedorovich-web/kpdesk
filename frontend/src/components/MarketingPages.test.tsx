@@ -24,6 +24,9 @@ describe('public feature and pricing pages', () => {
     expect(screen.getByText(/Добавьте сотрудников и назначьте им права на работу с прайсами/)).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'ИИ пишет текст КП' })).toBeInTheDocument();
     expect(screen.getByText(/KPDesk предложит позиции из каталога по требованиям заявки/)).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Добавить заявку' })).toHaveAttribute('href', '/app#workspace-request');
+    expect(screen.getByRole('link', { name: 'Загрузить прайс' })).toHaveAttribute('href', '/app#workspace-catalog');
+    expect(screen.getByRole('link', { name: 'Открыть свои КП' })).toHaveAttribute('href', '/app#workspace-quotes');
     expect(screen.queryByText('В разработке')).not.toBeInTheDocument();
   });
   it('shows actual five steps rather than unverified automatic delivery', () => {

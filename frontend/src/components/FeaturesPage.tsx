@@ -10,13 +10,21 @@ const featureIllustrations = [
   '/assets/supporting/kpdesk_offer_stack.png',
   designAssets.benefitsHero,
 ] as const;
+const featureActions = [
+  { href: '/app#workspace-request', label: 'Добавить заявку' },
+  { href: '/app#workspace-catalog', label: 'Загрузить прайс' },
+  { href: '/app#workspace-quote-editor', label: 'Подобрать товары' },
+  { href: '/app#workspace-quotes', label: 'Подготовить текст КП' },
+  { href: '/app#workspace-quotes', label: 'Добавить варианты КП' },
+  { href: '/app#workspace-quotes', label: 'Открыть свои КП' },
+] as const;
 
 export function FeaturesPage() {
   useEffect(() => applyDocumentSeo('features'), []);
   return <MarketingPage>
     <MarketingHero
       title="ИИ-генерация текста КП и подбор товаров"
-      description="ИИ разбирает заявку клиента, KPDesk предлагает товары из вашего прайса и рассчитывает стоимость. Затем ИИ готовит текст по выбранным позициям и условиям. Проверьте предложение, утвердите его и скачайте PDF."
+      description="Соберите предложение из письма клиента и своего прайса. ИИ разберёт заявку и подготовит текст, KPDesk предложит товары и рассчитает сумму. Проверьте результат и скачайте КП с реквизитами и логотипом компании."
       image={designAssets.featuresHero}
       imageAlt="Иллюстрация подготовки коммерческого предложения в KPDesk"
       anchor="#capabilities" secondaryLabel="Посмотреть возможности"
@@ -41,8 +49,8 @@ export function FeaturesPage() {
               : <img src={icon} alt="" loading="lazy" width={96} height={96}/>}
           </div>
           <div><h3>{title}</h3><p>{description}</p>
-            <a href={index === 1 ? '/app/prices' : index >= 3 ? '/app/quotes/review' : '/app/requests/new'}>
-              Посмотреть в кабинете <ArrowRight size={16} aria-hidden="true"/>
+            <a href={featureActions[index]!.href}>
+              {featureActions[index]!.label} <ArrowRight size={16} aria-hidden="true"/>
             </a>
           </div>
         </article>)}
@@ -59,7 +67,7 @@ export function FeaturesPage() {
             <p key={text}><CheckCircle2 size={18} aria-hidden="true"/>{text}</p>)}</div>
       </div>
     </MarketingSection>
-    <MarketingCta title="Попробуйте подбор товаров на примере заявки"
-      description="Откройте учебную заявку, сравните предложенные товары и посмотрите расчёт. Демо работает без внешнего ИИ." />
+    <MarketingCta title="Подготовьте предложение для клиента"
+      description="Добавьте прайс и заявку. Подберите товары, проверьте текст и суммы — скачайте КП с логотипом компании." />
   </MarketingPage>;
 }

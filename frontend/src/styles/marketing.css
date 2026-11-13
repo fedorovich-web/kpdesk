@@ -63,7 +63,7 @@
 .marketing-cta-next { display: grid; gap: var(--space-4); flex: none; }
 .public-cta-proof { display: flex; flex-wrap: wrap; gap: var(--space-4); list-style: none; padding: 0; margin: 0; font-size: var(--text-base); }
 .public-cta-proof li { display: flex; align-items: center; gap: var(--space-2); }
-.button-outline-light { background: transparent; color: var(--color-surface); border: var(--border-width) solid var(--color-surface); text-decoration: none; }
+.button.button-outline-light { background: transparent; color: var(--color-surface); border: var(--border-width) solid var(--color-surface); text-decoration: none; }
 .button-outline-light:hover { background: var(--color-surface); color: var(--color-accent-dark); }
 .marketing-step-ribbon { display: grid; grid-template-columns: repeat(5,minmax(0,1fr)); gap: var(--space-6); background: var(--gradient-tip); border-radius: var(--radius-card); }
 .marketing-ribbon-step { position: relative; min-inline-size: 0; display: grid; justify-items: start; align-content: start; text-align: left; gap: var(--space-4); }

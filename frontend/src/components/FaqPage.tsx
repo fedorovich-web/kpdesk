@@ -5,12 +5,14 @@ import { faqGroups } from '../content/faq';
 import { applyDocumentSeo } from '../seo';
 import { PublicFooter, PublicHeader } from './PublicChrome';
 import { MarketingCta } from './MarketingShared';
+import { FaqItem, useFaqAccordion } from './FaqAccordion';
 
 export function FaqPage() {
   const [search, setSearch] = useState('');
   const [submittedSearch, setSubmittedSearch] = useState('');
   const [category, setCategory] = useState('all');
   const [expandedGroups, setExpandedGroups] = useState<string[]>([]);
+  const accordion = useFaqAccordion();
 
   useEffect(() => applyDocumentSeo('faq'), []);
 
@@ -34,7 +36,7 @@ export function FaqPage() {
           <h1 id="faq-title">Вопросы и ответы о KPDesk</h1>
           <p>Как загрузить прайс, получить подбор товаров и сгенерировать текст КП. Что проверить перед утверждением и скачиванием PDF. Здесь же — тарифы, доступ команды и обработка данных.</p>
           <div className="public-hero-cta">
-            <a className="button button-primary" href="/demo">Открыть демо <ArrowRight size={18} aria-hidden="true"/></a>
+            <a className="button button-primary" href="/demo">Посмотреть демо <ArrowRight size={18} aria-hidden="true"/></a>
             <a className="button button-white" href="#faq-search">Найти ответ</a>
           </div>
           <ul className="public-proof">
@@ -84,11 +86,8 @@ export function FaqPage() {
               </button>
             </div>
             <div className="faq-questions" id={'faq-group-' + group.id}>
-              {group.items.map((item, index) => <details key={item.q}
-                hidden={index >= 3 && !submittedSearch && category === 'all' && !expandedGroups.includes(group.id)}>
-                <summary>{item.q}</summary>
-                <p>{item.a}</p>
-              </details>)}
+              {group.items.map((item, index) => <FaqItem key={item.q} item={item} accordion={accordion}
+                hidden={index >= 3 && !submittedSearch && category === 'all' && !expandedGroups.includes(group.id)}/>)}
             </div>
           </section>)}
         </div> : <div className="faq-no-results">
@@ -120,8 +119,8 @@ export function FaqPage() {
           </a>)}
         </div>
       </section>
-      <MarketingCta title="Попробуйте KPDesk на учебной заявке"
-        description="Откройте демо и посмотрите, как выбрать товары и рассчитать предложение."/>
+      <MarketingCta title="Переходите к своему первому КП"
+        description="Добавьте прайс и заявку клиента, проверьте подбор и подготовьте предложение в PDF."/>
     </main>
     <PublicFooter />
   </div>;

@@ -20,7 +20,7 @@ export const demoTourSteps: { page: keyof typeof pagePaths; target: string; titl
   { page: 'preview', target: 'print', title: 'Сохраните PDF', text: 'Кнопка откроет печать браузера. Выберите сохранение в PDF, чтобы скачать учебный документ. Для КП со своим прайсом и данными компании перейдите в личный кабинет.' },
 ];
 
-/** Nonmodal, opt-in product tour: Next navigates prepared demo stages. */
+/** Nonmodal product tour: Next navigates prepared demo stages. */
 export function DemoTour({ page, busy, onStepChange, onClose }: {
   page: Page; busy: boolean; onStepChange: (index: number) => void; onClose: () => void;
 }) {
@@ -58,6 +58,7 @@ export function DemoTour({ page, busy, onStepChange, onClose }: {
     <p className="demo-tour-description">{step.text}</p>
     <div className="demo-tour-controls">
       <button className="button button-white" type="button" disabled={index === 0 || busy} onClick={() => move(index - 1)}><ArrowLeft size={16} aria-hidden="true"/>Назад</button>
+      <a className="text-button demo-tour-exit" href="/">Выйти из демо</a>
       {!onStepPage && <button className="text-button" type="button" disabled={busy} onClick={() => onStepChange(index)}>Открыть этот шаг</button>}
       <button className="button button-primary" type="button" disabled={busy} onClick={() => index === demoTourSteps.length - 1 ? onClose() : move(index + 1)}>
         {index === demoTourSteps.length - 1 ? 'Завершить подсказки' : 'Далее'}<ArrowRight size={16} aria-hidden="true"/>

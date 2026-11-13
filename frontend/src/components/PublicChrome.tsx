@@ -16,8 +16,8 @@ export function PublicHeader() {
     </nav>
     <div className="public-header-actions">
       <a className="button button-white" href="/auth/login">Войти</a>
-      <a className="button button-primary public-header-cta" href="/demo">
-        Открыть демо <ArrowRight size={18} aria-hidden="true"/>
+      <a className="button button-primary public-header-cta" href="/app">
+        Создать КП <ArrowRight size={18} aria-hidden="true"/>
       </a>
     </div>
     <MobileNavigation links={[
@@ -26,8 +26,9 @@ export function PublicHeader() {
       { href: '/integrations', label: 'Прайсы и данные', current: window.location.pathname === '/integrations' },
       { href: '/pricing', label: 'Тарифы', current: window.location.pathname === '/pricing' },
       { href: '/faq', label: 'Вопросы и ответы', current: window.location.pathname === '/faq' },
+      { href: '/demo', label: 'Посмотреть демо', current: false },
       { href: '/auth/login', label: 'Войти', current: window.location.pathname === '/auth/login' },
-    ]} action={{ href: '/demo', label: 'Открыть демо' }}/>
+    ]} action={{ href: '/app', label: 'Создать КП' }}/>
   </header>;
 }
 
@@ -49,7 +50,7 @@ export function PublicFooter() {
       <h2>Помощь</h2>
       <a href="/faq">Вопросы и ответы</a>
       <a href="mailto:support@kpdesk.ru">support@kpdesk.ru</a>
-      <a href="/demo">Демонстрация</a>
+      <a href="/demo">Интерактивное демо</a>
     </nav>
     <div className="public-footer-column">
       <h2>Документы</h2>

@@ -41,15 +41,21 @@ describe('public landing for B2B suppliers', () => {
     expect(container).toHaveTextContent(/утвердите КП/);
   });
 
-  it('describes text and approval while directing the CTA to the limited demo', () => {
+  it('offers clear actions for a real quote and the guided demo', () => {
     render(<PublicHome />);
     expect(screen.getByRole('heading', { name: 'Генерация текста КП' })).toBeInTheDocument();
-    expect(screen.getByText(/Для своих прайсов, генерации текста и сохранения КП нужен настроенный кабинет компании/))
-      .toBeInTheDocument();
-    for (const link of screen.getAllByRole('link', { name: 'Открыть демо' })) {
+    expect(screen.queryByText(/Для своих прайсов, генерации текста и сохранения КП нужен настроенный кабинет компании/))
+      .not.toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Подготовьте КП для своего клиента' })).toBeInTheDocument();
+    for (const link of screen.getAllByRole('link', { name: 'Создать КП' })) {
+      expect(link).toHaveAttribute('href', '/app');
+    }
+    for (const link of screen.getAllByRole('link', { name: 'Посмотреть демо' })) {
       expect(link).toHaveAttribute('href', '/demo');
     }
-    expect(screen.getByRole('link', { name: 'Попробовать на примере' })).toHaveAttribute('href', '/demo');
+    for (const link of screen.getAllByRole('link', { name: 'Начать работу' })) {
+      expect(link).toHaveAttribute('href', '/app');
+    }
     expect(screen.queryByText('PDF-черновик КП')).not.toBeInTheDocument();
   });
 });

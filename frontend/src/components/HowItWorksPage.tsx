@@ -52,7 +52,7 @@ export function HowItWorksPage() {
       <div><h2>Готовите первое предложение?</h2><p>В справке разобраны формат прайса, работа с заявкой, генерация текста и утверждение PDF.</p></div>
       <a href="/faq" className="button button-white">Открыть справку <ArrowRight size={17} aria-hidden="true"/></a>
     </section>
-    <MarketingCta title="Пройдите первые шаги в демо"
-      description="Попробуйте заявку, подбор товаров и расчёт на учебном прайсе — без регистрации." />
+    <MarketingCta title="Создайте своё первое КП"
+      description="Начните с прайса и заявки клиента. KPDesk поможет подобрать товары, рассчитать стоимость и подготовить PDF." />
   </MarketingPage>;
 }

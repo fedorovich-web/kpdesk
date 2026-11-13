@@ -1,8 +1,57 @@
 import { fireEvent, render, screen } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { FaqPage } from './FaqPage';
 
 describe('public FAQ screen', () => {
+  it('keeps only one answer open across groups and lets it close and reopen', () => {
+    render(<FaqPage />);
+    const first = screen.getByText('Как создать коммерческое предложение по заявке?');
+    const next = screen.getByText('Как скачать коммерческое предложение в PDF?');
+    const firstDetails = first.closest('details')!;
+    const nextDetails = next.closest('details')!;
+    const firstAnswer = firstDetails.querySelector('p')!;
+    const nextAnswer = nextDetails.querySelector('p')!;
+
+    expect(firstAnswer).not.toBeVisible();
+    fireEvent.click(first);
+    expect(firstAnswer).toBeVisible();
+    fireEvent.click(next);
+    expect(nextAnswer).toBeVisible();
+    expect(firstAnswer).not.toBeVisible();
+    expect(document.querySelectorAll('.faq-questions details[open]')).toHaveLength(1);
+    fireEvent.click(next);
+    expect(nextAnswer).not.toBeVisible();
+    fireEvent.click(first);
+    expect(firstAnswer).toBeVisible();
+    expect(nextAnswer).not.toBeVisible();
+  });
+
+  it('keeps the clicked question in place when an earlier answer collapses', () => {
+    render(<FaqPage />);
+    const first = screen.getByText('Как создать коммерческое предложение по заявке?');
+    const next = screen.getByText('Как скачать коммерческое предложение в PDF?');
+    const firstDetails = first.closest('details')!;
+    let scrollOffset = 500;
+    // jsdom has no layout: model an answer above the clicked summary adding 120px.
+    const rect = vi.spyOn(next, 'getBoundingClientRect').mockImplementation(() => ({
+      top: (firstDetails.open ? 900 : 780) - scrollOffset,
+    } as DOMRect));
+    const scroll = vi.spyOn(window, 'scrollBy').mockImplementation((options: number | ScrollToOptions) => {
+      if (typeof options === 'object') scrollOffset += options.top ?? 0;
+    });
+    try {
+      fireEvent.click(first);
+      const before = next.getBoundingClientRect().top;
+      fireEvent.click(next);
+      expect(firstDetails).not.toHaveAttribute('open');
+      expect(next.getBoundingClientRect().top).toBe(before);
+      expect(scroll).toHaveBeenCalledWith({ top: -120, behavior: 'instant' });
+    } finally {
+      rect.mockRestore();
+      scroll.mockRestore();
+    }
+  });
+
   it('groups concrete questions about supplier RFQs', () => {
     document.head.innerHTML = '<meta name="description"><meta name="robots">';
     render(<FaqPage />);
@@ -36,7 +85,7 @@ describe('public FAQ screen', () => {
     expect(screen.getByText(/«Отозвать ссылку»/)).toBeInTheDocument();
     expect(screen.getByText(/Отправка писем из KPDesk и аналитика просмотров в кабинете не подключены/))
       .toBeInTheDocument();
-    for (const link of screen.getAllByRole('link', { name: 'Открыть демо' })) {
+    for (const link of screen.getAllByRole('link', { name: 'Посмотреть демо' })) {
       expect(link).toHaveAttribute('href', '/demo');
     }
   });

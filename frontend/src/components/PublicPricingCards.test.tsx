@@ -20,7 +20,7 @@ describe('researched launch pricing shared across public pages', () => {
       const card=screen.getByRole('heading',{name:name!}).closest('article')!;
       for(const text of [price,people,quotes,catalog]) expect(within(card).getByText(text!)).toBeInTheDocument();
       expect(card).toHaveTextContent('за организацию');
-      expect(within(card).getByRole('link')).toHaveAttribute('href','/demo');
+      expect(within(card).getByRole('link', {name:'Начать работу'})).toHaveAttribute('href','/app');
     }
     expect(screen.queryByText('По запросу')).not.toBeInTheDocument();
   });

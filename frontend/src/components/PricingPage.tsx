@@ -5,6 +5,7 @@ import { launchPlans, count, pricingFaqs, rubles } from '../content/pricing';
 import { applyDocumentSeo } from '../seo';
 import { MarketingCta, MarketingHero, MarketingPage, MarketingSection } from './MarketingShared';
 import { PublicPricingCards } from './PublicPricingCards';
+import { FaqAccordion } from './FaqAccordion';
 
 const included = [
   { title: 'Каталог из вашего прайса', text: 'Загрузите CSV/XLSX, чтобы подбирать товары и считать стоимость по своим данным.', icon: designAssets.icon.upload },
@@ -58,10 +59,9 @@ export function PricingPage() {
       </div>
     </MarketingSection>
     <MarketingSection heading="Вопросы о стоимости" modifier="marketing-price-faq">
-      <div className="faq-questions">{pricingFaqs.map(({q,a}) =>
-        <details key={q}><summary>{q}</summary><p>{a}</p></details>)}</div>
+      <FaqAccordion items={pricingFaqs} className="faq-questions" />
     </MarketingSection>
-    <MarketingCta title="Попробуйте демо перед выбором тарифа"
-      description="Посмотрите подбор и расчёт на учебных товарах. Регистрация и банковская карта не нужны."/>
+    <MarketingCta title="Начните готовить КП в одном кабинете"
+      description="Соберите товары, расчёт и текст предложения в одном документе. Сохраните проверенное КП в PDF для клиента."/>
   </MarketingPage>;
 }

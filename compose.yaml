@@ -1,0 +1,21 @@
+services:
+  db:
+    image: postgres:17@sha256:2d2b8998d31037bf721cfdf764d76ba74171b4fab3431b7f72c27c56ddbdf9e3
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: kpdesk
+      POSTGRES_USER: kpdesk
+      POSTGRES_PASSWORD: ${KP_DESK_DB_PASSWORD:?Set a local database password in .env}
+    ports:
+      - "127.0.0.1:${KP_DESK_DB_PORT:-55432}:5432"
+    volumes:
+      - kpdesk_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U kpdesk -d kpdesk"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
+
+volumes:
+  kpdesk_pgdata:

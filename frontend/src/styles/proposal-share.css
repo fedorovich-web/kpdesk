@@ -1,0 +1,20 @@
+.quote-share-panel { margin-block: 24px; padding-block: 20px; border-block: 1px solid var(--border, #dfe2e6); }
+.quote-share-panel p { max-width: 76ch; }
+.quote-share-actions, .quote-share-address { display: flex; align-items: end; flex-wrap: wrap; gap: 12px; margin-block: 16px; }
+.quote-share-actions label, .quote-share-address label { display: grid; gap: 8px; }
+.quote-share-address label { flex: 1 1 280px; min-width: 0; }
+.quote-share-address input { width: 100%; min-width: 0; }
+.quote-share-panel ul { padding: 0; list-style: none; display: grid; gap: 12px; }
+.quote-share-panel li { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; overflow-wrap: anywhere; }
+.shared-proposal-page { min-height: 100vh; background: #f7f7f5; color: #252a32; }
+.shared-proposal-shell { width: min(100% - 40px, 1320px); margin-inline: auto; }
+.shared-proposal-page header { padding-block: 24px; }
+.shared-proposal-page header img { width: 148px; height: 48px; object-fit: contain; object-position: left; }
+.shared-proposal-page main { padding-block: 24px; min-height: 60vh; }
+.shared-proposal-page h1 { font-size: clamp(1.6rem, 4vw, 2.5rem); overflow-wrap: anywhere; }
+.shared-proposal-pdf { display: block; width: 100%; height: 75vh; margin-top: 24px; border: 1px solid #dfe2e6; }
+.shared-proposal-page footer { padding-block: 24px; border-top: 1px solid #dfe2e6; }
+@media (max-width: 480px) {
+  .shared-proposal-shell { width: calc(100% - 32px); }
+  .quote-share-actions .button, .quote-share-address .button { width: 100%; }
+}

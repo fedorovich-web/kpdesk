@@ -1,0 +1,54 @@
+{
+  "source": "Кабель ВВГ нужно 100.5 м, материал медь\nНасос 2 шт, напор не менее 40 м\nОчиститель 1.25 л",
+  "output": {
+    "lines": [
+      {
+        "description": "Кабель ВВГ",
+        "source_quote": "Кабель ВВГ нужно 100.5 м, материал медь",
+        "quantity": 100.5,
+        "sale_unit": "м",
+        "sku": null,
+        "brand": null,
+        "model": null,
+        "requirements": [
+          {
+            "name": "материал",
+            "value": "медь",
+            "unit": null,
+            "operator": "eq",
+            "source_quote": "Кабель ВВГ нужно 100.5 м, материал медь"
+          }
+        ]
+      },
+      {
+        "description": "Насос",
+        "source_quote": "Насос 2 шт, напор не менее 40 м",
+        "quantity": 2,
+        "sale_unit": "шт",
+        "sku": null,
+        "brand": null,
+        "model": null,
+        "requirements": [
+          {
+            "name": "напор",
+            "value": 40,
+            "unit": "м",
+            "operator": "min",
+            "source_quote": "Насос 2 шт, напор не менее 40 м"
+          }
+        ]
+      },
+      {
+        "description": "Очиститель",
+        "source_quote": "Очиститель 1.25 л",
+        "quantity": 1.25,
+        "sale_unit": "л",
+        "sku": null,
+        "brand": null,
+        "model": null,
+        "requirements": []
+      }
+    ]
+  },
+  "origin": "Raw NVIDIA universal_extraction_v1 response e14a04a8486e,2026-11-06; correct values, overly broad property quotes"
+}

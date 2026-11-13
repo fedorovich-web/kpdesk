@@ -1,0 +1,27 @@
+{
+  "provenance": "saved real NVIDIA output for a public price title; diagnostic rejection, not gold accuracy",
+  "source": "Нужно 2 штуки: Линейка металлическая 50 см.",
+  "output": {
+    "instruction_quotes": [],
+    "lines": [
+      {
+        "source_quote": "Линейка металлическая 50 см",
+        "description": "Линейка металлическая 50 см",
+        "category": "ruler",
+        "quantity": 2,
+        "unit": "штука",
+        "brand": null,
+        "paper_format": null,
+        "paper_gsm": null,
+        "pen_ink_color": null,
+        "pen_ink_type": null,
+        "attributes": [
+          {
+            "name": "ruler.length_mm",
+            "value": 500
+          }
+        ]
+      }
+    ]
+  }
+}

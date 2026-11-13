@@ -1,0 +1,6 @@
+sku;name;category;sale_unit;pieces_per_sale_unit;price_rub;brand;paper_format;paper_gsm;pen_ink_color;pen_ink_type
+PAPER-A4-80;Бумага офисная А4 80 г/м2 500 листов;paper;пачка;1;399.00;DemoPaper;A4;80;;
+PAPER-A4-65;Бумага офисная А4 65 г/м2 500 листов;paper;пачка;1;349.00;DemoPaper;A4;65;;
+PAPER-A3-80;Бумага офисная А3 80 г/м2 500 листов;paper;пачка;1;799.00;DemoPaper;A3;80;;
+PEN-BLUE-BALL;Ручка шариковая синяя 0.7 мм;pen;штука;1;25.00;DemoPen;;;синий;шариковая
+PEN-BLACK-BALL;Ручка шариковая чёрная 0.7 мм;pen;штука;1;25.00;DemoPen;;;черный;шариковая

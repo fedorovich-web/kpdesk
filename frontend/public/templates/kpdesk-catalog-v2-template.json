@@ -1,0 +1,18 @@
+{
+  "products": [
+    {
+      "sku": "",
+      "name": "",
+      "category": "",
+      "sale_unit": "",
+      "pieces_per_sale_unit": null,
+      "price_rub": null,
+      "brand": null,
+      "paper_format": null,
+      "paper_gsm": null,
+      "pen_ink_color": null,
+      "pen_ink_type": null,
+      "attributes_json": {}
+    }
+  ]
+}

@@ -1,0 +1,28 @@
+/* Approved public 404 (#19): render native links, not an image of the page. */
+.not-found-hero {
+  display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1.05fr);
+  align-items: center; gap: var(--space-5); min-block-size: var(--layout-hero-public-min);
+  padding: var(--space-10) max(var(--space-8), calc((100% - var(--content-max)) / 2));
+  border-radius: var(--radius-card); background: var(--gradient-hero);
+}
+.not-found-hero h1 { font-size: var(--text-h1); line-height: var(--line-tight); }
+.not-found-hero h1 > span { display: block; }
+.not-found-hero .not-found-code { color: var(--color-accent); font-size: var(--text-error-code); letter-spacing: var(--tracking-stat); font-weight: var(--weight-extrabold); }
+.not-found-hero p { font-size: var(--text-lg); max-inline-size: var(--layout-hero-public-copy); color: var(--color-text-mid); }
+.not-found-hero > img { display: block; inline-size: 100%; block-size: auto; object-fit: contain; }
+.not-found-suggestions > p { margin-block-end: var(--space-5); }
+.not-found-links { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: var(--space-4); }
+.not-found-links a { min-inline-size: 0; display: flex; gap: var(--space-3); align-items: center; border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-card); padding: var(--space-5); color: var(--color-heading); text-decoration: none; }
+.not-found-links a:hover { border-color: var(--color-accent); background: var(--color-accent-pale); }
+.not-found-links a > span:nth-child(2) { display: grid; gap: var(--space-1); flex: 1; min-inline-size: 0; }
+.not-found-links a small { color: var(--color-muted); font-size: var(--text-base); }
+.not-found-link-icon { flex: none; display: grid; place-items: center; inline-size: var(--space-12); block-size: var(--space-12);
+  border-radius: 50%; background: var(--color-accent-pale); color: var(--color-accent-strong); }
+.not-found-links a > svg { flex: none; color: var(--color-muted); }
+@media (width <= 1024px) { .not-found-links { grid-template-columns: repeat(2,minmax(0,1fr)); } }
+@media (width <= 768px) {
+  .not-found-hero { grid-template-columns: minmax(0,1fr); padding: var(--space-8) var(--space-5); }
+  .not-found-hero > img { max-inline-size: var(--layout-hero-public-art-mobile); margin-inline: auto; }
+}
+@media (width <= 390px) { .not-found-links { grid-template-columns: minmax(0,1fr); } }

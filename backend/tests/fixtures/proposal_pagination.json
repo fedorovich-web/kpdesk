@@ -1,0 +1,106 @@
+{
+  "provenance": "Synthetic fixed quote and company profile from llm-live-retest-plan.json calls[1]; narrative from surface-feedback-control-result.json. No provider requests at test time.",
+  "fixed_quote": {
+    "quote_id": "22222222-2222-4222-8222-222222222222",
+    "revision": 1,
+    "catalog_version_id": "33333333-3333-4333-8333-333333333333",
+    "ready_for_draft": true,
+    "total_rub": "1128.50",
+    "lines": [
+      {
+        "line_number": 1,
+        "description": "Бумага офисная А4 80 г/м², 500 листов",
+        "status": "manager_selected",
+        "sku": "DEMO-PAPER-A4-80",
+        "product_name": "Бумага офисная А4 80 г/м², 500 листов",
+        "requested_quantity": 2,
+        "requested_unit": "пачка",
+        "sale_quantity": 2,
+        "sale_unit": "пачка",
+        "unit_price_rub": "349.90",
+        "line_total_rub": "699.80",
+        "reason_codes": [],
+        "product_brand": null,
+        "supplier_id": null,
+        "source_catalog_version_id": null,
+        "source_sha256": null
+      },
+      {
+        "line_number": 2,
+        "description": "Ручка шариковая синяя",
+        "status": "manager_selected",
+        "sku": "DEMO-PEN-BLUE",
+        "product_name": "Ручка шариковая синяя",
+        "requested_quantity": 10,
+        "requested_unit": "штука",
+        "sale_quantity": 10,
+        "sale_unit": "штука",
+        "unit_price_rub": "24.90",
+        "line_total_rub": "249.00",
+        "reason_codes": [],
+        "product_brand": null,
+        "supplier_id": null,
+        "source_catalog_version_id": null,
+        "source_sha256": null
+      },
+      {
+        "line_number": 3,
+        "description": "Маркер перманентный черный",
+        "status": "manager_selected",
+        "sku": "DEMO-MARKER-BLACK",
+        "product_name": "Маркер перманентный черный",
+        "requested_quantity": 3,
+        "requested_unit": "штука",
+        "sale_quantity": 3,
+        "sale_unit": "штука",
+        "unit_price_rub": "59.90",
+        "line_total_rub": "179.70",
+        "reason_codes": [],
+        "product_brand": null,
+        "supplier_id": null,
+        "source_catalog_version_id": null,
+        "source_sha256": null
+      }
+    ],
+    "snapshot_sha256": "d74dfe2c5a52455c9967878c0a190d2bbc58f2c621cc4596398b778180292aa8",
+    "approved": false,
+    "source_request": null,
+    "instructions": null,
+    "base_total_rub": null,
+    "estimated_total_rub": null,
+    "budget_exceeded": false,
+    "document": null,
+    "approval": null
+  },
+  "document": {
+    "issuer_name": "Учебная компания «Офис-пример»",
+    "recipient_name": "Учебный офис «Пример»",
+    "manager_brief": "Подготовь краткое КП для офиса на 12 рабочих мест. Объясни, как выбранные бумага, ручки и маркеры подходят для повседневной офисной работы; предложи согласовать состав и условия. Неизвестны опыт компании, наличие на складе, сертификаты, сроки доставки и гарантии: не добавляй такие утверждения. Не добавляй товары или характеристики.",
+    "commercial_terms": "Доставка, срок поставки и порядок оплаты согласуются отдельно. НДС не указан.",
+    "issued_on": "2026-10-29",
+    "company_profile": {
+      "revision": 1,
+      "sha256": "34d2737e238d1eead9cfabf5721d2cc1c4d242d7f309f1522553bc978d5afff4",
+      "data": {
+        "schema_version": 1,
+        "display_name": "Учебная компания «Офис-пример»",
+        "about": "Поставляем бумагу и канцелярские товары для офисов.",
+        "advantages": "Помогаем сопоставить заявку с позициями каталога.",
+        "contacts": "acceptance@example.invalid",
+        "default_terms": "Доставка, срок поставки и порядок оплаты согласуются отдельно. НДС не указан.",
+        "generation_style": "Кратко, деловой стиль, без рекламных преувеличений."
+      }
+    },
+    "narrative": {
+      "headline": "Коммерческое предложение: комплект канцелярских товаров для 12 рабочих мест",
+      "opening": "Предлагаем рассмотреть состав, сформированный для обеспечения повседневных задач офиса на 12 рабочих мест.",
+      "solution": "В состав входят:\n- Бумага офисная A4 80 г/м², 500 листов – 2 пачки. Предназначена для печати и копирования документов.\n- Шариковые ручки синего цвета – 10 штук. Предназначены для ежедневных записей.\n- Перманентные маркеры черного цвета – 3 штуки. Предназначены для маркировки документов.",
+      "closing": "Просим подтвердить предложенный состав или выбрать иной вариант, а также согласовать условия поставки и оплаты."
+    },
+    "appearance": {
+      "template": "presentation",
+      "accent_color": "#007F5F",
+      "show_company_section": true
+    }
+  }
+}

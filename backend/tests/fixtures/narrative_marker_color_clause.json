@@ -1,0 +1,92 @@
+{
+  "origin": "Saved raw NVIDIA writer and deterministic feedback from live unified acceptance 8abadd94c77a. No model review performed.",
+  "facts": {
+    "facts_version": "kpdesk_proposal_facts_v3",
+    "issuer": "Тестовый поставщик",
+    "recipient": "Тестовый получатель",
+    "manager_brief": "Подготовьте краткое предложение по трём выбранным позициям. Различайте маркер для досок и перманентный маркер. Укажите только подтверждённые характеристики.",
+    "confirmed_terms": "",
+    "selection_origin": "customer_request",
+    "products": [
+      {
+        "product_id": "variant:1:line:1",
+        "name": "Бумага офисная A4 80 г/м²",
+        "quantity": 2,
+        "unit": "пачка",
+        "brand": null,
+        "requested_specs": {
+          "category": "paper",
+          "paper_format": "A4",
+          "paper_gsm": 80,
+          "attributes": {}
+        },
+        "verified_specs": {
+          "category": "paper",
+          "paper_format": "A4",
+          "paper_gsm": "80"
+        }
+      },
+      {
+        "product_id": "variant:1:line:2",
+        "name": "Маркер для досок синий",
+        "quantity": 3,
+        "unit": "штука",
+        "brand": null,
+        "requested_specs": {
+          "category": "marker",
+          "attributes": {
+            "ink_color": "синий",
+            "marker_type": "для досок"
+          }
+        },
+        "verified_specs": {
+          "category": "marker",
+          "ink_color": "синий",
+          "marker_type": "whiteboard"
+        }
+      },
+      {
+        "product_id": "variant:1:line:3",
+        "name": "Маркер перманентный черный",
+        "quantity": 2,
+        "unit": "штука",
+        "brand": null,
+        "requested_specs": {
+          "category": "marker",
+          "attributes": {
+            "ink_color": "черный",
+            "marker_type": "перманентный"
+          }
+        },
+        "verified_specs": {
+          "category": "marker",
+          "ink_color": "черный",
+          "marker_type": "permanent"
+        }
+      }
+    ],
+    "confirmed_selection_rules": null
+  },
+  "draft": {
+    "headline": "Офисная бумага А4 и маркеры для досок и стойкой маркировки",
+    "opening": "Предлагаю рассмотреть состав из трёх позиций для офисной печати и работы с маркерными досками.",
+    "solution": "Бумага офисная А4 80 г/м² — для печати документов. Синий маркер предназначен для записей на маркерной доске, чёрный перманентный — для стойкой маркировки.",
+    "closing": "Подтвердите состав или укажите изменения. Неизвестные условия — сроки, доставка, оплата — согласуем отдельно."
+  },
+  "observed_feedback": {
+    "review_origin": "deterministic_context",
+    "model_review_performed": false,
+    "context_issues": [
+      {
+        "section": "headline",
+        "quote": "досок",
+        "reason": "unsupported_surface"
+      },
+      {
+        "section": "solution",
+        "quote": "доске",
+        "reason": "unsupported_surface"
+      }
+    ]
+  }
+}

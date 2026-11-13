@@ -1,0 +1,1 @@
+"""Transactional mail transport adapters."""

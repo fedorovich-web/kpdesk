@@ -1,0 +1,9 @@
+/* Approved review screen #14 adapted to actual automatic SKU matching. */
+.review-stat-grid { grid-template-columns: repeat(3,minmax(0,1fr)); margin-block: var(--space-4); }
+.review-grid > * { min-inline-size: 0; }
+.review-attention { margin-block-start: var(--space-4); padding: var(--space-4); border: var(--border-width) solid var(--color-warning-border); background: var(--color-warning-surface); border-radius: var(--radius-input); }
+.review-attention h3 { font-size: var(--text-h4); margin-block: 0 var(--space-2); }
+.review-attention p { margin: 0; }
+.review-table caption { font-size: var(--text-base); }
+@media (width <= 1040px) { .review-stat-grid { grid-template-columns: repeat(2,minmax(0,1fr)); } }
+@media (width <= 720px) { .review-stat-grid { grid-template-columns: minmax(0,1fr); } }

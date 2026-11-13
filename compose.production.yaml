@@ -1,0 +1,107 @@
+# First production instance. Secrets are supplied by Dokploy Environment, never Git.
+services:
+  secret-files:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: application
+    command: [python, -m, scripts.seed_production_secrets]
+    user: '0:0'
+    restart: 'no'
+    network_mode: none
+    environment:
+      KP_DESK_PRODUCTION_DB_PASSWORD: ${KP_DESK_PRODUCTION_DB_PASSWORD:?Set project database password}
+      KP_DESK_PRODUCTION_SERVICE_CREDENTIALS: ${KP_DESK_PRODUCTION_SERVICE_CREDENTIALS:?Set restricted service credentials}
+      KP_DESK_PRODUCTION_EMAIL_KEY: ${KP_DESK_PRODUCTION_EMAIL_KEY:?Set project email encryption key}
+    volumes:
+      - owner_secret:/secrets/owner
+      - service_secret:/secrets/service
+      - email_secret:/secrets/email
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    pids_limit: 32
+    mem_limit: 128m
+    healthcheck: {disable: true}
+  db:
+    image: postgres:17@sha256:2d2b8998d31037bf721cfdf764d76ba74171b4fab3431b7f72c27c56ddbdf9e3
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: kpdesk
+      POSTGRES_USER: kpdesk
+      POSTGRES_PASSWORD_FILE: /run/owner-secret/db_owner_password
+    depends_on:
+      secret-files: {condition: service_completed_successfully}
+    volumes:
+      - database:/var/lib/postgresql/data
+      - owner_secret:/run/owner-secret:ro
+    networks: [private]
+    healthcheck:
+      test: [CMD-SHELL, 'pg_isready -U kpdesk -d kpdesk']
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    mem_limit: 1g
+    cpus: 1
+    pids_limit: 128
+  provision:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: provisioner
+    restart: 'no'
+    depends_on:
+      db: {condition: service_healthy}
+    environment:
+      KP_DESK_DB_HOST: db
+      KP_DESK_INSTALL_NONCE: ${KP_DESK_INSTALL_NONCE:?Set unique instance nonce}
+    volumes:
+      - owner_secret:/run/owner-secret:ro
+      - service_secret:/run/service-secret:ro
+    networks: [private]
+    read_only: true
+    tmpfs: ['/tmp:rw,nosuid,noexec,size=32m']
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    pids_limit: 64
+    mem_limit: 512m
+    healthcheck: {disable: true}
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: application
+    restart: unless-stopped
+    depends_on:
+      provision: {condition: service_completed_successfully}
+    environment:
+      KP_DESK_PUBLIC_ORIGIN: https://kpdesk.ru
+      KP_DESK_DB_HOST: db
+      KP_DESK_DB_PORT: '5432'
+      KP_DESK_SERVICE_CREDENTIALS_FILE: /run/service-secret/service_credentials
+      KP_DESK_PROXY_HOST: dokploy-traefik
+      KP_DESK_DADATA_API_KEY: ${KP_DESK_DADATA_API_KEY:-}
+      KP_DESK_RESEND_API_KEY: ${KP_DESK_RESEND_API_KEY:-}
+      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
+    volumes:
+      - service_secret:/run/service-secret:ro
+      # PROJECT_ROOT of the installed, locked wheel is /opt/venv/lib.
+      # This is the existing account-lifecycle key path; never reuse a local key.
+      - email_secret:/opt/venv/lib/credentials:ro
+    networks: [private, dokploy-network]
+    expose: ['8000']
+    read_only: true
+    tmpfs: ['/tmp:rw,nosuid,noexec,size=64m']
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    pids_limit: 128
+    mem_limit: 1g
+    cpus: 2
+networks:
+  private: {internal: true}
+  dokploy-network: {external: true}
+volumes:
+  database:
+  owner_secret:
+  service_secret:
+  email_secret:

@@ -1,0 +1,46 @@
+# Local credentials and environments
+.env
+**/.env
+**/.venv/
+**/__pycache__/
+**/.pytest_cache/
+**/.mypy_cache/
+**/.ruff_cache/
+**/node_modules/
+**/dist/
+**/dist-e2e/
+**/playwright-report/
+ml/data/private/
+ml/manifests/*.joblib
+ml/models/
+credentials/
+google-oauth-client.json
+google-token.json
+**/google-oauth-client.json
+**/google-token.json
+
+# Unlicensed supplier originals, procurement documents and raw intake files
+ml/data/real/
+ml/data/incoming/
+
+# Generated screenshots, reports, local DB dumps and credentials-adjacent artifacts
+artifacts/
+backups/
+*.dump
+*.backup
+*.sql.gz
+.seo-cache/
+*.log
+.playwright-mcp/
+backend/artifacts/
+
+# Private engineering material; retained locally, excluded from publication.
+/docs/
+/.github/
+/AGENTS.md
+/AUDIT_REPORT.md
+/AUDIT_PROGRESS.md
+/SEO_RESEARCH.md
+/backend/tests/test_historical_operator_guards.py
+/backend/tests/test_offline_selection_safety.py
+/frontend/scripts/crop-ui-icons.py

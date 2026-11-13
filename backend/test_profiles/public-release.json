@@ -1,0 +1,571 @@
+{
+  "selected": [
+    "test_a12_release_snapshot.py",
+    "test_a51_grounding.py",
+    "test_a82_reviewed_publication_isolation.py",
+    "test_a86_migration_guard.py",
+    "test_a87_migration_lineage.py",
+    "test_a93_migration_guard.py",
+    "test_a93_review_signing_keyfile.py",
+    "test_a93_signer_provision_guard.py",
+    "test_a94_review_worker_admission.py",
+    "test_a95_rotation_cohort_guard.py",
+    "test_a96_authenticated_worker.py",
+    "test_a97_catalog_migration_proposal.py",
+    "test_account_catalog_copy.py",
+    "test_ai_quality_boundaries.py",
+    "test_api_llm_copy.py",
+    "test_async_inference_operation.py",
+    "test_async_provider_routes.py",
+    "test_attribute_normalization.py",
+    "test_auth_reset_serialization_migration.py",
+    "test_auto_draft_api.py",
+    "test_auto_draft_identifier_guard.py",
+    "test_auto_draft_identity_evidence.py",
+    "test_auto_draft_identity_taxonomy.py",
+    "test_auto_draft_marked_codes.py",
+    "test_automatic_draft.py",
+    "test_cartridge_compatibility.py",
+    "test_cartridge_quantity_evidence.py",
+    "test_catalog_api.py",
+    "test_catalog_db.py",
+    "test_catalog_extraction_contract.py",
+    "test_catalog_http_postgres.py",
+    "test_catalog_parse.py",
+    "test_category_bound_extraction.py",
+    "test_category_extraction_adapter.py",
+    "test_clone_cleanup_safety.py",
+    "test_commercial_document.py",
+    "test_committed_login.py",
+    "test_company_logo.py",
+    "test_company_logo_api.py",
+    "test_company_logo_migration.py",
+    "test_company_lookup.py",
+    "test_company_lookup_api.py",
+    "test_company_profile.py",
+    "test_company_profile_migration.py",
+    "test_composition_variants.py",
+    "test_container_entrypoint.py",
+    "test_csrf_header_contract.py",
+    "test_default_company_logo.py",
+    "test_document_alternatives.py",
+    "test_document_appearance.py",
+    "test_document_approval.py",
+    "test_document_preview.py",
+    "test_extracted_instructions.py",
+    "test_extraction_api.py",
+    "test_extraction_categories_v2.py",
+    "test_extraction_evaluation.py",
+    "test_extraction_paper_evidence.py",
+    "test_extraction_source_quote.py",
+    "test_extraction_strict_facts.py",
+    "test_google_service_account.py",
+    "test_google_service_sheet_bridge.py",
+    "test_google_sheets_import.py",
+    "test_groq_acceptance_diagnostics.py",
+    "test_groq_extraction.py",
+    "test_groq_telemetry.py",
+    "test_integration_contracts.py",
+    "test_issuer_requisites.py",
+    "test_issuer_requisites_migration.py",
+    "test_llm_cache_hash.py",
+    "test_local_release_operator.py",
+    "test_logical_budget_timeouts.py",
+    "test_manager_feedback_api.py",
+    "test_manager_feedback_bundle.py",
+    "test_manager_feedback_history_api.py",
+    "test_manager_feedback_storage.py",
+    "test_manager_selection.py",
+    "test_matching_baseline.py",
+    "test_metrics.py",
+    "test_multicategory_canonical_scale.py",
+    "test_multicategory_price_scale.py",
+    "test_narrative_consumption_effects.py",
+    "test_narrative_context.py",
+    "test_narrative_correction.py",
+    "test_narrative_internal_references.py",
+    "test_narrative_local_precheck.py",
+    "test_narrative_marker_color_clause.py",
+    "test_narrative_marker_media.py",
+    "test_narrative_passages.py",
+    "test_narrative_product_evidence.py",
+    "test_narrative_review.py",
+    "test_narrative_revision_scope.py",
+    "test_narrative_surface_evidence.py",
+    "test_notification_outbox_async.py",
+    "test_openrouter_budget.py",
+    "test_openrouter_client.py",
+    "test_openrouter_settings.py",
+    "test_p4_auth_environment_query.py",
+    "test_p4_performance_metrics.py",
+    "test_pdf_brand_v2.py",
+    "test_pdf_company_logo.py",
+    "test_pdf_pagination.py",
+    "test_persisted_quote_api.py",
+    "test_portfolio_sample_fixture.py",
+    "test_postgres_clone_safety.py",
+    "test_product_profiles_v2.py",
+    "test_production_entrypoint.py",
+    "test_proposal_narrative.py",
+    "test_proposal_share_http.py",
+    "test_proposal_share_migration.py",
+    "test_proposal_sharing.py",
+    "test_provider_authority_migration.py",
+    "test_provider_cancellation.py",
+    "test_public_catalog_templates.py",
+    "test_public_secret_templates.py",
+    "test_public_security_headers.py",
+    "test_pytest_session_safety.py",
+    "test_quote_calculation_api.py",
+    "test_quote_instruction_snapshot.py",
+    "test_quote_instructions.py",
+    "test_quote_math.py",
+    "test_quote_pdf.py",
+    "test_quote_persistence.py",
+    "test_quote_source_snapshot.py",
+    "test_quote_workflow_copy.py",
+    "test_real_request_cli.py",
+    "test_real_request_intake.py",
+    "test_recipient_requisites.py",
+    "test_registry_retirement_migration.py",
+    "test_release_quality_gate.py",
+    "test_release_runtime.py",
+    "test_request_analysis.py",
+    "test_resend_mail.py",
+    "test_review_selection_binding.py",
+    "test_review_source_readers_install_guard.py",
+    "test_reviewed_catalog_provenance_migration.py",
+    "test_reviewed_source_bridge_migration.py",
+    "test_runtime_config.py",
+    "test_runtime_readiness_migration_guard.py",
+    "test_safe_test_runner.py",
+    "test_source_evidence.py",
+    "test_stationery_taxonomy.py",
+    "test_streaming_body_limit.py",
+    "test_supplier_canonical_preview.py",
+    "test_supplier_catalog_diff.py",
+    "test_supplier_commerceml.py",
+    "test_supplier_comparison.py",
+    "test_supplier_directory_migration.py",
+    "test_supplier_historical_sources.py",
+    "test_supplier_json.py",
+    "test_supplier_legacy_xls.py",
+    "test_supplier_mapping.py",
+    "test_supplier_model_guard.py",
+    "test_supplier_pack_basis_guard.py",
+    "test_supplier_package_quantities.py",
+    "test_supplier_precision_batch.py",
+    "test_supplier_preview.py",
+    "test_supplier_profile_store.py",
+    "test_supplier_profiles.py",
+    "test_supplier_quote_migration_guard.py",
+    "test_supplier_registry_migration.py",
+    "test_supplier_registry_retirement.py",
+    "test_supplier_source_discovery.py",
+    "test_supplier_source_discovery_http.py",
+    "test_supplier_source_discovery_migration.py",
+    "test_synthetic_supplier_prices.py",
+    "test_tenant_access.py",
+    "test_tenant_batch_matching.py",
+    "test_tenant_fixture_safety.py",
+    "test_tenant_foundation_schema.py",
+    "test_tenant_matching_policy.py",
+    "test_tenant_models.py",
+    "test_tenant_quote_pagination.py",
+    "test_training_feedback_migration_guard.py",
+    "test_universal_api.py",
+    "test_universal_core.py",
+    "test_universal_extraction.py",
+    "test_universal_feedback_integrity.py",
+    "test_universal_migration.py",
+    "test_universal_pdf.py",
+    "test_universal_privacy.py",
+    "test_universal_quote_provenance.py",
+    "test_universal_storage_integrity.py",
+    "test_verified_supplier_sources.py",
+    "test_universal_requisites.py",
+    "test_production_provision.py",
+    "test_public_release_profile.py",
+    "test_production_secret_files.py"
+  ],
+  "excluded_protected_ml": [
+    {
+      "file": "test_a46_candidate_evaluation.py",
+      "reason": "ML training/holdout/model/data path outside runtime portability scope",
+      "markers": [
+        "ml/data/",
+        "ml/models/",
+        "scripts.evaluate_"
+      ]
+    },
+    {
+      "file": "test_a46_no_match_holdout.py",
+      "reason": "ML training/holdout/model/data path outside runtime portability scope",
+      "markers": [
+        "ml/models/",
+        "scripts.evaluate_",
+        "kpdesk.matching.cli"
+      ]
+    },
+    {
+      "file": "test_a46_semantic_training.py",
+      "reason": "ML training/holdout/model/data path outside runtime portability scope",
+      "markers": [
+        "ml/data/",
+        "kpdesk.matching.training",
+        "kpdesk.matching.cli"
+      ]
+    },
+    {
+      "file": "test_a46_taxonomy_coverage.py",
+      "reason": "ML training/holdout/model/data path outside runtime portability scope",
+      "markers": [
+        "ml/data/",
+        "scripts.evaluate_",
+        "kpdesk.matching.category_classifier",
+        "kpdesk.matching.cli"
+      ]
+    },
+    {
+      "file": "test_a57_contrastive_training.py",
+      "reason": "ML training/holdout/model/data path outside runtime portability scope",
+      "markers": [
+        "ml/data/",
+        "scripts.evaluate_",
+        "kpdesk.matching.category_classifier",
+        "kpdesk.matching.cli"
+      ]
+    },
+    {
+      "file": "test_additional_quantity_layouts.py",
+      "reason": "ML training/holdout/model/data path outside runtime portability scope",
+      "markers": [
+        "ml/data/"
+      ]
+    },
+    {
+      "file": "test_additional_supplier_sources.py",
+      "reason": "ML training/holdout/model/data path outside runtime portability scope",
+      "markers": [
+        "ml/data/"
+      ]
+    },
+    {
+      "file": "test_ai_runtime_quality_audit.py",
+      "reason": "ML training/holdout/model/data path outside runtime portability scope",
+      "markers": [
+        "kpdesk.matching.training",
+        "kpdesk.matching.artifact"
+      ]
+    },
+    {
+      "file": "test_annotation_adjudication.py",
+      "reason": "ML training/holdout/model/data path outside runtime portability scope",
+      "markers": [
+        "ml/data/"
+      ]
+    },
+    {
+      "file": "test_decision_audit.py",
+      "reason": "ML training/holdout/model/data path outside runtime portability scope",
+      "markers": [
+        "kpdesk.matching.training"
+      ]
+    },
+    {
+      "file": "test_expanded_real_procurement.py",
+      "reason": "ML training/holdout/model/data path outside runtime portability scope",
+      "markers": [
+        "ml/data/"
+      ]
+    },
+    {
+      "file": "test_manager_feedback_cli.py",
+      "reason": "ML training/holdout/model/data path outside runtime portability scope",
+      "markers": [
+        "kpdesk.matching.cli"
+      ]
+    },
+    {
+      "file": "test_ml_abstention.py",
+      "reason": "ML training/holdout/model/data path outside runtime portability scope",
+      "markers": [
+        "kpdesk.matching.training",
+        "kpdesk.matching.cli",
+        "kpdesk.matching.abstention"
+      ]
+    },
+    {
+      "file": "test_ml_category_classifier.py",
+      "reason": "ML training/holdout/model/data path outside runtime portability scope",
+      "markers": [
+        "kpdesk.matching.category_classifier",
+        "kpdesk.matching.cli"
+      ]
+    },
+    {
+      "file": "test_ml_cli.py",
+      "reason": "ML training/holdout/model/data path outside runtime portability scope",
+      "markers": [
+        "kpdesk.matching.cli"
+      ]
+    },
+    {
+      "file": "test_ml_curriculum.py",
+      "reason": "ML training/holdout/model/data path outside runtime portability scope",
+      "markers": [
+        "kpdesk.matching.training",
+        "kpdesk.matching.cli"
+      ]
+    },
+    {
+      "file": "test_ml_feedback.py",
+      "reason": "ML training/holdout/model/data path outside runtime portability scope",
+      "markers": [
+        "kpdesk.matching.training"
+      ]
+    },
+    {
+      "file": "test_ml_leakage_gates.py",
+      "reason": "ML training/holdout/model/data path outside runtime portability scope",
+      "markers": [
+        "kpdesk.matching.training"
+      ]
+    },
+    {
+      "file": "test_ml_quality_metrics.py",
+      "reason": "ML training/holdout/model/data path outside runtime portability scope",
+      "markers": [
+        "kpdesk.matching.training",
+        "kpdesk.matching.features"
+      ]
+    },
+    {
+      "file": "test_ml_rank_artifact.py",
+      "reason": "ML training/holdout/model/data path outside runtime portability scope",
+      "markers": [
+        "kpdesk.matching.training",
+        "kpdesk.matching.features",
+        "kpdesk.matching.artifact"
+      ]
+    },
+    {
+      "file": "test_ml_training.py",
+      "reason": "ML training/holdout/model/data path outside runtime portability scope",
+      "markers": [
+        "kpdesk.matching.training",
+        "kpdesk.matching.features"
+      ]
+    },
+    {
+      "file": "test_public_procurement_intake.py",
+      "reason": "ML training/holdout/model/data path outside runtime portability scope",
+      "markers": [
+        "ml/data/"
+      ]
+    },
+    {
+      "file": "test_quarantined_supplier_prices.py",
+      "reason": "ML training/holdout/model/data path outside runtime portability scope",
+      "markers": [
+        "ml/data/"
+      ]
+    },
+    {
+      "file": "test_real_review_queue.py",
+      "reason": "ML training/holdout/model/data path outside runtime portability scope",
+      "markers": [
+        "ml/data/"
+      ]
+    },
+    {
+      "file": "test_real_supplier_corpus.py",
+      "reason": "ML training/holdout/model/data path outside runtime portability scope",
+      "markers": [
+        "ml/data/"
+      ]
+    },
+    {
+      "file": "test_real_web_price_cards.py",
+      "reason": "ML training/holdout/model/data path outside runtime portability scope",
+      "markers": [
+        "ml/data/"
+      ]
+    },
+    {
+      "file": "test_research_ru_prices.py",
+      "reason": "ML training/holdout/model/data path outside runtime portability scope",
+      "markers": [
+        "ml/data/"
+      ]
+    },
+    {
+      "file": "test_reviewed_negative_policy.py",
+      "reason": "ML training/holdout/model/data path outside runtime portability scope",
+      "markers": [
+        "kpdesk.matching.training",
+        "kpdesk.matching.cli"
+      ]
+    },
+    {
+      "file": "test_russian_store_currency.py",
+      "reason": "ML training/holdout/model/data path outside runtime portability scope",
+      "markers": [
+        "ml/data/"
+      ]
+    },
+    {
+      "file": "test_semantic_no_match_decisions.py",
+      "reason": "ML training/holdout/model/data path outside runtime portability scope",
+      "markers": [
+        "scripts.evaluate_",
+        "scripts.audit_semantic_no_match_decisions",
+        "kpdesk.matching.cli"
+      ]
+    },
+    {
+      "file": "test_supplier_formula_quarantine.py",
+      "reason": "ML training/holdout/model/data path outside runtime portability scope",
+      "markers": [
+        "ml/data/"
+      ]
+    },
+    {
+      "file": "test_supplier_inference.py",
+      "reason": "ML training/holdout/model/data path outside runtime portability scope",
+      "markers": [
+        "ml/data/"
+      ]
+    },
+    {
+      "file": "test_supplier_price_precision.py",
+      "reason": "ML training/holdout/model/data path outside runtime portability scope",
+      "markers": [
+        "ml/data/"
+      ]
+    },
+    {
+      "file": "test_supplier_stage_http.py",
+      "reason": "ML training/holdout/model/data path outside runtime portability scope",
+      "markers": [
+        "ml/data/"
+      ]
+    },
+    {
+      "file": "test_supplier_staging.py",
+      "reason": "ML training/holdout/model/data path outside runtime portability scope",
+      "markers": [
+        "ml/data/"
+      ]
+    },
+    {
+      "file": "test_xlsx_adjacent_evidence.py",
+      "reason": "ML training/holdout/model/data path outside runtime portability scope",
+      "markers": [
+        "ml/data/"
+      ]
+    }
+  ],
+  "original_offline_excluded_unsafe": [
+    "test_a2_legacy_quarantine.py",
+    "test_a3_rls_contract.py",
+    "test_a45_live_role_browser.py",
+    "test_auth_gateway_limits.py",
+    "test_auth_role_split.py",
+    "test_auth_session_http.py",
+    "test_auth_sessions_postgres.py",
+    "test_catalog_preflight.py",
+    "test_checkpoint_route_guard.py",
+    "test_live_account_security.py",
+    "test_live_expand_schema.py",
+    "test_live_member_routes.py",
+    "test_live_taxonomy_v4_schema.py",
+    "test_live_tenant_api.py",
+    "test_quote_manager_decisions_db.py",
+    "test_reviewed_catalog_provenance_postgres.py",
+    "test_session_bound_rls.py",
+    "test_supplier_canonical_http.py",
+    "test_supplier_historical_http.py",
+    "test_supplier_mapping_history_postgres.py",
+    "test_supplier_precision_postgres.py",
+    "test_supplier_review_postgres.py",
+    "test_supplier_unit_postgres.py",
+    "test_tenant_candidate_governance.py",
+    "test_tenant_candidate_http.py",
+    "test_tenant_catalog_storage.py",
+    "test_tenant_quote_storage.py",
+    "test_tenant_supplier_comparison_http.py",
+    "test_tenant_supplier_precision_http.py",
+    "test_tenant_supplier_unit_http.py"
+  ],
+  "initial_full_qa": "collection failed because protected loader was intentionally not staged; not a passing full suite",
+  "manually_reviewed_restored": [
+    "test_attribute_normalization.py",
+    "test_public_secret_templates.py",
+    "test_universal_api.py"
+  ],
+  "additional_external_fixture_exclusions": [
+    {
+      "file": "test_a40_synthetic_pipeline.py",
+      "reason": "Requires historical trained experimental models; no model mounted or activated"
+    },
+    {
+      "file": "test_matching_preview_api.py",
+      "reason": "Requires historical experimental models/category classifier"
+    },
+    {
+      "file": "test_multicategory_retrieval_diagnostic.py",
+      "reason": "Loads frozen ML model and thresholds"
+    },
+    {
+      "file": "test_recent_supplier_candidates.py",
+      "reason": "Reads historical real supplier originals/manifests"
+    },
+    {
+      "file": "test_p2_real_benchmark_readiness.py",
+      "reason": "Reads historical request/corpus benchmark data"
+    },
+    {
+      "file": "test_portfolio_sku_benchmark.py",
+      "reason": "Loads training/holdout benchmark dataset and fits models"
+    },
+    {
+      "file": "test_real_labeling_cli.py",
+      "reason": "Requires historical real supplier corpus/manifests"
+    },
+    {
+      "file": "test_supplier_original_provenance.py",
+      "reason": "Requires verified real supplier originals root"
+    },
+    {
+      "file": "test_supplier_quality_triage.py",
+      "reason": "Requires historical supplier research manifests/originals"
+    },
+    {
+      "file": "test_supplier_quality_decisions.py",
+      "reason": "All positive fixtures require historical supplier quality queue data"
+    },
+    {
+      "file": "test_portfolio_evidence.py",
+      "reason": "Checks historical ML model/evidence receipts outside current runtime scope"
+    }
+  ],
+  "deselected_nodes": [
+    {
+      "node": "tests/test_supplier_precision_batch.py::test_real_ecoplast_precision_packet_matches_immutable_original",
+      "reason": "Only this case reads immutable historical supplier original; other batch tests retained"
+    }
+  ],
+  "harness_fixes": [
+    "Complete backend package assets restored",
+    "Ordinary test fixtures restored",
+    "Historical guard source code staged without environment/receipts",
+    "Synthetic offline .env, network none",
+    "Final r2 runtime dependencies take precedence over QA-only packages"
+  ],
+  "scope": "Public runtime checks; private historical operator harnesses and protected ML/data validation remain local",
+  "local_operator_only": [
+    "test_historical_operator_guards.py",
+    "test_offline_selection_safety.py"
+  ]
+}

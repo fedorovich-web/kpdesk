@@ -1,0 +1,230 @@
+/* KPDesk design system: reusable, source-of-truth UI tokens.
+   Keep visuals in this file; component CSS must use variables for styles. */
+:root {
+  color-scheme: light;
+  --font-ui: "Inter Variable", Inter, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+  --weight-extrabold: 800;
+
+  /* Type scale, including H1-H4 and dense tables. */
+  --text-base: 14px;
+  --text-breadcrumb: 12px; /* Only breadcrumbs; copyright footer may also use 12px */
+  --text-lg: 16px;
+  --text-h4: 18px;
+  --text-h3: 22px;
+  --text-h2: clamp(34px, 2.7vw, 42px);
+  --text-section: clamp(30px, 2.15vw, 36px);
+  --text-panel: 24px;
+  --text-stat: 28px;
+  --text-total: 30px;
+  --text-h1: clamp(42px, 3.6vw, 56px);
+  --text-hero: clamp(48px, 4.2vw, 64px);
+  --text-error-code: clamp(100px, 11vw, 180px);
+  --text-dashboard-hero: clamp(36px, 2.6vw, 40px);
+  --line-tight: 1.22;
+  --line-snug: 1.4;
+  --line-default: 1.5;
+  --line-body: 1.55;
+  --line-readable: 1.65;
+  --tracking-heading: -0.035em;
+  --tracking-subheading: -0.023em;
+  --tracking-stat: -0.04em;
+  --tracking-value: -0.03em;
+  --tracking-tight: -0.045em;
+  --tracking-compact: -0.01em;
+  --tracking-preview-template: -0.035em;
+
+  /* Neutral surface / text scale. */
+  --color-ink: #0d2e31;
+  --color-heading: #112c3a;
+  --color-text: #263e4f;
+  --color-text-mid: #314b5c;
+  --color-muted: #5c7280;
+  --color-muted-alt: #5e7282;
+  --color-soft: #91a0af;
+  --color-soft-alt: #a8b8c3;
+  --color-placeholder: #afbbc5;
+  --color-border: #e1eaf0;
+  --color-border-soft: #edf2f4;
+  --color-border-strong: #d0dee4;
+  --color-surface: #ffffff;
+  --color-surface-alt: #f4f7f9;
+  --color-surface-hover: #fcfefd;
+  --color-background: #f6fbf8;
+  --color-focus: #51c48b;
+
+  /* Brand green from approved layout language. */
+  --color-accent: #08ad63;
+  --color-accent-strong: #00804a;
+  --color-accent-foreground: #02100a;
+  --color-accent-dark: #006f43;
+  --color-accent-hover: #00a763;
+  --color-accent-hover-dark: #008f50;
+  --color-accent-text: #145d43;
+  --color-accent-pale: #e9f9f0;
+  --color-accent-pale-2: #e1f8ed;
+  --color-accent-pale-3: #d9f4e6;
+  --color-accent-border: #beead5;
+  --color-accent-focus: #d8f7e8;
+
+  /* Semantic feedback colors. */
+  --color-warning: #ba7600;
+  --color-warning-ink: #905d14;
+  --color-warning-pale: #fff5de;
+  --color-warning-surface: #fff8e7;
+  --color-warning-border: #ffe4ad;
+  --color-error-ink: #a03340;
+  --color-error-pale: #fff0f0;
+  --color-error-border: #f8ccd1;
+  --color-success-ink: #117e4d;
+  --color-success-border: #cbeddc;
+
+  /* Gradients are named tokens, never reconstructed in components. */
+  --gradient-nav: linear-gradient(100deg, #e7f8ef, #eefaf3);
+  --gradient-sidebar: linear-gradient(120deg, #f4fbf7, #eefaf3);
+  --gradient-button: linear-gradient(135deg, #1eb772, #00a55d);
+  --gradient-button-hover: linear-gradient(135deg, #00a763, #008f50);
+  --gradient-hero: linear-gradient(108deg, #f7fffb 15%, #e7f9ef 75%, #f6fffa);
+  --gradient-help: linear-gradient(140deg, #f5fffa, #effaf3);
+  --image-public-cta: url('/assets/hero/04_cta_background_trimmed.avif');
+  --gradient-step: linear-gradient(135deg, #26c07a, #06a65e);
+  --gradient-tip: linear-gradient(135deg, #fff, #f4fcf6);
+
+  /* Component states and motion. */
+  --duration-fast: 150ms;
+  --drawer-duration: 280ms;
+  --drawer-easing: cubic-bezier(.2,.8,.2,1);
+  --duration-reduced: 0.01ms;
+  --duration-spin: 1s;
+  --ease-ui: ease;
+  --transition-interactive: background var(--duration-fast) var(--ease-ui),
+    border-color var(--duration-fast) var(--ease-ui),
+    transform var(--duration-fast) var(--ease-ui);
+  --hover-lift: translateY(-1px);
+  --focus-ring: 3px solid var(--color-focus);
+  --shadow-card: 0 10px 30px rgb(26 68 58 / 3%);
+  --drawer-shadow: -16px 0 48px rgb(5 25 22 / 17%);
+  --drawer-overlay-color: rgb(9 29 32 / 58%);
+  --shadow-button: 0 4px 12px rgb(3 173 96 / 12%);
+  --shadow-input: 0 0 0 3px var(--color-accent-focus);
+  --opacity-disabled: .55;
+  --opacity-muted: .52;
+
+  /* Spacing: compact 4px-based scale. Exact control sizes remain semantic tokens. */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-14: 56px;
+  --space-16: 64px;
+
+  /* Shared reading rhythm: separate sections more than related content. */
+  --section-padding-block: clamp(48px, 5.5vw, 80px);
+  --section-padding-inline: clamp(20px, 3vw, 40px);
+  --public-shell-max: 1500px;
+  --public-shell-gutter: clamp(16px, 4vw, 64px);
+  --brand-logo-height: 28px;
+  --brand-wordmark-height: 20px;
+  --brand-1c-height: 24px;
+  --brand-symbol-height: 40px;
+  --brand-other-size: 44px;
+  --heading-content-gap: clamp(24px, 2.25vw, 32px);
+  --content-group-gap: clamp(24px, 2.5vw, 36px);
+  --content-card-padding: clamp(24px, 2.5vw, 32px);
+  --content-prose-gap: 16px;
+
+  --radius-card: 13px;
+  --radius-input: 8px;
+  --border-width: 1px;
+  --border-width-strong: 2px;
+  --sidebar-width: 256px;
+  --drawer-width: 360px;
+  --drawer-viewport-width: 88vw;
+  --drawer-control-size: 44px;
+  --drawer-link-height: 52px;
+  --z-drawer: 1000;
+  --content-max: 1500px;
+  --control-height: 43px;
+  --button-padding-block: 10px;
+  --button-padding-inline: 19px;
+  --button-font-size: var(--text-base);
+  --button-font-weight: var(--weight-semibold);
+  --button-radius: var(--radius-input);
+  --button-icon-gap: 10px;
+  --field-height: 42px;
+  --field-padding-block: 9px;
+  --field-padding-inline: 12px;
+  --card-padding: 20px;
+  --card-gap: 17px;
+  --layout-viewport-min: 320px;
+  --layout-brand-logo-max: 156px;
+  --layout-header-height: 80px;
+  --layout-search-max: 860px;
+  --layout-hero-min-height: 205px;
+  --layout-hero-public-min: 460px;
+  --layout-hero-public-copy: 660px;
+  --layout-hero-public-art-mobile: 480px;
+  --marketing-hero-art-max: 520px;
+  --marketing-detail-visual-min: 145px;
+  --marketing-detail-visual-max: 165px;
+  --marketing-faq-max: 850px;
+  --layout-hero-button-width: 220px;
+  --layout-quick-card-min: 111px;
+  --layout-stat-card-min: 129px;
+  --layout-panel-min: 280px;
+  --layout-empty-min: 224px;
+  --layout-item-table-min: 660px;
+  --layout-review-table-min: 500px;
+  --layout-table-title-max: 450px;
+  --layout-request-side-min: 260px;
+  --layout-guide-side-min: 285px;
+  --layout-filter-search-min: 270px;
+  --layout-import-side-min: 245px;
+  --layout-import-drop-min: 295px;
+  --layout-textarea-min: 180px;
+  --request-textarea-min: 190px;
+  --preview-paper-width: 760px;
+  --preview-sidebar-min: 420px;
+  --preview-paper-min-height: 820px;
+  --preview-table-min: 520px;
+  --preview-thumb-width: 72px;
+  --preview-thumb-height: 86px;
+  --preview-scale-small: .75;
+  --preview-scale-normal: 1;
+  --preview-scale-large: 1.25;
+  --layout-seller-form-width: 190px;
+  --layout-brand-mobile-max: 130px;
+  --layout-content-note-max: 600px;
+  --layout-header-mobile-height: 62px;
+}
+
+@media (width <= 1250px) {
+  :root { --sidebar-width: 225px; }
+}
+@media (width <= 1040px) {
+  :root { --sidebar-width: 200px; }
+}
+
+.public-page {
+  --color-ink: #08152c;
+  --color-heading: #101735;
+  --color-text: #29344d;
+  --color-text-mid: #5f648b;
+  --color-muted: #656a90;
+  --text-hero: clamp(34px, 3.5vw, 50px);
+  --text-h2: clamp(28px, 2.6vw, 38px);
+  --text-h3: clamp(22px, 2.1vw, 30px);
+}
+
+/* Long Russian headings must not force horizontal scrolling on 320px devices. */
+@media (width <= 390px) {
+  :root { --text-h2: 30px; --text-hero: 40px; }
+}

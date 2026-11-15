@@ -8,6 +8,7 @@ const primary = [
   { id: 'workspace-quotes', label: 'Коммерческие предложения', icon: FileText },
 ];
 const secondary = [
+  { id: 'workspace-billing', label: 'Тариф и оплата', icon: FileText },
   { id: 'workspace-company', label: 'Компания и оформление', icon: FileText },
   { id: 'workspace-team', label: 'Команда и доступ', icon: Users },
   { id: 'workspace-sources', label: 'Прайсы и проверка данных', icon: SlidersHorizontal, write: true },

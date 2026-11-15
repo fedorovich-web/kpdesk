@@ -20,6 +20,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.pool import NullPool
 
 TARGET = '0047_auth_reset_serialization'
+VERIFIED_REVISIONS = {TARGET: 48, '0048_lava_billing': 56}
 ACCOUNTS = {'kpdesk_auth_service': 'kpdesk_auth_runtime',
             'kpdesk_tenant_service': 'kpdesk_tenant_runtime'}
 OPERATIONS = Path('/app/operations')
@@ -29,7 +30,8 @@ def admission(database: str, owner: str, revision: str | None, marker: str | Non
               tables: int, roles: int, nonce: str) -> str:
     if not re.fullmatch(r'[a-f0-9]{24}', nonce) or (database, owner) != ('kpdesk', 'kpdesk'):
         raise ValueError('production_target_identity_mismatch')
-    if revision == TARGET and marker == 'kpdesk:production:' + nonce and tables == 48 and roles == 5:
+    if (revision in VERIFIED_REVISIONS and marker == 'kpdesk:production:' + nonce
+            and tables == VERIFIED_REVISIONS[revision] and roles == 5):
         return 'verify'
     if revision is None and marker is None and tables == roles == 0:
         return 'install'
@@ -83,8 +85,9 @@ def proxy_addresses(hostname: str, *, resolver: Any = socket.getaddrinfo) -> str
     return ','.join(sorted(addresses))
 
 
-def verify_database(connection: Connection) -> None:
-    if connection.scalar(text('SELECT public.kpdesk_runtime_schema_revision()')) != TARGET:
+def verify_database(connection: Connection) -> str:
+    revision = connection.scalar(text('SELECT public.kpdesk_runtime_schema_revision()'))
+    if revision not in VERIFIED_REVISIONS:
         raise ValueError('production_runtime_revision_mismatch')
     definition = connection.scalar(text("SELECT pg_get_functiondef('public.kpdesk_auth_credential(text,text)'::regprocedure)"))
     if not isinstance(definition, str) or 'FOR UPDATE OF u' not in definition:
@@ -98,6 +101,12 @@ def verify_database(connection: Connection) -> None:
     for row in roles:
         if tuple(row[1:]) != (row[0] in ACCOUNTS, False, False, False, False, False, False):
             raise ValueError('production_role_privileges_unsafe')
+    if revision == '0048_lava_billing':
+        from kpdesk.billing.schema import billing_available
+
+        if not billing_available(connection):
+            raise ValueError('production_billing_schema_incomplete')
+    return str(revision)
 
 
 def install() -> dict[str, object]:
@@ -161,7 +170,7 @@ def install() -> dict[str, object]:
                     connection.exec_driver_sql('CREATE ROLE ' + login +
                         " LOGIN NOINHERIT NOSUPERUSER NOCREATEDB NOCREATEROLE NOREPLICATION NOBYPASSRLS PASSWORD '" + services[login] + "'")
                     connection.exec_driver_sql('GRANT ' + role + ' TO ' + login)
-            verify_database(connection)
+            verified_revision = verify_database(connection)
         from kpdesk.db.live_service_engines import _restricted_engine
         from kpdesk.release_runtime import verify_release_schema
 
@@ -175,10 +184,10 @@ def install() -> dict[str, object]:
                     if connection.scalar(text("SELECT has_table_privilege(current_user,'public.users','SELECT')")) is not False:
                         raise ValueError('production_direct_users_access_forbidden')
                 if role == 'kpdesk_tenant_runtime':
-                    verify_release_schema(restricted)
+                    verify_release_schema(restricted, check_billing_activation=False)
             finally:
                 restricted.dispose()
-        return {'status': 'passed', 'mode': mode, 'revision': TARGET,
+        return {'status': 'passed', 'mode': mode, 'revision': verified_revision,
                 'migration_count': len(steps) if mode == 'install' else 0, 'restricted_logins_verified': True}
     finally:
         engine.dispose()

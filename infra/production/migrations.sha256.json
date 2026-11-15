@@ -147,6 +147,7 @@
     "0044_universal_products.py": "9a9a8c296222be7cbf3bdbffc1b2e1349f8210163d0f5f7501a0c33ef1cd0990",
     "0045_registry_retirement.py": "d818fa56cd56dbb913088283b2ce0cff618997b0f3da05df1d1252998cfc7d87",
     "0046_provider_authority.py": "4d882a0a86d138c3284d2c6ade3c87211ed35968e341a90514ab59d43cdabc76",
-    "0047_auth_reset_serialization.py": "0fd40fca0ab8d27f8461ad915dae83e23b4558affc86e6cf2ae05c048de796ed"
+    "0047_auth_reset_serialization.py": "0fd40fca0ab8d27f8461ad915dae83e23b4558affc86e6cf2ae05c048de796ed",
+    "0048_lava_billing.py": "9af2e80f5efaac0739d6ec8051de9dc756af3c9de3789cc1b0e024ad23284a49"
   }
 }

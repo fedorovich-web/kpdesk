@@ -1,5 +1,6 @@
 """Offline release boundaries: no DB connection, provider calls or filesystem secrets."""
 from pathlib import Path
+from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -140,6 +141,111 @@ def test_0047_ready_with_prior_release_guards_intact() -> None:
         verify_release_schema(pair[1])
 
 
+@pytest.mark.parametrize('enabled', [False, True])
+@pytest.mark.parametrize('gate', ['sharing', 'universal', 'registry', 'billing'])
+def test_0048_preserves_all_release_guards_even_when_billing_off(enabled: bool, gate: str) -> None:
+    from kpdesk.release_runtime import verify_release_schema
+
+    pair = engines('0048_lava_billing')
+    pair[1].begin.return_value.__enter__.return_value.scalar.return_value = True
+    with (patch('kpdesk.billing.settings.BillingSettings.from_env', return_value=SimpleNamespace(enabled=enabled)),
+          patch('kpdesk.quotes.sharing.sharing_available', return_value=gate != 'sharing'),
+          patch('kpdesk.db.universal_schema.universal_available', return_value=gate != 'universal'),
+          patch('kpdesk.db.supplier_registry_schema.registry_retired', return_value=gate != 'registry'),
+          patch('kpdesk.billing.schema.billing_available', return_value=gate != 'billing'),
+          patch('kpdesk.billing.schema.billing_enabled', return_value=enabled),
+          pytest.raises(RuntimeError, match='schema')):
+        verify_release_schema(pair[1])
+
+
+@pytest.mark.parametrize('enabled', [False, True])
+def test_0048_ready_only_when_application_and_database_switches_match(enabled: bool) -> None:
+    from kpdesk.release_runtime import verify_release_schema
+
+    pair = engines('0048_lava_billing')
+    connection = pair[1].begin.return_value.__enter__.return_value
+    connection.scalar.return_value = True
+    with (patch('kpdesk.billing.settings.BillingSettings.from_env', return_value=SimpleNamespace(enabled=enabled)),
+          patch('kpdesk.quotes.sharing.sharing_available', return_value=True),
+          patch('kpdesk.db.universal_schema.universal_available', return_value=True),
+          patch('kpdesk.db.supplier_registry_schema.registry_retired', return_value=True),
+          patch('kpdesk.billing.schema.billing_available', return_value=True),
+          patch('kpdesk.billing.schema.billing_enabled', return_value=enabled)):
+        verify_release_schema(pair[1])
+    statements = [str(call.args[0]) for call in connection.execute.call_args_list]
+    assert statements[0] == 'SET TRANSACTION READ ONLY'
+    assert not any(statement.lstrip().upper().startswith(('INSERT ', 'UPDATE ', 'DELETE ', 'CREATE ', 'ALTER ')) for statement in statements)
+
+
+@pytest.mark.parametrize('enabled', [False, True])
+def test_0048_application_database_switch_mismatch_fails_closed(enabled: bool) -> None:
+    from kpdesk.release_runtime import verify_release_schema
+
+    pair = engines('0048_lava_billing')
+    pair[1].begin.return_value.__enter__.return_value.scalar.return_value = True
+    with (patch('kpdesk.billing.settings.BillingSettings.from_env', return_value=SimpleNamespace(enabled=enabled)),
+          patch('kpdesk.quotes.sharing.sharing_available', return_value=True),
+          patch('kpdesk.db.universal_schema.universal_available', return_value=True),
+          patch('kpdesk.db.supplier_registry_schema.registry_retired', return_value=True),
+          patch('kpdesk.billing.schema.billing_available', return_value=True),
+          patch('kpdesk.billing.schema.billing_enabled', return_value=not enabled),
+          pytest.raises(RuntimeError, match='billing')):
+        verify_release_schema(pair[1])
+
+
+@pytest.mark.parametrize('revision', ['0042_openrouter_budget', '0043_proposal_shares', '0044_universal_products', '0045_registry_retirement', '0046_provider_authority', '0047_auth_reset_serialization'])
+def test_enabled_billing_requires_0048_even_if_older_schema_is_complete(revision: str) -> None:
+    from kpdesk.release_runtime import verify_release_schema
+
+    pair = engines(revision)
+    pair[1].begin.return_value.__enter__.return_value.scalar.return_value = True
+    with (patch('kpdesk.billing.settings.BillingSettings.from_env', return_value=SimpleNamespace(enabled=True)),
+          patch('kpdesk.quotes.sharing.sharing_available', return_value=True),
+          patch('kpdesk.db.universal_schema.universal_available', return_value=True),
+          patch('kpdesk.db.supplier_registry_schema.registry_retired', return_value=True),
+          pytest.raises(RuntimeError, match='billing')):
+        verify_release_schema(pair[1])
+
+
+@pytest.mark.parametrize('revision', ['0042_openrouter_budget', '0043_proposal_shares', '0044_universal_products', '0045_registry_retirement', '0046_provider_authority', '0047_auth_reset_serialization'])
+def test_disabled_billing_preserves_every_supported_previous_release(revision: str) -> None:
+    from kpdesk.release_runtime import verify_release_schema
+
+    pair = engines(revision)
+    pair[1].begin.return_value.__enter__.return_value.scalar.return_value = True
+    with (patch.dict('os.environ', {'KP_DESK_LAVA_ENABLED': 'false'}, clear=True),
+          patch('kpdesk.quotes.sharing.sharing_available', return_value=True),
+          patch('kpdesk.db.universal_schema.universal_available', return_value=True),
+          patch('kpdesk.db.supplier_registry_schema.registry_retired', return_value=True),
+          patch('kpdesk.billing.schema.billing_available') as available):
+        verify_release_schema(pair[1])
+    available.assert_not_called()
+
+
+@pytest.mark.parametrize('flag', ['TRUE', '1', '', 'true'])
+def test_invalid_billing_configuration_fails_before_database_work(flag: str) -> None:
+    from kpdesk.release_runtime import verify_release_schema
+
+    pair = engines()
+    with (patch.dict('os.environ', {'KP_DESK_LAVA_ENABLED': flag}, clear=True),
+          pytest.raises(RuntimeError, match='billing')):
+        verify_release_schema(pair[1])
+    pair[1].begin.assert_not_called()
+
+
+def test_production_environment_passes_disabled_billing_and_server_only_settings() -> None:
+    root = Path(__file__).resolve().parents[2]
+    compose = (root / 'compose.production.yaml').read_text(encoding='utf-8')
+    example = (root / '.env.example').read_text(encoding='utf-8')
+    assert 'KP_DESK_LAVA_ENABLED: ${KP_DESK_LAVA_ENABLED:-false}' in compose
+    assert 'KP_DESK_LAVA_ENABLED=false' in example
+    names = ['KP_DESK_LAVA_API_KEY', 'KP_DESK_LAVA_WEBHOOK_SECRET']
+    names += [f'KP_DESK_LAVA_{plan}_{field}_ID' for plan in ('START', 'TEAM', 'BUSINESS') for field in ('PRODUCT', 'OFFER')]
+    for name in names:
+        assert f'{name}: ${{{name}:-}}' in compose
+        assert f'{name}=\n' in example
+
+
 @pytest.mark.parametrize('slot',[0,2,3,4])
 def test_startup_rejects_wrong_role_or_missing_release_objects(slot: int) -> None:
     pair=engines()
@@ -165,3 +271,19 @@ def test_required_error_page_cannot_resolve_outside_frontend_root(tmp_path: Path
         'kpdesk.db.live_service_engines.live_service_engines',return_value=engines()),
         pytest.raises(RuntimeError,match='Frontend')):
         create_production_app()
+
+
+def test_operator_structural_check_does_not_require_application_provider_secrets() -> None:
+    from kpdesk.release_runtime import verify_release_schema
+
+    pair=engines('0048_lava_billing')
+    pair[1].begin.return_value.__enter__.return_value.scalar.return_value=True
+    with (patch.dict('os.environ',{},clear=True),
+          patch('kpdesk.quotes.sharing.sharing_available',return_value=True),
+          patch('kpdesk.db.universal_schema.universal_available',return_value=True),
+          patch('kpdesk.db.supplier_registry_schema.registry_retired',return_value=True),
+          patch('kpdesk.billing.schema.billing_available',return_value=True),
+          patch('kpdesk.billing.schema.billing_enabled',return_value=True)):
+        verify_release_schema(pair[1],check_billing_activation=False)
+        with pytest.raises(RuntimeError,match='activation'):
+            verify_release_schema(pair[1])

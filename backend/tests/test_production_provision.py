@@ -30,6 +30,16 @@ def test_matching_completed_install_only_enters_read_only_verification() -> None
         admission('kpdesk', 'kpdesk', None, None, 0, 0, "';DROP DATABASE kpdesk")
 
 
+def test_reviewed_billing_upgrade_is_verified_without_reinstalling() -> None:
+    assert admission('kpdesk', 'kpdesk', '0048_lava_billing',
+        'kpdesk:production:' + NONCE, 56, 5, NONCE) == 'verify'
+    for tables, roles, marker in ((48, 5, 'kpdesk:production:' + NONCE),
+                                  (56, 4, 'kpdesk:production:' + NONCE),
+                                  (56, 5, 'foreign')):
+        with pytest.raises(ValueError):
+            admission('kpdesk', 'kpdesk', '0048_lava_billing', marker, tables, roles, NONCE)
+
+
 def test_separated_owner_auth_tenant_secrets_are_required() -> None:
     credentials = {'kpdesk_auth_service': 'b' * 64, 'kpdesk_tenant_service': 'c' * 64}
     check_secrets('a' * 64, credentials)

@@ -44,11 +44,11 @@ FROM runtime AS provisioner
 COPY backend/migrations/versions/ /app/operations/migrations/versions/
 COPY infra/production/alembic/ /app/operations/alembic/
 COPY infra/production/migrations.sha256.json /app/operations/migrations.sha256.json
-COPY backend/scripts/__init__.py backend/scripts/provision_production.py /app/operations/scripts/
+COPY backend/scripts/__init__.py backend/scripts/provision_production.py backend/scripts/upgrade_billing.py /app/operations/scripts/
 ENV PYTHONPATH=/app/operations
 CMD ["python", "-m", "scripts.provision_production", "--new-instance-or-verify"]
 
 FROM runtime AS application
-COPY backend/scripts/__init__.py backend/scripts/provision_production.py backend/scripts/start_production.py backend/scripts/seed_production_secrets.py /app/operations/scripts/
+COPY backend/scripts/__init__.py backend/scripts/provision_production.py backend/scripts/start_production.py backend/scripts/seed_production_secrets.py backend/scripts/reconcile_lava_reversal.py /app/operations/scripts/
 ENV PYTHONPATH=/app/operations
 CMD ["python", "-m", "scripts.start_production"]

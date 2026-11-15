@@ -6,6 +6,7 @@ from fastapi.responses import FileResponse
 from sqlalchemy import Engine, text
 
 REQUIRED_SCHEMA = '0042_openrouter_budget'
+BILLING_SCHEMA = '0048_lava_billing'
 SCHEMA_CHECK = text('''SELECT current_user,
     public.kpdesk_runtime_schema_revision(),
     to_regprocedure('public.kpdesk_company_profile_read(uuid)') IS NOT NULL
@@ -23,30 +24,47 @@ SCHEMA_CHECK = text('''SELECT current_user,
 ''')
 
 
-def verify_release_schema(engine: Engine) -> None:
+def verify_release_schema(engine: Engine, *, check_billing_activation: bool = True) -> None:
+    from kpdesk.billing.settings import BillingSettings
+
+    try:
+        # The isolated provisioner has no provider secrets. It checks structure;
+        # the application startup/readiness always validates its actual switches.
+        billing = BillingSettings.from_env() if check_billing_activation else None
+    except (ValueError, TypeError):
+        raise RuntimeError('Production billing settings are invalid.') from None
     with engine.begin() as connection:
         connection.execute(text('SET TRANSACTION READ ONLY'))
         available: object = connection.execute(text("SELECT to_regprocedure('public.kpdesk_runtime_schema_revision()') IS NOT NULL")).scalar_one()
         if available is not True:
             raise RuntimeError('Production database schema is not ready; runtime metadata function is missing.')
         result = connection.execute(SCHEMA_CHECK).one()
-        if result[1] in ('0043_proposal_shares', '0044_universal_products', '0045_registry_retirement', '0046_provider_authority', '0047_auth_reset_serialization'):
+        if result[1] in ('0043_proposal_shares', '0044_universal_products', '0045_registry_retirement', '0046_provider_authority', '0047_auth_reset_serialization', BILLING_SCHEMA):
             from kpdesk.quotes.sharing import sharing_available
 
             if not sharing_available(connection) or connection.scalar(text('''SELECT relrowsecurity AND relforcerowsecurity
                 FROM pg_catalog.pg_class WHERE oid=to_regclass('public.proposal_shares')''')) is not True:
                 raise RuntimeError('Production database schema is not ready; proposal sharing gateway is incomplete.')
-        if result[1] in ('0044_universal_products', '0045_registry_retirement', '0046_provider_authority', '0047_auth_reset_serialization'):
+        if result[1] in ('0044_universal_products', '0045_registry_retirement', '0046_provider_authority', '0047_auth_reset_serialization', BILLING_SCHEMA):
             from kpdesk.db.universal_schema import universal_available
 
             if not universal_available(connection):
                 raise RuntimeError('Production database schema is not ready; universal gateway is incomplete.')
-        if result[1] in ('0045_registry_retirement', '0046_provider_authority', '0047_auth_reset_serialization'):
+        if result[1] in ('0045_registry_retirement', '0046_provider_authority', '0047_auth_reset_serialization', BILLING_SCHEMA):
             from kpdesk.db.supplier_registry_schema import registry_retired
 
             if not registry_retired(connection):
                 raise RuntimeError('Production database schema is not ready; retired registry privileges remain.')
-    if (result[1] not in (REQUIRED_SCHEMA, '0043_proposal_shares', '0044_universal_products', '0045_registry_retirement', '0046_provider_authority', '0047_auth_reset_serialization')
+        if result[1] == BILLING_SCHEMA:
+            from kpdesk.billing.schema import billing_available, billing_enabled
+
+            if not billing_available(connection):
+                raise RuntimeError('Production database schema is not ready; billing gateway is incomplete.')
+            if billing is not None and billing_enabled(connection) is not billing.enabled:
+                raise RuntimeError('Production billing application and database activation settings disagree.')
+        elif billing is not None and billing.enabled:
+            raise RuntimeError('Production billing schema is not ready; reviewed migration 0048 is required.')
+    if (result[1] not in (REQUIRED_SCHEMA, '0043_proposal_shares', '0044_universal_products', '0045_registry_retirement', '0046_provider_authority', '0047_auth_reset_serialization', BILLING_SCHEMA)
             or (result[0], *result[2:]) != ('kpdesk_tenant_runtime', True, True, True)):
         raise RuntimeError('Production database schema is not ready; reviewed migrations must be applied separately.')
 

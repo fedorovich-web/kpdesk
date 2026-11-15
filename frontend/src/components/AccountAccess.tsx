@@ -4,6 +4,7 @@ import { ArrowRight, CheckCircle2, LockKeyhole, Mail, UploadCloud } from 'lucide
 import { designAssets } from '../design-assets';
 import { TenantOperations } from './TenantOperations';
 import { WorkspaceNavigation } from './WorkspaceNavigation';
+import { BillingPanel } from './BillingPanel';
 import { sessionApi, SessionApiError } from '../tenant-session';
 import type { ActiveTenantCatalog, CatalogPreflight, TenantOrganization } from '../tenant-session';
 
@@ -502,6 +503,9 @@ export function AccountAccess() {
             onCanonicalReady={normalized => acceptReviewedSupplier(normalized, selectedId)}
             compactNavigation
           />}
+          {csrf && selectedOrganization && <div id="workspace-billing">
+            <BillingPanel organization={selectedOrganization} csrf={csrf}/>
+          </div>}
           {!csrf && <button className="button button-white" type="button"
             onClick={() => navigate('login')}>Войти снова для сохранения данных</button>}
           </div></div>

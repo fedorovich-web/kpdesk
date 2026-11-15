@@ -14,6 +14,7 @@ const styles = [
   'src/styles/request.css',
   'src/styles/preview.css',
   'src/styles/mobile-navigation.css',
+  'src/styles/billing.css',
 ].map((path) => readFileSync(resolve(root, path), 'utf8')).join('\n');
 const tokens = readFileSync(resolve(root, 'src/styles/tokens.css'), 'utf8');
 const faces = readFileSync(resolve(root, 'src/styles/fonts.css'), 'utf8');

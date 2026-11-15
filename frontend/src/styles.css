@@ -12,6 +12,7 @@
 @import "./styles/mobile-navigation.css";
 @import "./styles/account-access.css";
 @import "./styles/workspace.css";
+@import "./styles/billing.css";
 
 
 * { box-sizing: border-box; }

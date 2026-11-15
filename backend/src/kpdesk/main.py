@@ -79,7 +79,9 @@ def create_app(
         origin = request.headers.get("origin")
         if origin is not None and origin not in permitted_origins:
             return json_error(request, 403, "invalid_origin", "Недопустимый Origin.")
-        if request.method in {"POST", "PUT", "PATCH", "DELETE"} and origin is None:
+        webhook = (tenant_sessions and request.method == 'POST'
+                   and request.url.path == '/api/billing/lava/webhook')
+        if request.method in {"POST", "PUT", "PATCH", "DELETE"} and origin is None and not webhook:
             return json_error(request, 403, "missing_origin", "Требуется заголовок Origin.")
         response = await call_next(request)
         response.headers["X-Request-ID"] = request.state.request_id
@@ -106,6 +108,10 @@ def create_app(
             if request.url.scheme == 'https':
                 response.headers['Strict-Transport-Security'] = 'max-age=31536000'
         parts = request.url.path.split('/')
+        if request.url.path.startswith('/api/billing/') or (
+            request.url.path.startswith('/api/session/organizations/') and 'billing' in parts
+        ):
+            response.headers.update({'Cache-Control': 'no-store', 'X-Robots-Tag': 'noindex, nofollow'})
         if (len(parts) >= 6 and parts[1:4] == ['api', 'session', 'organizations']
                 and parts[5] == 'universal'):
             # Dependencies do not carry headers into exception responses or
@@ -121,11 +127,24 @@ def create_app(
 
     @app.exception_handler(ApiError)
     async def api_error(request: Request, exception: ApiError) -> JSONResponse:
+        from kpdesk.billing.errors import billing_error
+
+        exception = billing_error(exception) or exception
         return json_error(
             request, exception.status_code, exception.code, exception.message,
             field=exception.field, row=exception.row,
             retry_after_seconds=exception.retry_after_seconds,
         )
+
+    from sqlalchemy.exc import SQLAlchemyError
+
+    @app.exception_handler(SQLAlchemyError)
+    async def sql_error(request: Request, exception: SQLAlchemyError) -> JSONResponse:
+        from kpdesk.billing.errors import billing_error
+
+        error = billing_error(exception) or ApiError(
+            503, 'database_unavailable', 'Данные временно недоступны. Повторите действие позже.')
+        return json_error(request, error.status_code, error.code, error.message)
 
     @app.exception_handler(RequestValidationError)
     async def validation_error(request: Request, exception: RequestValidationError) -> JSONResponse:
@@ -145,6 +164,7 @@ def create_app(
         # Opt-in local ASGI factory only. The normal app global does not mount
         # cookie sessions, and the owner-token/global write routes are absent.
         from kpdesk.api.account_routes import router as account_router
+        from kpdesk.api.billing_routes import router as billing_router
         from kpdesk.api.member_routes import router as member_router
         from kpdesk.api.proposal_share_routes import router as proposal_share_router
         from kpdesk.api.tenant_candidate_adjudication_routes import (
@@ -212,6 +232,7 @@ def create_app(
 
         app.include_router(unreleased_router)
         app.include_router(account_router)
+        app.include_router(billing_router)
         app.include_router(member_router)
         app.include_router(tenant_extract_router)
         app.include_router(tenant_matching_router)

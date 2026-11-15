@@ -31,6 +31,8 @@ class RequestBodyLimitMiddleware:
             )) else 0
         )
         maximum = self.max_upload_bytes + _MULTIPART_OVERHEAD + allowance
+        if path == '/api/billing/lava/webhook':
+            maximum = 65_536
         if path.endswith("/company-profile/logo/prepare"):
             maximum = min(self.max_upload_bytes, 1024 * 1024) + _MULTIPART_OVERHEAD
         declared_length = Headers(scope=scope).get("content-length")

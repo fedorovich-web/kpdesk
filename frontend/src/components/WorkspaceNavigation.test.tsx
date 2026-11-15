@@ -24,5 +24,6 @@ describe('workspace task navigation', () => {
     expect(screen.queryByRole('link', { name: 'Товары для КП' })).not.toBeInTheDocument();
     expect(screen.queryByRole('link', { name: 'Прайсы и проверка данных' })).not.toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Коммерческие предложения' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Тариф и оплата' })).toHaveAttribute('href', '#workspace-billing');
   });
 });

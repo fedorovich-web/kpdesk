@@ -3,6 +3,8 @@ from __future__ import annotations
 
 import json
 import os
+import re
+from pathlib import Path
 import sys
 import time
 from urllib.error import HTTPError, URLError
@@ -78,34 +80,47 @@ def google_pagespeed(strategy: str) -> bool:
     return True
 
 
+def _expected_frontend_assets() -> tuple[str, str]:
+    """Use this commit's actual Vite build as the post-deploy version marker."""
+    root = Path(__file__).resolve().parents[2]
+    local_html = (root / "frontend" / "dist" / "index.html").read_text(encoding="utf-8")
+    js = re.search(r'/assets/(index-[A-Za-z0-9_-]+\.js)', local_html)
+    css = re.search(r'/assets/(index-[A-Za-z0-9_-]+\.css)', local_html)
+    if js is None or css is None:
+        raise ValueError("Built index.html does not contain a versioned JS and CSS entry")
+    return js.group(1), css.group(1)
+
+
 def wait_for_production_release() -> bool:
-    """Avoid presenting pre-deploy data as a post-merge regression result."""
+    """Measure only after production HTML references this commit's build."""
     if os.environ.get("GITHUB_EVENT_NAME") != "push":
         return True
+    try:
+        js, css = _expected_frontend_assets()
+    except (OSError, ValueError) as exc:
+        print(f"Missing expected build fingerprint: {exc}", flush=True)
+        return False
+    print(f"Waiting for live frontend assets: {js}, {css}", flush=True)
     for attempt in range(32):
         try:
-            # This release ships a new, small variant absent from the previous
-            # deployment. Do not mistake an old cached image for a fresh build.
-            resource = "assets/hero/01_hero_main-480w.avif"
-            request = Request(BASE + resource, method="HEAD")
-            with urlopen(request, timeout=12) as response:
-                cache = response.headers.get("Cache-Control", "")
-                size = response.headers.get("Content-Length", "")
-                if (response.status == 200 and response.headers.get("Content-Type") == "image/avif"
-                        and size == "20006" and "max-age=2592000" in cache):
-                    with urlopen(Request(BASE, headers={"Cache-Control": "no-cache"}),
-                                 timeout=12) as home:
-                        html = home.read(100000).decode("utf-8", errors="replace")
-                        if "01_hero_main-480w.avif 480w" in html:
-                            print(f"Detected deployed responsive-AVIF release after {attempt} checks.", flush=True)
-                            return True
-                print(f"Live release not ready yet: {response.status} size={size!r} cache={cache!r}", flush=True)
+            with urlopen(Request(BASE, headers={"Cache-Control": "no-cache"}),
+                         timeout=12) as response:
+                html = response.read(100000).decode("utf-8", errors="replace")
+                if f"/assets/{js}" in html and f"/assets/{css}" in html:
+                    for resource in (js, css):
+                        with urlopen(Request(BASE + "assets/" + resource, method="HEAD"),
+                                     timeout=12) as asset:
+                            if asset.status != 200:
+                                raise HTTPError(BASE + resource, asset.status,
+                                                "Unexpected asset response", asset.headers, None)
+                    print(f"Detected exact deployed frontend build after {attempt} checks.", flush=True)
+                    return True
+                print(f"Live frontend not deployed yet: expected {js} and {css}", flush=True)
         except (HTTPError, URLError, TimeoutError) as exc:
             print(f"Live release not ready yet: {type(exc).__name__}: {exc}", flush=True)
         time.sleep(15)
     print("Deployment not observed: cannot claim a post-release audit.", flush=True)
     return False
-
 
 if __name__ == "__main__":
     if not wait_for_production_release():

@@ -16,11 +16,17 @@ jobs:
     timeout-minutes: 16
     steps:
       - uses: actions/checkout@v4
-      - name: Query site headers and Google PageSpeed Insights
-        run: python3 .github/scripts/live_pagespeed_audit.py
       - uses: actions/setup-node@v4
         with:
           node-version: "24"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Build expected Vite assets for exact deployment verification
+        if: github.event_name == 'push'
+        working-directory: frontend
+        run: npm ci && npm run build
+      - name: Query site headers and Google PageSpeed Insights
+        run: python3 .github/scripts/live_pagespeed_audit.py
       - name: Run Lighthouse locally on the live site (not Google PSI)
         run: |
           set -euo pipefail

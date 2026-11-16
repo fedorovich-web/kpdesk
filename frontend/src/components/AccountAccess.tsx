@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import '../styles.css';
 import type { FormEvent } from 'react';
 import { ArrowRight, CheckCircle2, LockKeyhole, Mail, UploadCloud } from 'lucide-react';
 import { designAssets } from '../design-assets';

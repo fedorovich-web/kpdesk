@@ -243,11 +243,11 @@ async def test_invalid_creation_response_is_always_ambiguous(payload: str) -> No
 @pytest.mark.parametrize("method", ["POST", "GET"])
 @pytest.mark.asyncio
 async def test_deep_provider_json_is_normalized_without_retry(method: str) -> None:
-    # Below the response byte cap but beyond the JSON decoder's recursion bound.
+    # Depth handling differs between Python JSON decoder versions.
+    # Regardless of whether parsing raises, the provider boundary must reject
+    # an unexpected deeply nested response without retrying the request.
     payload = '{"nested":' + '[' * 30000 + '0' + ']' * 30000 + '}'
     assert len(payload.encode()) < 65536
-    with pytest.raises(RecursionError):
-        json.loads(payload)
     requests = []
     def handle(request: httpx.Request) -> httpx.Response:
         requests.append(request)

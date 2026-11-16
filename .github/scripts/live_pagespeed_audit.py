@@ -2,7 +2,9 @@
 from __future__ import annotations
 
 import json
+import os
 import sys
+import time
 from urllib.error import HTTPError, URLError
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
@@ -76,7 +78,29 @@ def google_pagespeed(strategy: str) -> bool:
     return True
 
 
+def wait_for_production_release() -> bool:
+    """Avoid presenting pre-deploy data as a post-merge regression result."""
+    if os.environ.get("GITHUB_EVENT_NAME") != "push":
+        return True
+    for attempt in range(32):
+        try:
+            request = Request(BASE + "assets/hero/01_hero_main.avif", method="HEAD")
+            with urlopen(request, timeout=12) as response:
+                cache = response.headers.get("Cache-Control", "")
+                if response.status == 200 and "max-age=2592000" in cache:
+                    print(f"Detected live optimized deployment after {attempt} checks.", flush=True)
+                    return True
+                print(f"Live release not ready yet: {response.status} cache={cache!r}", flush=True)
+        except (HTTPError, URLError, TimeoutError) as exc:
+            print(f"Live release not ready yet: {type(exc).__name__}: {exc}", flush=True)
+        time.sleep(15)
+    print("Deployment not observed: cannot claim a post-release audit.", flush=True)
+    return False
+
+
 if __name__ == "__main__":
+    if not wait_for_production_release():
+        sys.exit(2)
     for resource in ("", "app", "assets/hero/01_hero_main.avif", "fonts/inter/inter-cyrillic-wght-normal.woff2"):
         fetch_headers(resource)
     ok = [google_pagespeed(strategy) for strategy in ("mobile", "desktop")]

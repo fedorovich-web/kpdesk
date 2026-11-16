@@ -52,3 +52,14 @@ jobs:
 
 # This smoke workflow does not exercise live providers, PostgreSQL clone
 # migrations, HTTPS, deployed infrastructure or real external services.
+
+  production-docker:
+    name: Build production app and provisioner images
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build application image (no production environment)
+        run: docker build --target application --tag kpdesk-ci-app -f Dockerfile .
+      - name: Build provisioner image
+        run: docker build --target provisioner --tag kpdesk-ci-provisioner -f Dockerfile .

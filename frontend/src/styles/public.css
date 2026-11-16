@@ -197,3 +197,7 @@
 @media (width <= 600px) { .public-integration-grid { grid-template-columns: minmax(0,1fr); } }
 
 
+
+/* The FAQ follow-up link is a genuine 32px+ touch target on phones. */
+.public-faq-more { margin-block-start: var(--space-5); }
+.public-faq-more-link { display: inline-flex; align-items: center; min-block-size: 36px; padding-block: 8px; }

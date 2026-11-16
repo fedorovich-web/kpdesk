@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite --host 127.0.0.1",
-    "build": "tsc -b && vite build && node scripts/prerender-public.mjs && node scripts/verify-public-seo.mjs && node scripts/verify-public-social.mjs && node scripts/verify-public-preview.mjs",
+    "build": "tsc -b && vite build && node scripts/prerender-public.mjs && node scripts/verify-public-seo.mjs && node scripts/verify-public-social.mjs && node scripts/verify-public-preview.mjs && node scripts/compress-dist.mjs",
     "build:e2e": "tsc --noEmit -p tsconfig.e2e.json && vite build --config vite.e2e.config.ts",
     "typecheck": "tsc -b --pretty false",
     "test": "vitest run",

@@ -11,8 +11,11 @@ WORKDIR /build/backend
 RUN apk add --no-cache g++=15.2.0-r5 \
     && python -m pip install --no-cache-dir uv==0.11.23
 COPY backend/pyproject.toml backend/uv.lock ./
-COPY backend/src/ ./src/
 ENV UV_PROJECT_ENVIRONMENT=/opt/venv
+# Dependency install is independent of backend/src, so source-only deploys
+# reuse the expensive native scikit-learn build layer.
+RUN uv sync --locked --no-dev --no-install-project --no-python-downloads --config-settings-package scikit-learn:compile-args=-j2
+COPY backend/src/ ./src/
 RUN uv sync --locked --no-dev --no-editable --no-python-downloads --config-settings-package scikit-learn:compile-args=-j2
 
 FROM python:3.14-alpine3.24@sha256:5862d971d1f0ae26b258cefa4e893556b1d3aba81bd2ff30888704ad378bab67 AS runtime

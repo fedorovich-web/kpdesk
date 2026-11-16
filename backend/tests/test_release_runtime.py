@@ -75,6 +75,81 @@ def test_production_serves_built_frontend_without_spa_fallback_for_api(tmp_path:
             assert client.post('/faq',headers={'Origin':'https://kpdesk.ru'}).status_code==405
 
 
+def test_frontend_cache_lifetimes_keep_private_data_uncached(tmp_path: Path) -> None:
+    files = (
+        'index.html', '404.html', 'app/index.html', 'auth/login/index.html',
+        'proposal/index.html', 'features/index.html',
+        'assets/index-AbCd1234.js', 'assets/index-AbCd1234.css',
+        'assets/hero/01_hero_main.avif', 'fonts/inter/inter-cyrillic.woff2',
+        'robots.txt',
+    )
+    for name in files:
+        file_path = tmp_path / name
+        file_path.parent.mkdir(parents=True, exist_ok=True)
+        file_path.write_text(name)
+    with (patch.dict('os.environ', variables(tmp_path), clear=True),
+          patch('kpdesk.db.live_service_engines.live_service_engines', return_value=engines()),
+          TestClient(create_production_app(), base_url='https://kpdesk.ru') as client):
+        immutable = 'public, max-age=31536000, immutable'
+        static = 'public, max-age=2592000, stale-while-revalidate=86400'
+        html = 'no-cache, max-age=0, must-revalidate'
+        for path in ('/assets/index-AbCd1234.js', '/assets/index-AbCd1234.css'):
+            assert client.get(path).headers['cache-control'] == immutable
+        for path in ('/assets/hero/01_hero_main.avif', '/fonts/inter/inter-cyrillic.woff2'):
+            assert client.get(path).headers['cache-control'] == static
+        for path in ('/', '/features', '/features/'):
+            assert client.get(path).headers['cache-control'] == html
+        assert client.get('/robots.txt').headers['cache-control'] == 'public, max-age=3600'
+        for path in ('/app', '/auth/login', '/proposal', '/proposal/index.html'):
+            response = client.get(path)
+            assert response.headers['cache-control'] == 'no-store'
+            assert 'noindex' in response.headers['x-robots-tag']
+        for path in ('/', '/features', '/assets/index-AbCd1234.js',
+                     '/fonts/inter/inter-cyrillic.woff2', '/app'):
+            head = client.head(path)
+            get = client.get(path)
+            assert head.status_code == 200
+            assert head.headers['cache-control'] == get.headers['cache-control']
+            assert head.content == b''
+        unknown = client.get('/unknown-page')
+        assert unknown.status_code == 404
+        assert unknown.headers['cache-control'] == html
+
+
+def test_precompressed_static_files_respect_accept_encoding_and_privacy(tmp_path: Path) -> None:
+    import gzip
+
+    for name in ('index.html', '404.html', 'app/index.html', 'assets/index-AbCd1234.js'):
+        file_path = tmp_path / name
+        file_path.parent.mkdir(parents=True, exist_ok=True)
+        file_path.write_text('body ' + name)
+    source = tmp_path / 'assets/index-AbCd1234.js'
+    encoded = gzip.compress(source.read_bytes())
+    (tmp_path / 'assets/index-AbCd1234.js.gz').write_bytes(encoded)
+    with (patch.dict('os.environ', variables(tmp_path), clear=True),
+          patch('kpdesk.db.live_service_engines.live_service_engines', return_value=engines()),
+          TestClient(create_production_app(), base_url='https://kpdesk.ru') as client):
+        zipped = client.get('/assets/index-AbCd1234.js',
+                            headers={'Accept-Encoding': 'gzip'})
+        assert zipped.status_code == 200
+        assert zipped.text == source.read_text()
+        assert zipped.headers['content-encoding'] == 'gzip'
+        assert 'Accept-Encoding' in zipped.headers['vary'].split(', ')
+        assert zipped.headers['cache-control'].endswith('immutable')
+        plain = client.get('/assets/index-AbCd1234.js',
+                           headers={'Accept-Encoding': 'gzip;q=0, br;q=0'})
+        assert plain.headers.get('content-encoding') is None
+        assert 'Accept-Encoding' in plain.headers['vary'].split(', ')
+        assert plain.text == zipped.text
+        head = client.head('/assets/index-AbCd1234.js',
+                           headers={'Accept-Encoding': 'gzip'})
+        assert head.status_code == 200
+        assert head.headers['content-encoding'] == 'gzip'
+        assert int(head.headers['content-length']) == len(encoded)
+        assert head.content == b''
+        assert client.get('/assets/index-AbCd1234.js.gz').status_code == 404
+
+
 def test_static_escape_or_symlink_cannot_read_outside_build(tmp_path: Path) -> None:
     root=tmp_path/'dist';root.mkdir();(root/'index.html').write_text('home');(root/'404.html').write_text('missing')
     (tmp_path/'secret.txt').write_text('private-sentinel')

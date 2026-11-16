@@ -46,6 +46,7 @@ export function PublicHome() {
       </section>
 
       <section className="public-advantages" aria-label="Подготовка коммерческого предложения">
+        <h2 className="sr-only">Преимущества KPDesk</h2>
         {advantages.map(({ icon, title, text }) =>
           <article className="public-advantage" key={title}>
             <span className="public-icon"><img src={icon} alt="" width={48} height={48} loading="lazy"/></span>
@@ -112,7 +113,7 @@ export function PublicHome() {
         <h2 id="home-faq-title">Вопросы о работе с KPDesk</h2>
         <p className="public-section-lead">Как подготовить прайс, проверить подбор и текст ИИ, утвердить предложение и скачать PDF.</p>
         <FaqAccordion items={homeFaqs} className="public-faq-list" itemClassName="public-faq-item" />
-        <p><a href="/faq">Все вопросы и ответы</a></p>
+        <p className="public-faq-more"><a href="/faq" className="public-faq-more-link">Все вопросы и ответы</a></p>
       </section>
 
       <section className="public-end-cta">

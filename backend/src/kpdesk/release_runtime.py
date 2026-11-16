@@ -1,11 +1,23 @@
 """Read-only release schema check and optional built frontend, never legacy APIs."""
+import re
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse
 from sqlalchemy import Engine, text
 
-REQUIRED_SCHEMA = '0042_openrouter_budget'
+# Vite emits eight-character fingerprints in built JS/CSS filenames.
+# Only fingerprinted URLs may be cached for a year without risking stale deploys.
+_FINGERPRINTED_ASSET = re.compile(r"^assets/(?:[^/]+/)*[^/]+-[A-Za-z0-9]{8}\.(?:js|css|mjs|woff2|avif|webp|png|svg)$")
+_STATIC_EXTENSIONS = frozenset({'.js', '.mjs', '.css', '.avif', '.webp', '.png',
+                               '.jpg', '.jpeg', '.gif', '.svg', '.ico', '.woff',
+                               '.woff2', '.ttf', '.otf'})
+_HTML_CACHE = 'no-cache, max-age=0, must-revalidate'
+_PUBLIC_STATIC_CACHE = 'public, max-age=2592000, stale-while-revalidate=86400'
+_FINGERPRINTED_CACHE = 'public, max-age=31536000, immutable'
+
+
+REQUIRED_SCHEMA = '0042_openrouter_budget'
 BILLING_SCHEMA = '0048_lava_billing'
 SCHEMA_CHECK = text('''SELECT current_user,
     public.kpdesk_runtime_schema_revision(),
@@ -94,10 +106,10 @@ def mount_built_frontend(app: FastAPI, directory: str) -> None:
         if path == 'api' or path.startswith('api/'):
             raise HTTPException(404)
         normalized = path.rstrip('/')
-        private = normalized in ('app', 'auth', 'proposal') or normalized.startswith(('app/', 'auth/'))
+        private = normalized in ('app', 'auth', 'proposal') or normalized.startswith(('app/', 'auth/', 'proposal/'))
         if not normalized:
             file = safe_file('index.html')
-        elif normalized == 'proposal':
+        elif normalized == 'proposal' or normalized.startswith('proposal/'):
             file = safe_file('proposal/index.html')
         elif private:
             file = safe_file('app/index.html' if normalized == 'app' or normalized.startswith('app/') else 'auth/login/index.html')
@@ -107,6 +119,19 @@ def mount_built_frontend(app: FastAPI, directory: str) -> None:
             error_page=safe_file('404.html')
             if error_page is None:
                 raise HTTPException(404)
-            return FileResponse(error_page, status_code=404, headers={'X-Robots-Tag': 'noindex, nofollow'})
-        headers = {'Cache-Control': 'no-store', 'X-Robots-Tag': 'noindex, nofollow'} if private else {}
+            return FileResponse(error_page, status_code=404, headers={
+                'X-Robots-Tag': 'noindex, nofollow', 'Cache-Control': _HTML_CACHE,
+            })
+        if private:
+            headers = {'Cache-Control': 'no-store', 'X-Robots-Tag': 'noindex, nofollow'}
+        elif _FINGERPRINTED_ASSET.fullmatch(normalized):
+            headers = {'Cache-Control': _FINGERPRINTED_CACHE}
+        elif file.suffix.lower() in _STATIC_EXTENSIONS:
+            # Non-fingerprinted public assets can change without their URL changing.
+            headers = {'Cache-Control': _PUBLIC_STATIC_CACHE}
+        elif normalized in ('robots.txt', 'sitemap.xml', 'site.webmanifest'):
+            headers = {'Cache-Control': 'public, max-age=3600'}
+        else:
+            # In particular, never cache the version-specific HTML entrypoint.
+            headers = {'Cache-Control': _HTML_CACHE}
         return FileResponse(file, headers=headers)

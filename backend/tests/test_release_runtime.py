@@ -104,6 +104,13 @@ def test_frontend_cache_lifetimes_keep_private_data_uncached(tmp_path: Path) -> 
             response = client.get(path)
             assert response.headers['cache-control'] == 'no-store'
             assert 'noindex' in response.headers['x-robots-tag']
+        for path in ('/', '/features', '/assets/index-AbCd1234.js',
+                     '/fonts/inter/inter-cyrillic.woff2', '/app'):
+            head = client.head(path)
+            get = client.get(path)
+            assert head.status_code == 200
+            assert head.headers['cache-control'] == get.headers['cache-control']
+            assert head.content == b''
         unknown = client.get('/unknown-page')
         assert unknown.status_code == 404
         assert unknown.headers['cache-control'] == html

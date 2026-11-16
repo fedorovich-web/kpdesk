@@ -32,3 +32,12 @@ export const designAssets = {
     checkQuote: '/assets/icons/36_document_check.avif',
   },
 } as const;
+
+/** Density-aware versions for 48px public marketing icons; source art stays intact. */
+export function publicIconSrcSet(src: string): string {
+  if (!src.startsWith('/assets/icons/') || !src.endsWith('.avif')) {
+    throw new Error('Responsive public icons must be registered AVIF assets.');
+  }
+  const base = src.slice(0, -'.avif'.length);
+  return `${base}-96w.avif 96w, ${base}-144w.avif 144w, ${src} 256w`;
+}

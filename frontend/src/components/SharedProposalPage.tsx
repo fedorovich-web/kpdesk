@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import '../styles.css';
 import { designAssets } from '../design-assets';
 import '../styles/proposal-share.css';
 

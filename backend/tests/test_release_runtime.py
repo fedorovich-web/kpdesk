@@ -116,6 +116,40 @@ def test_frontend_cache_lifetimes_keep_private_data_uncached(tmp_path: Path) -> 
         assert unknown.headers['cache-control'] == html
 
 
+def test_precompressed_static_files_respect_accept_encoding_and_privacy(tmp_path: Path) -> None:
+    import gzip
+
+    for name in ('index.html', '404.html', 'app/index.html', 'assets/index-AbCd1234.js'):
+        file_path = tmp_path / name
+        file_path.parent.mkdir(parents=True, exist_ok=True)
+        file_path.write_text('body ' + name)
+    source = tmp_path / 'assets/index-AbCd1234.js'
+    encoded = gzip.compress(source.read_bytes())
+    (tmp_path / 'assets/index-AbCd1234.js.gz').write_bytes(encoded)
+    with (patch.dict('os.environ', variables(tmp_path), clear=True),
+          patch('kpdesk.db.live_service_engines.live_service_engines', return_value=engines()),
+          TestClient(create_production_app(), base_url='https://kpdesk.ru') as client):
+        zipped = client.get('/assets/index-AbCd1234.js',
+                            headers={'Accept-Encoding': 'gzip'})
+        assert zipped.status_code == 200
+        assert zipped.text == source.read_text()
+        assert zipped.headers['content-encoding'] == 'gzip'
+        assert zipped.headers['vary'] == 'Accept-Encoding'
+        assert zipped.headers['cache-control'].endswith('immutable')
+        plain = client.get('/assets/index-AbCd1234.js',
+                           headers={'Accept-Encoding': 'gzip;q=0, br;q=0'})
+        assert plain.headers.get('content-encoding') is None
+        assert plain.headers['vary'] == 'Accept-Encoding'
+        assert plain.text == zipped.text
+        head = client.head('/assets/index-AbCd1234.js',
+                           headers={'Accept-Encoding': 'gzip'})
+        assert head.status_code == 200
+        assert head.headers['content-encoding'] == 'gzip'
+        assert int(head.headers['content-length']) == len(encoded)
+        assert head.content == b''
+        assert client.get('/assets/index-AbCd1234.js.gz').status_code == 404
+
+
 def test_static_escape_or_symlink_cannot_read_outside_build(tmp_path: Path) -> None:
     root=tmp_path/'dist';root.mkdir();(root/'index.html').write_text('home');(root/'404.html').write_text('missing')
     (tmp_path/'secret.txt').write_text('private-sentinel')

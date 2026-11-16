@@ -43,8 +43,8 @@ def audit_migration_lineage(
     if heads != {_LEGACY_HEAD, _RELEASE_HEAD}:
         raise RuntimeError(f"Unexpected Alembic heads: {sorted(heads)}")
     live = script.get_revision(f"{_RELEASE_BRANCH}@head")
-    if live is None or live.revision != _RELEASE_HEAD
-        or live.down_revision != "0047_auth_reset_serialization":
+    if (live is None or live.revision != _RELEASE_HEAD
+            or live.down_revision != "0047_auth_reset_serialization"):
         raise RuntimeError("Active live_release lineage is not at reviewed revision.")
     if script.get_revision(_LEGACY_HEAD) is None:
         raise RuntimeError("Historical test-only migration lineage is missing.")

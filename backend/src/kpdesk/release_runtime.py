@@ -1,14 +1,16 @@
 """Read-only release schema check and optional built frontend, never legacy APIs."""
 import re
+from mimetypes import guess_type
 from pathlib import Path
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import FileResponse
 from sqlalchemy import Engine, text
 
 # Vite emits eight-character fingerprints in built JS/CSS filenames.
 # Only fingerprinted URLs may be cached for a year without risking stale deploys.
 _FINGERPRINTED_ASSET = re.compile(r"^assets/(?:[^/]+/)*[^/]+-[A-Za-z0-9]{8}\.(?:js|css|mjs|woff2|avif|webp|png|svg)$")
+_COMPRESSIBLE_EXTENSIONS = frozenset({'.html', '.js', '.mjs', '.css', '.svg', '.json', '.xml', '.txt'})
 _STATIC_EXTENSIONS = frozenset({'.js', '.mjs', '.css', '.avif', '.webp', '.png',
                                '.jpg', '.jpeg', '.gif', '.svg', '.ico', '.woff',
                                '.woff2', '.ttf', '.otf'})
@@ -81,6 +83,23 @@ def verify_release_schema(engine: Engine, *, check_billing_activation: bool = Tr
         raise RuntimeError('Production database schema is not ready; reviewed migrations must be applied separately.')
 
 
+def _accepted_encoding_quality(header: str, coding: str) -> float:
+    for item in header.split(','):
+        name, *params = item.split(';')
+        if name.strip().lower() != coding:
+            continue
+        quality = 1.0
+        for parameter in params:
+            key, separator, value = parameter.partition('=')
+            if separator and key.strip().lower() == 'q':
+                try:
+                    quality = float(value.strip())
+                except ValueError:
+                    return 0.0
+        return quality if 0.0 <= quality <= 1.0 else 0.0
+    return 0.0
+
+
 def mount_built_frontend(app: FastAPI, directory: str) -> None:
     candidate = Path(directory)
     if not candidate.is_absolute() or not candidate.is_dir():
@@ -102,10 +121,13 @@ def mount_built_frontend(app: FastAPI, directory: str) -> None:
         raise RuntimeError('Frontend required pages must stay within the build directory.')
 
     @app.api_route('/{path:path}', methods=['GET', 'HEAD'], include_in_schema=False)
-    def frontend(path: str) -> FileResponse:
+    def frontend(path: str, request: Request) -> FileResponse:
         if path == 'api' or path.startswith('api/'):
             raise HTTPException(404)
         normalized = path.rstrip('/')
+        # Precompressed files are implementation details, never public URLs.
+        if normalized.endswith(('.br', '.gz')):
+            raise HTTPException(404)
         private = normalized in ('app', 'auth', 'proposal') or normalized.startswith(('app/', 'auth/', 'proposal/'))
         if not normalized:
             file = safe_file('index.html')
@@ -134,4 +156,22 @@ def mount_built_frontend(app: FastAPI, directory: str) -> None:
         else:
             # In particular, never cache the version-specific HTML entrypoint.
             headers = {'Cache-Control': _HTML_CACHE}
+        if file.suffix.lower() in _COMPRESSIBLE_EXTENSIONS:
+            # Keep the private API out of compression; only public build
+            # artifacts are eligible. The original URL stays unchanged.
+            headers['Vary'] = 'Accept-Encoding'
+            accepted = request.headers.get('accept-encoding', '')
+            ordered = sorted(
+                (('br', 'br'), ('gzip', 'gz')),
+                key=lambda pair: _accepted_encoding_quality(accepted, pair[0]),
+                reverse=True,
+            )
+            for coding, extension in ordered:
+                if _accepted_encoding_quality(accepted, coding) <= 0:
+                    continue
+                compressed = safe_file(file.relative_to(root).as_posix() + '.' + extension)
+                if compressed is not None:
+                    headers['Content-Encoding'] = coding
+                    media_type = guess_type(file.name)[0] or 'application/octet-stream'
+                    return FileResponse(compressed, media_type=media_type, headers=headers)
         return FileResponse(file, headers=headers)

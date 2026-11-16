@@ -73,7 +73,7 @@ def test_new_revision_keeps_single_live_release_head() -> None:
     script = ScriptDirectory.from_config(Config(str(backend / "alembic.ini")))
     assert set(script.get_heads()) == {
         "0012_session_bound_rls",
-        "0047_auth_reset_serialization",
+        "0048_lava_billing",
     }
     assert migration.down_revision == "0032_supplier_quote_audit"
 

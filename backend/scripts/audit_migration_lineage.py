@@ -14,7 +14,9 @@ from alembic.script import ScriptDirectory
 _BACKEND = Path(__file__).resolve().parents[1]
 _FORK_BASE = "0005_tenant_expand"
 _LEGACY_HEAD = "0012_session_bound_rls"
-_RELEASE_HEAD = "0047_auth_reset_serialization"
+# 0048 is an explicitly approved, opt-in billing migration at the script head.
+# The fresh production installer remains separately pinned to 0047.
+_RELEASE_HEAD = "0048_lava_billing"
 _RELEASE_BRANCH = "live_release"
 _CLONE_HEAD = "0031_reviewed_catalog_clone"
 
@@ -41,7 +43,8 @@ def audit_migration_lineage(
     if heads != {_LEGACY_HEAD, _RELEASE_HEAD}:
         raise RuntimeError(f"Unexpected Alembic heads: {sorted(heads)}")
     live = script.get_revision(f"{_RELEASE_BRANCH}@head")
-    if live is None or live.revision != _RELEASE_HEAD:
+    if live is None or live.revision != _RELEASE_HEAD
+        or live.down_revision != "0047_auth_reset_serialization":
         raise RuntimeError("Active live_release lineage is not at reviewed revision.")
     if script.get_revision(_LEGACY_HEAD) is None:
         raise RuntimeError("Historical test-only migration lineage is missing.")

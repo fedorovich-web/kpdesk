@@ -56,5 +56,5 @@ def test_unapproved_candidate_not_in_default_migration_graph() -> None:
     backend = Path(__file__).resolve().parents[1]
     config = Config(str(backend / "alembic.ini"))
     assert set(ScriptDirectory.from_config(config).get_heads()) == {
-        "0012_session_bound_rls", "0047_auth_reset_serialization",
+        "0012_session_bound_rls", "0048_lava_billing",
     }

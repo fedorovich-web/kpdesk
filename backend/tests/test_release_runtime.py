@@ -84,9 +84,9 @@ def test_frontend_cache_lifetimes_keep_private_data_uncached(tmp_path: Path) -> 
         'robots.txt',
     )
     for name in files:
-        path = tmp_path / name
-        path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(name)
+        file_path = tmp_path / name
+        file_path.parent.mkdir(parents=True, exist_ok=True)
+        file_path.write_text(name)
     with (patch.dict('os.environ', variables(tmp_path), clear=True),
           patch('kpdesk.db.live_service_engines.live_service_engines', return_value=engines()),
           TestClient(create_production_app(), base_url='https://kpdesk.ru') as client):

@@ -1,0 +1,54 @@
+name: KPDesk offline quality
+
+# Fast public checks only. PostgreSQL clone E2E and protected ML/data
+# evaluations must run through separately reviewed release gates.
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  frontend:
+    name: React TypeScript unit and production build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+      - run: npm test
+      - run: npm run build
+
+  backend:
+    name: Python static checks and offline domain tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+          cache-dependency-glob: backend/uv.lock
+      - run: uv python install 3.14
+      - run: uv sync --locked --python 3.14
+      - run: uv run --locked ruff check src tests scripts migrations
+      - run: uv run --locked mypy src tests scripts
+      # Public offline scope skips historical private dataset cases.
+      # Database/authorization safety guards remain enabled.
+      - run: uv run --locked python -m scripts.run_public_release_tests
+
+# This smoke workflow does not exercise live providers, PostgreSQL clone
+# migrations, HTTPS, deployed infrastructure or real external services.

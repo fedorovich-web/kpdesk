@@ -1,0 +1,28 @@
+name: Live PageSpeed and cache audit
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  live-audit:
+    name: Google PageSpeed and response headers (read-only)
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: Query site headers and Google PageSpeed Insights
+        run: python3 .github/scripts/live_pagespeed_audit.py
+      - name: Store results when available
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pagespeed-summary-${{ github.run_id }}
+          path: pagespeed-*.json
+          if-no-files-found: ignore
+          retention-days: 14

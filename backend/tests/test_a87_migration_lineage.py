@@ -13,9 +13,10 @@ from scripts import run_release_quality_gate as gate
 def test_known_branches_have_single_shared_0005_fork() -> None:
     audited = lineage.audit_migration_lineage()
     assert audited.target == "live_release@head"
-    assert audited.release_head == "0048_lava_billing"
+    assert audited.release_head == "0049_yandex_id"
     assert audited.historical_test_head == "0012_session_bound_rls"
-    assert len(audited.release_revisions) == 36
+    assert len(audited.release_revisions) == 37
+    assert audited.release_revisions[:3] == ("0049_yandex_id", "0048_lava_billing", "0047_auth_reset_serialization")
     assert len(audited.historical_test_revisions) == 7
     assert set(audited.release_revisions).isdisjoint(
         audited.historical_test_revisions
@@ -56,5 +57,5 @@ def test_cli_audit_is_read_only(capsys: pytest.CaptureFixture[str]) -> None:
     assert lineage.main() == 0
     output = capsys.readouterr().out
     assert "read-only" in output
-    assert "live_release@head -> 0048_lava_billing" in output
+    assert "live_release@head -> 0049_yandex_id" in output
     assert "0012_session_bound_rls" in output

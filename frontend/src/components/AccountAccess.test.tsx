@@ -1,7 +1,13 @@
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { AccountAccess } from './AccountAccess';
 import { SessionApiError, sessionApi } from '../tenant-session';
+import { yandexApi, YandexApiError } from '../yandex-api';
+
+beforeEach(() => {
+  // Optional provider discovery must never forward real requests in account tests.
+  vi.spyOn(yandexApi, 'providers').mockResolvedValue(false);
+});
 
 afterEach(() => {
   vi.restoreAllMocks();
@@ -342,5 +348,114 @@ describe('expired session protection on workspace refresh', () => {
       .toBeInTheDocument();
     expect(screen.queryByText('97')).not.toBeInTheDocument();
     expect(screen.getByRole('alert')).toHaveTextContent('Сессия завершилась');
+  });
+});
+
+describe('Yandex access integration in the existing account screens', () => {
+  function securedPage(path: string) {
+    window.history.replaceState({}, '', path);
+    const original = window;
+    const secured = Object.create(original) as Window;
+    const assign = vi.fn();
+    Object.defineProperty(secured, 'location', { get: () => ({
+      protocol: 'https:', pathname: original.location.pathname,
+      search: original.location.search, hash: original.location.hash,
+      assign,
+    }) });
+    vi.stubGlobal('window', secured);
+    vi.stubGlobal('fetch', vi.fn(() => { throw new Error('Unexpected network request'); }));
+    return assign;
+  }
+  it.each(['/auth/login', '/auth/register'])('adds optional Yandex access on %s and preserves password access', async path => {
+    securedPage(path); vi.mocked(yandexApi.providers).mockResolvedValue(true);
+    render(<AccountAccess/>);
+    const yandex = await screen.findByRole('link', { name: path.endsWith('register')
+      ? 'Зарегистрироваться с Яндекс ID' : 'Войти с Яндекс ID' });
+    expect(yandex).toHaveAttribute('href', '/api/session/yandex/start?next=/app');
+    expect(screen.getByText('или с помощью почты')).toBeInTheDocument();
+    const email = screen.getByLabelText('Электронная почта');
+    expect(yandex.compareDocumentPosition(email) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(email).toBeInTheDocument();
+    expect(screen.getByLabelText(/^Пароль/)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: path.endsWith('register') ? 'Зарегистрироваться' : 'Войти' }))
+      .toBeEnabled();
+  });
+  it.each([
+    ['%2Fadmin', '/admin'], ['%2Fapp', '/app'], ['https%3A%2F%2Fevil.test', '/app'], ['%2Fadmin%2F', '/app'],
+  ])('uses exact allowed next target %s', async (query, target) => {
+    securedPage('/auth/login?next=' + query); vi.mocked(yandexApi.providers).mockResolvedValue(true);
+    render(<AccountAccess/>);
+    expect(await screen.findByRole('link', { name: 'Войти с Яндекс ID' }))
+      .toHaveAttribute('href', '/api/session/yandex/start?next=' + target);
+  });
+  it('shows fixed linking help and removes only OAuth feedback from the current URL', () => {
+    securedPage('/auth/login?token=keep&oauth_error=yandex_account_link_required&next=%2Fadmin#keep');
+    render(<AccountAccess/>);
+    expect(screen.getByRole('alert')).toHaveTextContent(/Войдите.*парол.*подключите Яндекс/);
+    expect(window.location.search).toBe('?token=keep&next=%2Fadmin');
+    expect(window.location.hash).toBe('#keep');
+  });
+  it('never treats a callback error query as successful authentication', () => {
+    securedPage('/auth/login?oauth_error=yandex_cancelled');
+    const resume = vi.spyOn(sessionApi, 'resume');
+    render(<AccountAccess/>);
+    expect(screen.getByRole('alert')).toHaveTextContent('отменён');
+    expect(screen.queryByRole('status')).toBeNull(); expect(resume).not.toHaveBeenCalled();
+  });
+  it('keeps password login usable when capability discovery fails', async () => {
+    securedPage('/auth/login'); vi.mocked(yandexApi.providers).mockRejectedValue(new Error('Unavailable'));
+    render(<AccountAccess/>); await act(async () => {});
+    expect(screen.getByRole('button', { name: 'Войти' })).toBeEnabled();
+    expect(screen.queryByRole('link', { name: 'Войти через Яндекс' })).toBeNull();
+    expect(screen.queryByRole('alert')).toBeNull();
+  });
+  it('offers account-level connection even when the user has no organization', async () => {
+    securedPage('/app'); vi.mocked(yandexApi.providers).mockResolvedValue(true);
+    vi.spyOn(sessionApi, 'resume').mockResolvedValue({ user_id: 'user-a', csrf_token: 'a'.repeat(43) });
+    vi.spyOn(sessionApi, 'organizations').mockResolvedValue({ organizations: [] });
+    vi.spyOn(yandexApi, 'identity').mockResolvedValue(false);
+    render(<AccountAccess/>);
+    expect(await screen.findByRole('button', { name: 'Подключить Яндекс ID' })).toBeEnabled();
+    expect(screen.getByRole('heading', { name: 'Личный кабинет KPDesk' })).toBeInTheDocument();
+  });
+  it('clears a connected identity after logout', async () => {
+    securedPage('/app'); vi.mocked(yandexApi.providers).mockResolvedValue(true);
+    vi.spyOn(sessionApi, 'resume').mockResolvedValue({ user_id: 'user-a', csrf_token: 'a'.repeat(43) });
+    vi.spyOn(sessionApi, 'organizations').mockResolvedValue({ organizations: [] });
+    vi.spyOn(yandexApi, 'identity').mockResolvedValue(true);
+    vi.spyOn(sessionApi, 'logout').mockResolvedValue(null);
+    render(<AccountAccess/>);
+    await screen.findByText('Яндекс ID подключён.');
+    fireEvent.click(screen.getByRole('button', { name: 'Выйти' }));
+    await screen.findByRole('heading', { name: 'Вход в KPDesk' });
+    expect(screen.queryByText('Яндекс ID подключён.')).toBeNull();
+  });
+  it('aborts linking as soon as logout begins, before the logout response arrives', async () => {
+    const assign = securedPage('/app'); vi.mocked(yandexApi.providers).mockResolvedValue(true);
+    vi.spyOn(sessionApi, 'resume').mockResolvedValue({ user_id: 'user-a', csrf_token: 'a'.repeat(43) });
+    vi.spyOn(sessionApi, 'organizations').mockResolvedValue({ organizations: [] });
+    vi.spyOn(yandexApi, 'identity').mockResolvedValue(false);
+    let finishLink!: (url: string) => void;
+    let finishLogout!: (value: null) => void;
+    const link = vi.spyOn(yandexApi, 'startLink').mockImplementation(() => new Promise(resolve => { finishLink = resolve; }));
+    vi.spyOn(sessionApi, 'logout').mockImplementation(() => new Promise(resolve => { finishLogout = resolve; }));
+    render(<AccountAccess/>);
+    fireEvent.click(await screen.findByRole('button', { name: 'Подключить Яндекс ID' }));
+    const signal = link.mock.calls[0]![1]!;
+    fireEvent.click(screen.getByRole('button', { name: 'Выйти' }));
+    expect(signal.aborted).toBe(true);
+    await act(async () => { finishLink('https://oauth.yandex.ru/authorize?ignored=stale'); finishLogout(null); });
+    expect(assign).not.toHaveBeenCalled();
+    expect(screen.queryByRole('button', { name: 'Подключить Яндекс ID' })).toBeNull();
+  });
+  it('clears the existing session when the identity endpoint rejects it', async () => {
+    securedPage('/app'); vi.mocked(yandexApi.providers).mockResolvedValue(true);
+    vi.spyOn(sessionApi, 'resume').mockResolvedValue({ user_id: 'user-a', csrf_token: 'a'.repeat(43) });
+    vi.spyOn(sessionApi, 'organizations').mockResolvedValue({ organizations: [] });
+    vi.spyOn(yandexApi, 'identity').mockRejectedValue(new YandexApiError(401));
+    render(<AccountAccess/>);
+    expect(await screen.findByRole('heading', { name: 'Вход в KPDesk' })).toBeInTheDocument();
+    expect(screen.getByRole('alert')).toHaveTextContent('Сессия завершилась');
+    expect(screen.queryByRole('button', { name: 'Выйти' })).toBeNull();
   });
 });

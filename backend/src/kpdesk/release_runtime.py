@@ -21,6 +21,16 @@ _FINGERPRINTED_CACHE = 'public, max-age=31536000, immutable'
 
 REQUIRED_SCHEMA = '0042_openrouter_budget'
 BILLING_SCHEMA = '0048_lava_billing'
+YANDEX_SCHEMA = '0049_yandex_id'
+_RELEASES = (REQUIRED_SCHEMA, '0043_proposal_shares', '0044_universal_products',
+             '0045_registry_retirement', '0046_provider_authority',
+             '0047_auth_reset_serialization', BILLING_SCHEMA, YANDEX_SCHEMA)
+
+
+def _at_least(revision: object, minimum: str) -> bool:
+    return revision in _RELEASES[_RELEASES.index(minimum):]
+
+
 SCHEMA_CHECK = text('''SELECT current_user,
     public.kpdesk_runtime_schema_revision(),
     to_regprocedure('public.kpdesk_company_profile_read(uuid)') IS NOT NULL
@@ -38,8 +48,10 @@ SCHEMA_CHECK = text('''SELECT current_user,
 ''')
 
 
-def verify_release_schema(engine: Engine, *, check_billing_activation: bool = True) -> None:
+def verify_release_schema(engine: Engine, *, check_billing_activation: bool = True,
+                          check_yandex_activation: bool = True) -> None:
     from kpdesk.billing.settings import BillingSettings
+    from kpdesk.yandex.settings import YandexSettings
 
     try:
         # The isolated provisioner has no provider secrets. It checks structure;
@@ -47,29 +59,41 @@ def verify_release_schema(engine: Engine, *, check_billing_activation: bool = Tr
         billing = BillingSettings.from_env() if check_billing_activation else None
     except (ValueError, TypeError):
         raise RuntimeError('Production billing settings are invalid.') from None
+    try:
+        yandex = YandexSettings.from_env() if check_yandex_activation else None
+    except (ValueError, TypeError):
+        raise RuntimeError('Production Yandex ID settings are invalid.') from None
+    if yandex is not None and yandex.enabled:
+        from kpdesk.yandex.client import YandexError
+        from kpdesk.yandex.state import VerifierCipher
+
+        try:
+            VerifierCipher.from_runtime()
+        except YandexError:
+            raise RuntimeError('Production Yandex ID envelope configuration is invalid.') from None
     with engine.begin() as connection:
         connection.execute(text('SET TRANSACTION READ ONLY'))
         available: object = connection.execute(text("SELECT to_regprocedure('public.kpdesk_runtime_schema_revision()') IS NOT NULL")).scalar_one()
         if available is not True:
             raise RuntimeError('Production database schema is not ready; runtime metadata function is missing.')
         result = connection.execute(SCHEMA_CHECK).one()
-        if result[1] in ('0043_proposal_shares', '0044_universal_products', '0045_registry_retirement', '0046_provider_authority', '0047_auth_reset_serialization', BILLING_SCHEMA):
+        if _at_least(result[1], '0043_proposal_shares'):
             from kpdesk.quotes.sharing import sharing_available
 
             if not sharing_available(connection) or connection.scalar(text('''SELECT relrowsecurity AND relforcerowsecurity
                 FROM pg_catalog.pg_class WHERE oid=to_regclass('public.proposal_shares')''')) is not True:
                 raise RuntimeError('Production database schema is not ready; proposal sharing gateway is incomplete.')
-        if result[1] in ('0044_universal_products', '0045_registry_retirement', '0046_provider_authority', '0047_auth_reset_serialization', BILLING_SCHEMA):
+        if _at_least(result[1], '0044_universal_products'):
             from kpdesk.db.universal_schema import universal_available
 
             if not universal_available(connection):
                 raise RuntimeError('Production database schema is not ready; universal gateway is incomplete.')
-        if result[1] in ('0045_registry_retirement', '0046_provider_authority', '0047_auth_reset_serialization', BILLING_SCHEMA):
+        if _at_least(result[1], '0045_registry_retirement'):
             from kpdesk.db.supplier_registry_schema import registry_retired
 
             if not registry_retired(connection):
                 raise RuntimeError('Production database schema is not ready; retired registry privileges remain.')
-        if result[1] == BILLING_SCHEMA:
+        if _at_least(result[1], BILLING_SCHEMA):
             from kpdesk.billing.schema import billing_available, billing_enabled
 
             if not billing_available(connection):
@@ -78,7 +102,14 @@ def verify_release_schema(engine: Engine, *, check_billing_activation: bool = Tr
                 raise RuntimeError('Production billing application and database activation settings disagree.')
         elif billing is not None and billing.enabled:
             raise RuntimeError('Production billing schema is not ready; reviewed migration 0048 is required.')
-    if (result[1] not in (REQUIRED_SCHEMA, '0043_proposal_shares', '0044_universal_products', '0045_registry_retirement', '0046_provider_authority', '0047_auth_reset_serialization', BILLING_SCHEMA)
+        if _at_least(result[1], YANDEX_SCHEMA):
+            from kpdesk.yandex.schema import yandex_available
+
+            if not yandex_available(connection):
+                raise RuntimeError('Production database schema is not ready; Yandex ID gateway is incomplete.')
+        elif yandex is not None and yandex.enabled:
+            raise RuntimeError('Production Yandex ID schema is not ready; reviewed migration 0049 is required.')
+    if (result[1] not in _RELEASES
             or (result[0], *result[2:]) != ('kpdesk_tenant_runtime', True, True, True)):
         raise RuntimeError('Production database schema is not ready; reviewed migrations must be applied separately.')
 

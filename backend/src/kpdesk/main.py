@@ -108,6 +108,9 @@ def create_app(
             if request.url.scheme == 'https':
                 response.headers['Strict-Transport-Security'] = 'max-age=31536000'
         parts = request.url.path.split('/')
+        if (request.url.path.startswith('/api/session/yandex/')
+                or request.url.path == '/api/session/providers'):
+            response.headers.update({'Cache-Control': 'no-store', 'X-Robots-Tag': 'noindex, nofollow'})
         if request.url.path.startswith('/api/billing/') or (
             request.url.path.startswith('/api/session/organizations/') and 'billing' in parts
         ):
@@ -203,6 +206,7 @@ def create_app(
             router as tenant_supplier_unit_router,
         )
         from kpdesk.api.universal_routes import router as universal_router
+        from kpdesk.api.yandex_routes import router as yandex_router
         from kpdesk.db.live_service_engines import live_service_engines
 
         auth_engine, catalog_engine = live_service_engines()
@@ -233,6 +237,7 @@ def create_app(
         app.include_router(unreleased_router)
         app.include_router(account_router)
         app.include_router(billing_router)
+        app.include_router(yandex_router)
         app.include_router(member_router)
         app.include_router(tenant_extract_router)
         app.include_router(tenant_matching_router)

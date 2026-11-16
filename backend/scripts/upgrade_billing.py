@@ -131,14 +131,16 @@ def run(*, apply: bool = False, maintenance: bool = False, backup_restored: bool
             connection.exec_driver_sql('SET TRANSACTION READ ONLY')
             connection.exec_driver_sql("SET LOCAL statement_timeout='30s'")
             revision = verify_target(connection, nonce)
-        verify_release_schema(restricted, check_billing_activation=False)
+        verify_release_schema(restricted, check_billing_activation=False,
+                              check_yandex_activation=False)
         if not apply:
             return {'status': 'passed', 'mode': 'preflight', 'revision': revision, 'database_writes': 0}
         with engine.begin() as connection:
             apply_schema(connection, nonce, config)
         # A failed final physical-role check cannot roll back the committed schema.
         try:
-            verify_release_schema(restricted, check_billing_activation=False)
+            verify_release_schema(restricted, check_billing_activation=False,
+                              check_yandex_activation=False)
         except (RuntimeError, SQLAlchemyError):
             return {'status': 'failed', 'code': 'billing_upgrade_postcommit_verification_failed',
                     'revision': TARGET, 'schema_committed': True, 'billing_enabled': False}

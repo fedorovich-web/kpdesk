@@ -41,7 +41,7 @@ def test_candidate_rejects_duplicate_or_unsafe_category_values(
 
 def test_released_local_taxonomy_precedes_pending_supplier_audit_revision() -> None:
     audited = audit_migration_lineage()
-    assert audited.release_head == "0048_lava_billing"
+    assert audited.release_head == "0049_yandex_id"
     assert proposal.revision in audited.release_revisions
     supplier = importlib.import_module("migrations.versions.0032_supplier_quote_audit")
     assert supplier.down_revision == proposal.revision

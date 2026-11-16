@@ -6,6 +6,8 @@ import { designAssets } from '../design-assets';
 import { TenantOperations } from './TenantOperations';
 import { WorkspaceNavigation } from './WorkspaceNavigation';
 import { BillingPanel } from './BillingPanel';
+import { YandexConnection, YandexLogin } from './YandexAccess';
+import { consumeYandexError } from '../yandex-api';
 import { sessionApi, SessionApiError } from '../tenant-session';
 import type { ActiveTenantCatalog, CatalogPreflight, TenantOrganization } from '../tenant-session';
 
@@ -68,11 +70,16 @@ export function AccountAccess() {
   const fileRef = useRef<File | null>(null);
   fileRef.current = file;
   const [pending, setPending] = useState(false);
+  const [loggingOut, setLoggingOut] = useState(false);
   const [notice, setNotice] = useState('');
   const [error, setError] = useState('');
+  const [oauthFeedback, setOauthFeedback] = useState('');
+  const [yandexNextPath] = useState<'/app' | '/admin'>(() =>
+    new URLSearchParams(window.location.search).get('next') === '/admin' ? '/admin' : '/app');
   const secure = window.location.protocol === 'https:';
   const selectedOrganization = organizations.find(org => org.id === selectedId);
 
+  useEffect(() => { setOauthFeedback(consumeYandexError()); }, []);
   useEffect(() => {
     // Verification secrets do not remain in history, bookmarks or copied URLs.
     if (token && (window.location.pathname === paths['verify-email']
@@ -89,6 +96,7 @@ export function AccountAccess() {
       setError('');
       setNotice('');
       setPassword('');
+      setOauthFeedback(consumeYandexError());
     };
     window.addEventListener('popstate', back);
     return () => {
@@ -154,6 +162,7 @@ export function AccountAccess() {
     setError('');
     setNotice('');
     setPassword('');
+    setOauthFeedback('');
   };
 
   const invalidateSession = () => {
@@ -327,19 +336,22 @@ export function AccountAccess() {
   };
 
   const logout = async () => {
-    if (!csrf) return;
+    if (!csrf || loggingOut) return;
+    const logoutCsrf = csrf;
+    // Remove the link UI immediately; its cleanup aborts an in-flight OAuth redirect.
+    setLoggingOut(true);
     setPending(true);
     try {
-      await sessionApi.logout(csrf);
+      await sessionApi.logout(logoutCsrf);
       catalogRequestSequence.current++;
-      setCsrf(null);
+        setCsrf(null);
       setSelectedId('');
       setOrganizations([]);
       setCatalogRecord(null);
       navigate('login');
       setNotice('Вы вышли из аккаунта.');
     } catch (err) { setError(feedback(err)); }
-    finally { setPending(false); }
+    finally { setPending(false); setLoggingOut(false); }
   };
 
   return <div className={mode === 'organizations' ? 'access-page workspace-page' : 'access-page'}>
@@ -359,10 +371,13 @@ export function AccountAccess() {
           Действия с аккаунтом доступны только по HTTPS. Откройте защищённую версию KPDesk.
         </div>}
         {error && <div className="alert error" role="alert">{error}</div>}
+        {oauthFeedback && <div className="alert warning" role="alert">{oauthFeedback}</div>}
         {notice && <div className="alert success" role="status">
           <CheckCircle2 size={19} aria-hidden="true"/>{notice}
         </div>}
 
+        {(mode === 'login' || mode === 'register') && <YandexLogin secure={secure}
+          nextPath={yandexNextPath} mode={mode}/>}
         {mode !== 'organizations' ? <form className="access-form" onSubmit={event => void submit(event)}>
           {(mode === 'login' || mode === 'register' || mode === 'forgot-password'
             || mode === 'resend-confirmation') && <label>
@@ -429,6 +444,8 @@ export function AccountAccess() {
           {csrf && <button className="text-button workspace-logout" type="button"
             disabled={pending} onClick={() => void logout()}>Выйти</button>}
           </div>
+          <YandexConnection secure={secure} csrfToken={loggingOut ? null : csrf}
+            onSessionExpired={invalidateSession}/>
           <div className={csrf && selectedOrganization ? 'workspace-layout' : 'workspace-layout-empty'}>
           {csrf && selectedOrganization && <WorkspaceNavigation canWrite={selectedOrganization.role !== 'viewer'}/>}
           <div className="workspace-content">

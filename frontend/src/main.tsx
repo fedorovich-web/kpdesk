@@ -1,13 +1,5 @@
 import React from 'react';
 import { createRoot, hydrateRoot } from 'react-dom/client';
-import { PublicHome } from './components/PublicHome';
-import { FaqPage } from './components/FaqPage';
-import { FeaturesPage } from './components/FeaturesPage';
-import { HowItWorksPage } from './components/HowItWorksPage';
-import { IntegrationsPage } from './components/IntegrationsPage';
-import { PricingPage } from './components/PricingPage';
-import { PrivacyPage } from './components/PrivacyPage';
-import { NotFoundPage } from './components/NotFoundPage';
 import './styles.css';
 
 // Private session/workspace code is never needed for public route hydration.
@@ -22,15 +14,34 @@ const normalizedPath = (path: string) => path.replace(/\/+$/, '') || '/';
 
 type DemoComponent = typeof import('./App').App;
 
-function RootRoute({ DemoApp }: { DemoApp: DemoComponent | null }) {
+type PublicPageComponent = React.ComponentType;
+
+/**
+ * Only load the public page the visitor actually requested.
+ * The server already sends prerendered, crawlable markup while the route chunk
+ * downloads, so this does not block the initial HTML/LCP paint.
+ */
+async function loadPublicPage(path: string): Promise<PublicPageComponent | null> {
+  if (path === '/' || path === '/index.html') return (await import('./components/PublicHome')).PublicHome;
+  if (path === '/faq') return (await import('./components/FaqPage')).FaqPage;
+  if (path === '/features') return (await import('./components/FeaturesPage')).FeaturesPage;
+  if (path === '/how-it-works') return (await import('./components/HowItWorksPage')).HowItWorksPage;
+  if (path === '/integrations') return (await import('./components/IntegrationsPage')).IntegrationsPage;
+  if (path === '/pricing') return (await import('./components/PricingPage')).PricingPage;
+  if (path === '/privacy') return (await import('./components/PrivacyPage')).PrivacyPage;
+  if (path === '/demo' || path.startsWith('/demo/') || path === '/proposal'
+    || path.startsWith('/auth/') || path === '/app' || path.startsWith('/app/')) {
+    return null;
+  }
+  return (await import('./components/NotFoundPage')).NotFoundPage;
+}
+
+function RootRoute({ DemoApp, PublicPage }: {
+  DemoApp: DemoComponent | null;
+  PublicPage: PublicPageComponent | null;
+}) {
   const path = normalizedPath(window.location.pathname);
-  if (path === '/' || path === '/index.html') return <PublicHome />;
-  if (path === '/faq') return <FaqPage />;
-  if (path === '/features') return <FeaturesPage />;
-  if (path === '/how-it-works') return <HowItWorksPage />;
-  if (path === '/integrations') return <IntegrationsPage />;
-  if (path === '/pricing') return <PricingPage />;
-  if (path === '/privacy') return <PrivacyPage />;
+  if (PublicPage) return <PublicPage />;
   if (path === '/demo' || path.startsWith('/demo/')) return DemoApp ? <DemoApp /> : null;
   if (path === '/proposal') return <React.Suspense fallback={<main role="status">Открываем КП…</main>}>
     <SharedProposalPage/>
@@ -40,18 +51,20 @@ function RootRoute({ DemoApp }: { DemoApp: DemoComponent | null }) {
       <AccountAccess />
     </React.Suspense>;
   }
-  return <NotFoundPage />;
+  return null;
 }
-
 async function mount() {
   const path = normalizedPath(window.location.pathname);
   // Only the interactive demo needs its workspace bundle. Pre-rendered demo
   // HTML remains visible while its module downloads, then hydrates normally.
-  const DemoApp = path === '/demo' || path.startsWith('/demo/')
-    ? (await import('./App')).App
-    : null;
+  const [PublicPage, DemoApp] = await Promise.all([
+    loadPublicPage(path),
+    path === '/demo' || path.startsWith('/demo/')
+      ? import('./App').then(module => module.App)
+      : Promise.resolve(null),
+  ]);
   const root = document.getElementById('root')!;
-  const app = <React.StrictMode><RootRoute DemoApp={DemoApp} /></React.StrictMode>;
+  const app = <React.StrictMode><RootRoute DemoApp={DemoApp} PublicPage={PublicPage} /></React.StrictMode>;
   if (root.getAttribute('data-ssr-route') === path) {
     hydrateRoot(root, app);
   } else {

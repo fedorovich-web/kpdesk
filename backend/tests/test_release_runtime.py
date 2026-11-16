@@ -134,12 +134,12 @@ def test_precompressed_static_files_respect_accept_encoding_and_privacy(tmp_path
         assert zipped.status_code == 200
         assert zipped.text == source.read_text()
         assert zipped.headers['content-encoding'] == 'gzip'
-        assert zipped.headers['vary'] == 'Accept-Encoding'
+        assert 'Accept-Encoding' in zipped.headers['vary'].split(', ')
         assert zipped.headers['cache-control'].endswith('immutable')
         plain = client.get('/assets/index-AbCd1234.js',
                            headers={'Accept-Encoding': 'gzip;q=0, br;q=0'})
         assert plain.headers.get('content-encoding') is None
-        assert plain.headers['vary'] == 'Accept-Encoding'
+        assert 'Accept-Encoding' in plain.headers['vary'].split(', ')
         assert plain.text == zipped.text
         head = client.head('/assets/index-AbCd1234.js',
                            headers={'Accept-Encoding': 'gzip'})

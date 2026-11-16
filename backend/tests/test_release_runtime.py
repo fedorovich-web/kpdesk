@@ -75,6 +75,40 @@ def test_production_serves_built_frontend_without_spa_fallback_for_api(tmp_path:
             assert client.post('/faq',headers={'Origin':'https://kpdesk.ru'}).status_code==405
 
 
+def test_frontend_cache_lifetimes_keep_private_data_uncached(tmp_path: Path) -> None:
+    files = (
+        'index.html', '404.html', 'app/index.html', 'auth/login/index.html',
+        'proposal/index.html', 'features/index.html',
+        'assets/index-AbCd1234.js', 'assets/index-AbCd1234.css',
+        'assets/hero/01_hero_main.avif', 'fonts/inter/inter-cyrillic.woff2',
+        'robots.txt',
+    )
+    for name in files:
+        path = tmp_path / name
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(name)
+    with (patch.dict('os.environ', variables(tmp_path), clear=True),
+          patch('kpdesk.db.live_service_engines.live_service_engines', return_value=engines()),
+          TestClient(create_production_app(), base_url='https://kpdesk.ru') as client):
+        immutable = 'public, max-age=31536000, immutable'
+        static = 'public, max-age=2592000, stale-while-revalidate=86400'
+        html = 'no-cache, max-age=0, must-revalidate'
+        for path in ('/assets/index-AbCd1234.js', '/assets/index-AbCd1234.css'):
+            assert client.get(path).headers['cache-control'] == immutable
+        for path in ('/assets/hero/01_hero_main.avif', '/fonts/inter/inter-cyrillic.woff2'):
+            assert client.get(path).headers['cache-control'] == static
+        for path in ('/', '/features', '/features/'):
+            assert client.get(path).headers['cache-control'] == html
+        assert client.get('/robots.txt').headers['cache-control'] == 'public, max-age=3600'
+        for path in ('/app', '/auth/login', '/proposal', '/proposal/index.html'):
+            response = client.get(path)
+            assert response.headers['cache-control'] == 'no-store'
+            assert 'noindex' in response.headers['x-robots-tag']
+        unknown = client.get('/unknown-page')
+        assert unknown.status_code == 404
+        assert unknown.headers['cache-control'] == html
+
+
 def test_static_escape_or_symlink_cannot_read_outside_build(tmp_path: Path) -> None:
     root=tmp_path/'dist';root.mkdir();(root/'index.html').write_text('home');(root/'404.html').write_text('missing')
     (tmp_path/'secret.txt').write_text('private-sentinel')

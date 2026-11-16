@@ -84,8 +84,8 @@ def _expected_frontend_assets() -> tuple[str, str]:
     """Use this commit's actual Vite build as the post-deploy version marker."""
     root = Path(__file__).resolve().parents[2]
     local_html = (root / "frontend" / "dist" / "index.html").read_text(encoding="utf-8")
-    js = re.search(r'/assets/(index-[A-Za-z0-9_-]+\\.js)', local_html)
-    css = re.search(r'/assets/(index-[A-Za-z0-9_-]+\\.css)', local_html)
+    js = re.search(r'/assets/(index-[A-Za-z0-9_-]+\.js)', local_html)
+    css = re.search(r'/assets/(index-[A-Za-z0-9_-]+\.css)', local_html)
     if js is None or css is None:
         raise ValueError("Built index.html does not contain a versioned JS and CSS entry")
     return js.group(1), css.group(1)

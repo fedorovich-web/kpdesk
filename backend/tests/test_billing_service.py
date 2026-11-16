@@ -3,6 +3,7 @@ import asyncio
 import json
 from dataclasses import replace
 from types import SimpleNamespace
+from typing import Any
 from unittest.mock import AsyncMock
 from uuid import uuid4
 
@@ -23,7 +24,9 @@ class Repository:
             'product_id': str(self.product), 'offer_id': str(self.offer), 'status': 'creating',
             'invoice_id': None, 'payment_url': None, 'created_at': '2026-11-14T12:00:00+00:00'}
         self.calls: list[str] = []
-        self.new, self.denied, self.settled = True, False, []
+        self.new = True
+        self.denied = False
+        self.settled: list[dict[str, Any]] = []
         self.reversals: dict[str, dict[str, object]] = {}
 
     def tenant(self, org, session, csrf, action, *args):  # type: ignore[no-untyped-def]
@@ -54,7 +57,7 @@ class Repository:
         return dict(self.order)
 
 
-def setup():  # type: ignore[no-untyped-def]
+def setup() -> tuple[Repository, SimpleNamespace, BillingService]:
     repo=Repository()
     settings=BillingSettings(enabled=True,api_key='synthetic-provider',webhook_secret='w'*64,
         offers={plan:Offer(repo.product,repo.offer) for plan in ('start','team','business')})

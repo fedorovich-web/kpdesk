@@ -1,11 +1,14 @@
 """Storage adapters recheck session authority before every tenant gateway call."""
+from typing import cast
 from unittest.mock import Mock, patch
-from uuid import uuid4
+from uuid import UUID, uuid4
+
+import pytest
 
 from kpdesk.billing.storage import BillingStore, VerifiedBillingStore
 
 
-def test_prepare_binds_owner_and_passes_no_browser_identity_or_price():
+def test_prepare_binds_owner_and_passes_no_browser_identity_or_price() -> None:
     connection = Mock()
     connection.scalar.return_value = {'order_id': str(uuid4()), 'created_new': True}
     org, key = uuid4(), uuid4()
@@ -17,7 +20,7 @@ def test_prepare_binds_owner_and_passes_no_browser_identity_or_price():
     assert result['created_new'] is True
 
 
-def test_summary_uses_read_session_and_unavailable_summary(monkeypatch):
+def test_summary_uses_read_session_and_unavailable_summary(monkeypatch: pytest.MonkeyPatch) -> None:
     connection = Mock()
     with patch('kpdesk.billing.storage.bind_authenticated_tenant') as bind, patch('kpdesk.billing.storage.billing_available', return_value=False):
         result = BillingStore(connection, uuid4(), 'session').summary()
@@ -26,7 +29,7 @@ def test_summary_uses_read_session_and_unavailable_summary(monkeypatch):
     connection.scalar.assert_not_called()
 
 
-def test_verified_gateway_uses_bound_parameters_and_no_tenant_guc():
+def test_verified_gateway_uses_bound_parameters_and_no_tenant_guc() -> None:
     connection = Mock()
     connection.scalar.return_value = {'status': 'paid'}
     result = VerifiedBillingStore(connection).settle_verified(uuid4(), event_id='a'*64,
@@ -39,7 +42,7 @@ def test_verified_gateway_uses_bound_parameters_and_no_tenant_guc():
 
 
 
-def test_invalid_plan_and_key_cannot_reach_database():
+def test_invalid_plan_and_key_cannot_reach_database() -> None:
     import pytest
 
     from kpdesk.billing.storage import BillingConflict
@@ -48,12 +51,12 @@ def test_invalid_plan_and_key_cannot_reach_database():
         with pytest.raises(BillingConflict):
             BillingStore(connection, uuid4(), 'session', 'csrf').prepare_order('browser-price', uuid4())
         with pytest.raises(BillingConflict):
-            BillingStore(connection, uuid4(), 'session', 'csrf').prepare_order('start', 'not-a-uuid')
+            BillingStore(connection, uuid4(), 'session', 'csrf').prepare_order('start', cast(UUID, 'not-a-uuid'))
     bind.assert_not_called()
     connection.scalar.assert_not_called()
 
 
-def test_recheck_session_denial_prevents_invoice_attachment():
+def test_recheck_session_denial_prevents_invoice_attachment() -> None:
     import pytest
 
     from kpdesk.db.tenant_access import TenantAccessDenied
@@ -63,7 +66,7 @@ def test_recheck_session_denial_prevents_invoice_attachment():
     connection.scalar.assert_not_called()
 
 
-def test_sql_gateway_conflict_cannot_be_misreported_as_success():
+def test_sql_gateway_conflict_cannot_be_misreported_as_success() -> None:
     import pytest
 
     from kpdesk.billing.storage import BillingConflict
@@ -76,7 +79,7 @@ def test_sql_gateway_conflict_cannot_be_misreported_as_success():
 
 
 
-def test_reversal_inbox_mismatch_never_appears_successful():
+def test_reversal_inbox_mismatch_never_appears_successful() -> None:
     import pytest
 
     from kpdesk.billing.storage import BillingConflict
@@ -88,7 +91,7 @@ def test_reversal_inbox_mismatch_never_appears_successful():
             amount_minor=29900, currency='RUB')
 
 
-def test_reversal_resolution_passes_original_receipt_and_explicit_order():
+def test_reversal_resolution_passes_original_receipt_and_explicit_order() -> None:
     connection = Mock()
     connection.scalar.return_value = {'status': 'refunded'}
     event, order, invoice = uuid4(), uuid4(), uuid4()

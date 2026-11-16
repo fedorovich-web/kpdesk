@@ -2,6 +2,9 @@
 from importlib.util import module_from_spec, spec_from_file_location
 from pathlib import Path
 from types import SimpleNamespace
+from typing import cast
+
+from sqlalchemy.engine import Connection
 
 import pytest
 
@@ -9,15 +12,16 @@ from kpdesk.billing.schema import BILLING_TABLES, create_billing_schema
 
 
 class RecordingConnection:
-    def __init__(self):
-        self.statements = []
-    def execute(self, statement, parameters=None):
+    def __init__(self) -> None:
+        self.statements: list[str] = []
+
+    def execute(self, statement: object, parameters: object | None = None) -> None:
         self.statements.append(str(statement))
 
 
-def test_all_billing_tables_are_forced_rls_and_runtime_has_no_dml():
+def test_all_billing_tables_are_forced_rls_and_runtime_has_no_dml() -> None:
     connection = RecordingConnection()
-    create_billing_schema(connection)
+    create_billing_schema(cast(Connection, connection))
     sql = '\n'.join(connection.statements)
     for table in BILLING_TABLES:
         assert f'ALTER TABLE public.{table} FORCE ROW LEVEL SECURITY' in sql
@@ -27,9 +31,10 @@ def test_all_billing_tables_are_forced_rls_and_runtime_has_no_dml():
     assert "current_setting('kpdesk.billing_enabled'" not in sql
 
 
-def test_migration_unapproved_does_not_get_connection(monkeypatch):
+def test_migration_unapproved_does_not_get_connection(monkeypatch: pytest.MonkeyPatch) -> None:
     path = Path(__file__).parents[1] / 'migrations/versions/0048_lava_billing.py'
     spec = spec_from_file_location('billing_migration', path)
+    assert spec is not None and spec.loader is not None
     module = module_from_spec(spec)
     spec.loader.exec_module(module)
     monkeypatch.setattr(module.op, 'get_context', lambda: SimpleNamespace(config=SimpleNamespace(attributes={})))
@@ -43,16 +48,21 @@ def test_migration_unapproved_does_not_get_connection(monkeypatch):
     ('kpdesk', 'kpdesk', False),
     ('kpdesk', 'unmarked_database', True),
 ])
-def test_migration_rejects_wrong_role_unmarked_or_unapproved_working_database(monkeypatch, role, database, working_approved):
+def test_migration_rejects_wrong_role_unmarked_or_unapproved_working_database(
+    monkeypatch: pytest.MonkeyPatch, role: str, database: str, working_approved: bool
+) -> None:
     path = Path(__file__).parents[1] / 'migrations/versions/0048_lava_billing.py'
     spec = spec_from_file_location('billing_migration_guard', path)
+    assert spec is not None and spec.loader is not None
     module = module_from_spec(spec)
     spec.loader.exec_module(module)
-    statements = []
+    statements: list[str] = []
+
     class Target:
-        def in_transaction(self):
+        def in_transaction(self) -> bool:
             return True
-        def execute(self, statement):
+
+        def execute(self, statement: object) -> SimpleNamespace:
             statements.append(str(statement))
             return SimpleNamespace(one=lambda: (database, role, module.down_revision))
     config = SimpleNamespace(attributes={
@@ -68,9 +78,9 @@ def test_migration_rejects_wrong_role_unmarked_or_unapproved_working_database(mo
     assert all(statement.startswith('SELECT ') for statement in statements)
 
 
-def test_gateway_acl_keeps_settlement_outside_tenant_role():
+def test_gateway_acl_keeps_settlement_outside_tenant_role() -> None:
     connection = RecordingConnection()
-    create_billing_schema(connection)
+    create_billing_schema(cast(Connection, connection))
     grants = [sql for sql in connection.statements if sql.startswith('GRANT EXECUTE')]
     assert any('kpdesk_billing_settle(' in sql and sql.endswith('TO kpdesk_auth_runtime') for sql in grants)
     assert not any('kpdesk_billing_settle(' in sql and sql.endswith('TO kpdesk_tenant_runtime') for sql in grants)

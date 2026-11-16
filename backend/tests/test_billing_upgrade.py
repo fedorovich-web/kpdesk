@@ -4,6 +4,8 @@ from pathlib import Path
 from unittest.mock import Mock
 
 import pytest
+from alembic import command
+from alembic.script import ScriptDirectory
 
 from scripts import upgrade_billing as operator
 
@@ -71,7 +73,7 @@ def test_migration_identity_is_pinned_after_inventory_validation(monkeypatch: py
     config = Mock()
     directory = Mock()
     directory.get_revision.return_value = Mock(down_revision="0046_provider_authority")
-    monkeypatch.setattr(operator.ScriptDirectory, "from_config", Mock(return_value=directory))
+    monkeypatch.setattr(ScriptDirectory, "from_config", Mock(return_value=directory))
     with pytest.raises(ValueError, match="billing_upgrade_lineage_invalid"):
         operator.migration_config(config)
     inventory.assert_called_once()
@@ -81,7 +83,7 @@ def test_source_requires_exact_0047_before_mutation(monkeypatch: pytest.MonkeyPa
     connection = Mock()
     monkeypatch.setattr(operator, "verify_target", Mock(return_value=operator.TARGET))
     migration = Mock()
-    monkeypatch.setattr(operator.command, "upgrade", migration)
+    monkeypatch.setattr(command, "upgrade", migration)
     with pytest.raises(ValueError, match="billing_upgrade_requires_0047"):
         operator.apply_schema(connection, "a" * 24, Mock())
     migration.assert_not_called()

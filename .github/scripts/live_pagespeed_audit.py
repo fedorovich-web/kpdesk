@@ -93,7 +93,7 @@ def _expected_frontend_assets() -> tuple[str, str]:
 
 def wait_for_production_release() -> bool:
     """Measure only after production HTML references this commit's build."""
-    if os.environ.get("GITHUB_EVENT_NAME") != "push":
+    if os.environ.get("GITHUB_EVENT_NAME") != "deployment_status":
         return True
     try:
         js, css = _expected_frontend_assets()

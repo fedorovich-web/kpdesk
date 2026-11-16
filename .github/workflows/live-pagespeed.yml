@@ -1,9 +1,11 @@
 name: Live PageSpeed and cache audit
 
 on:
-  pull_request:
-  push:
-    branches: [main]
+  # Dokploy may deploy independently of pushes. Audit the LIVE site only after
+  # a confirmed GitHub deployment or on a separate daily/manual audit.
+  deployment_status:
+  schedule:
+    - cron: '17 4 * * *'
   workflow_dispatch:
 
 permissions:
@@ -11,6 +13,7 @@ permissions:
 
 jobs:
   live-audit:
+    if: github.event_name != 'deployment_status' || github.event.deployment_status.state == 'success'
     name: Google PageSpeed and response headers (read-only)
     runs-on: ubuntu-latest
     timeout-minutes: 16
@@ -22,7 +25,7 @@ jobs:
           cache: npm
           cache-dependency-path: frontend/package-lock.json
       - name: Build expected Vite assets for exact deployment verification
-        if: github.event_name == 'push'
+        if: github.event_name == 'deployment_status'
         working-directory: frontend
         run: npm ci && npm run build
       - name: Query site headers and Google PageSpeed Insights

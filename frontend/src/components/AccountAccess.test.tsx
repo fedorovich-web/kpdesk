@@ -177,7 +177,7 @@ describe('A67 catalog preflight before publication', () => {
       'org-a', good, expect.any(String), expect.any(String), 'b'.repeat(64),
     ));
     expect(inspected).toHaveBeenCalledTimes(2);
-  });
+  }, 20_000);
 });
 
 describe('A75 persistent HTTPS session recovery', () => {

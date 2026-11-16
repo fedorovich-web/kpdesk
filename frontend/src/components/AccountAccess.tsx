@@ -113,7 +113,8 @@ export function AccountAccess() {
       if (cancelled) return;
       if (err instanceof SessionApiError && err.status === 401) {
         navigate('login');
-        setError('Сессия завершилась. Войдите снова.');
+        // A first-time visitor opening /app has no session to expire.
+        setNotice('Чтобы продолжить, войдите или создайте аккаунт.');
       } else setError(feedback(err));
     });
     return () => { cancelled = true; };

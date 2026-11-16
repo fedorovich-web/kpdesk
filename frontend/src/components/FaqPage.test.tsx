@@ -26,28 +26,22 @@ describe('public FAQ screen', () => {
     expect(nextAnswer).not.toBeVisible();
   });
 
-  it('keeps the clicked question in place when an earlier answer collapses', () => {
+  it('does not force page scrolling while switching open answers', () => {
     render(<FaqPage />);
     const first = screen.getByText('Как создать коммерческое предложение по заявке?');
     const next = screen.getByText('Как скачать коммерческое предложение в PDF?');
-    const firstDetails = first.closest('details')!;
-    let scrollOffset = 500;
-    // jsdom has no layout: model an answer above the clicked summary adding 120px.
-    const rect = vi.spyOn(next, 'getBoundingClientRect').mockImplementation(() => ({
-      top: (firstDetails.open ? 900 : 780) - scrollOffset,
-    } as DOMRect));
-    const scroll = vi.spyOn(window, 'scrollBy').mockImplementation((options: number | ScrollToOptions) => {
-      if (typeof options === 'object') scrollOffset += options.top ?? 0;
-    });
+    const scroll = vi.spyOn(window, 'scrollBy').mockImplementation(() => {});
     try {
       fireEvent.click(first);
-      const before = next.getBoundingClientRect().top;
+      expect(first.closest('details')).toHaveAttribute('open');
       fireEvent.click(next);
-      expect(firstDetails).not.toHaveAttribute('open');
-      expect(next.getBoundingClientRect().top).toBe(before);
-      expect(scroll).toHaveBeenCalledWith({ top: -120, behavior: 'instant' });
+      expect(next.closest('details')).toHaveAttribute('open');
+      expect(first.closest('details')).not.toHaveAttribute('open');
+      fireEvent.click(next);
+      expect(next.closest('details')).not.toHaveAttribute('open');
+      expect(scroll).not.toHaveBeenCalled();
+      expect(next.closest('details')).not.toHaveAttribute('style');
     } finally {
-      rect.mockRestore();
       scroll.mockRestore();
     }
   });

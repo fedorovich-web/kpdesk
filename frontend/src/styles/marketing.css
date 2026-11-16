@@ -103,7 +103,7 @@
 .marketing-task-grid article { padding: var(--content-card-padding); }
 .marketing-task-grid h3 { margin-block: var(--space-5) var(--space-4); }
 .marketing-task-grid p { color: var(--color-muted); }
-.marketing-api-grid { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1.2fr) minmax(0,.9fr); gap: var(--space-5); align-items: center; }
+.marketing-api-grid { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1.2fr) minmax(0,.9fr); gap: var(--space-5); align-items: start; }
 .marketing-api-grid > img { display: block; inline-size: 100%; block-size: auto; object-fit: contain; }
 .marketing-api-grid > div p { color: var(--color-muted); margin-block-end: var(--space-5); }
 .marketing-api-checks { display: grid; gap: var(--space-3); margin: 0; padding: var(--space-5); list-style: none; background: var(--color-accent-pale); border-radius: var(--radius-card); }
@@ -111,7 +111,6 @@
 .marketing-api-checks svg { color: var(--color-accent); flex: none; }
 .marketing-pricing-disclaimer { padding: var(--space-4); border-radius: var(--radius-input); background: var(--color-warning-surface); border: var(--border-width) solid var(--color-warning-border); }
 .marketing-pricing-benefits { grid-template-columns: repeat(3,minmax(0,1fr)); }
-.marketing-price-faq .faq-questions { max-inline-size: var(--marketing-faq-max); }
 @media (width <= 1200px) {
   .marketing-capabilities { grid-template-columns: repeat(3,minmax(0,1fr)); }
   .marketing-integration-grid { grid-template-columns: repeat(4,minmax(0,1fr)); }

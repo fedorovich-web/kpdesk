@@ -25,7 +25,7 @@ export function MarketingHero({
       <ul className="public-proof">{highlights.map((item) => <li key={item}>
         <CheckCircle2 size={18} aria-hidden="true"/>{item}</li>)}</ul>
     </div>
-    <img src={image} alt={imageAlt} width={1448} height={1086} decoding="async" />
+    <img src={image} alt={imageAlt} width={1448} height={1086} loading="eager" decoding="async" fetchPriority="high" />
   </section>;
 }
 

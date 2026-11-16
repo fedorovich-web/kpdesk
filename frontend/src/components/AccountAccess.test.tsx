@@ -206,20 +206,22 @@ describe('A75 persistent HTTPS session recovery', () => {
     expect(screen.getByRole('button', { name: 'Выйти' })).toBeInTheDocument();
   });
 
-  it('on revoked/expired sessions goes to login rather than pretending authorization', async () => {
+  it('invites a first-time /app visitor to sign in without claiming a session expired', async () => {
     const securedWindow = Object.create(window) as Window;
     Object.defineProperty(securedWindow, 'location', {
-      value: { protocol: 'https:', pathname: '/auth/organizations', search: '' },
+      value: { protocol: 'https:', pathname: '/app', search: '' },
     });
     vi.stubGlobal('window', securedWindow);
     vi.spyOn(sessionApi, 'resume').mockRejectedValue(
-      new SessionApiError('invalid_session', 'Expired', 401),
+      new SessionApiError('invalid_session', 'No prior session', 401),
     );
     const list = vi.spyOn(sessionApi, 'organizations');
     render(<AccountAccess/>);
     expect(await screen.findByRole('heading', { name: 'Вход в KPDesk' }))
       .toBeInTheDocument();
-    expect(screen.getByRole('alert')).toHaveTextContent('Сессия завершилась');
+    expect(screen.getByText('Чтобы продолжить, войдите или создайте аккаунт.'))
+      .toBeInTheDocument();
+    expect(screen.queryByText(/Сессия завершилась/)).not.toBeInTheDocument();
     expect(list).not.toHaveBeenCalled();
   });
 });

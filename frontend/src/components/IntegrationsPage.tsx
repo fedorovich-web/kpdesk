@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { ArrowRight, CheckCircle2 } from 'lucide-react';
-import { designAssets } from '../design-assets';
+import { designAssets, publicIconSrcSet } from '../design-assets';
 import { integrationCards } from '../content/marketing';
 import { applyDocumentSeo } from '../seo';
 import { MarketingCta, MarketingHero, MarketingPage, MarketingSection } from './MarketingShared';
@@ -26,7 +26,7 @@ export function IntegrationsPage() {
     <MarketingSection id="integrations-list" heading="Перенесите товары из своей таблицы или выгрузки">
       <div className="marketing-integration-grid">
         {integrationCards.map(({ name, text, state, icon }) => <article key={name}>
-          <img className="marketing-integration-icon" src={icon} alt="" width={48} height={48} loading="lazy"/>
+          <img className="marketing-integration-icon" src={icon} srcSet={publicIconSrcSet(icon)} sizes="48px" alt="" width={48} height={48} loading="eager" decoding="async" fetchPriority="low"/>
           <h3>{name}</h3><p>{text}</p>
           <span className="marketing-status">{state}</span>
         </article>)}
@@ -34,7 +34,7 @@ export function IntegrationsPage() {
     </MarketingSection>
     <MarketingSection heading="Что прайс даёт при подготовке КП" modifier="marketing-task-section">
       <div className="marketing-task-grid">{tasks.map(({ title, text, icon }) =>
-        <article key={title}><img src={icon} alt="" width={48} height={48} loading="lazy"/>
+        <article key={title}><img src={icon} srcSet={publicIconSrcSet(icon)} sizes="48px" alt="" width={48} height={48} loading="eager" decoding="async" fetchPriority="low"/>
           <h3>{title}</h3><p>{text}</p></article>)}</div>
     </MarketingSection>
     <MarketingSection id="api" heading="Что должно быть в прайсе" modifier="marketing-api-section">
@@ -42,7 +42,9 @@ export function IntegrationsPage() {
         <div><p>Для расчёта нужны названия товаров, артикулы, единицы и цены. Добавьте характеристики для подбора по требованиям клиента. Приведите столбцы к формату KPDesk и проверьте файл перед загрузкой. Данные из 1С, Битрикс24 и amoCRM загружаются через подготовленную таблицу; прямая синхронизация с этими системами пока не подключена.</p>
           <a href="/faq" className="button button-primary">Вопросы о прайсах <ArrowRight size={17} aria-hidden="true"/></a></div>
         <img src={designAssets.integrationScheme} alt="Иллюстрация работы с товарными данными в KPDesk"
-          width={1448} height={1086} loading="lazy"/>
+          width={1448} height={1086} loading="eager" decoding="async" fetchPriority="low"
+          srcSet="/assets/hero/07_hero_integrations_scheme-640w.avif 640w, /assets/hero/07_hero_integrations_scheme-960w.avif 960w, /assets/hero/07_hero_integrations_scheme.avif 1448w"
+          sizes="(max-width: 600px) calc(100vw - 40px), (max-width: 1200px) 50vw, 33vw"/>
         <ul className="marketing-api-checks">
           <li><CheckCircle2 aria-hidden="true"/>Импорт CSV и XLSX</li>
           <li><CheckCircle2 aria-hidden="true"/>Подготовка столбцов таблицы</li>

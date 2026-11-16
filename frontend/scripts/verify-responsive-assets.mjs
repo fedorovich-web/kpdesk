@@ -3,10 +3,11 @@ import { resolve } from 'node:path';
 
 const root = resolve(import.meta.dirname, '..', 'dist', 'assets');
 const sources = {
-  hero: ['01_hero_main', '12_hero_offer_stack'],
+  hero: ['01_hero_main', '12_hero_offer_stack', '07_hero_integrations_scheme'],
   icons: [
     '01_document_add', '06_settings', '12_team', '22_success_check',
     '27_database', '31_lightning', '33_analytics',
+    '02_documents_stack', '09_document_info', '16_upload', '36_document_check',
   ],
 };
 
@@ -14,7 +15,9 @@ for (const [folder, names] of Object.entries(sources)) {
   for (const name of names) {
     const full = resolve(root, folder, name + '.avif');
     const original = await stat(full);
-    const widths = folder === 'hero' ? [480, 800] : [96, 144];
+    const widths = folder === 'hero'
+      ? (name === '07_hero_integrations_scheme' ? [640, 960] : [480, 800])
+      : [96, 144];
     let previous = 0;
     for (const width of widths) {
       const file = resolve(root, folder, name + '-' + width + 'w.avif');

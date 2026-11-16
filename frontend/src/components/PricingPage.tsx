@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { designAssets } from '../design-assets';
+import { designAssets, publicIconSrcSet } from '../design-assets';
 import { Check } from 'lucide-react';
 import { launchPlans, count, pricingFaqs, rubles } from '../content/pricing';
 import { applyDocumentSeo } from '../seo';
@@ -53,13 +53,13 @@ export function PricingPage() {
     <MarketingSection heading="Что входит в каждый тариф" modifier="pricing-included-section">
       <div className="pricing-included-grid">
         {included.map(({title, text, icon}) => <article key={title}>
-          <img src={icon} alt="" width={48} height={48} loading="lazy"/>
+          <img src={icon} srcSet={publicIconSrcSet(icon)} sizes="48px" alt="" width={48} height={48} loading="eager" decoding="async" fetchPriority="low"/>
           <div><h3>{title}</h3><p>{text}</p></div>
         </article>)}
       </div>
     </MarketingSection>
     <MarketingSection heading="Вопросы о стоимости" modifier="marketing-price-faq">
-      <FaqAccordion items={pricingFaqs} className="faq-questions" />
+      <FaqAccordion items={pricingFaqs} className="public-faq-list" itemClassName="public-faq-item" />
     </MarketingSection>
     <MarketingCta title="Начните готовить КП в одном кабинете"
       description="Соберите товары, расчёт и текст предложения в одном документе. Сохраните проверенное КП в PDF для клиента."/>

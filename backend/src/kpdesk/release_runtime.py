@@ -9,7 +9,7 @@ from sqlalchemy import Engine, text
 
 # Vite emits eight-character fingerprints in built JS/CSS filenames.
 # Only fingerprinted URLs may be cached for a year without risking stale deploys.
-_FINGERPRINTED_ASSET = re.compile(r"^assets/(?:[^/]+/)*[^/]+-[A-Za-z0-9]{8}\.(?:js|css|mjs|woff2|avif|webp|png|svg)$")
+_FINGERPRINTED_ASSET = re.compile(r"^assets/(?:[^/]+/)*[^/]+-[A-Za-z0-9_-]{8}\.(?:js|css|mjs|woff2|avif|webp|png|svg)$")
 _COMPRESSIBLE_EXTENSIONS = frozenset({'.html', '.js', '.mjs', '.css', '.svg', '.json', '.xml', '.txt'})
 _STATIC_EXTENSIONS = frozenset({'.js', '.mjs', '.css', '.avif', '.webp', '.png',
                                '.jpg', '.jpeg', '.gif', '.svg', '.ico', '.woff',

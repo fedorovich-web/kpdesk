@@ -101,7 +101,7 @@ def mount_built_frontend(app: FastAPI, directory: str) -> None:
     if safe_file('index.html') is None or safe_file('404.html') is None:
         raise RuntimeError('Frontend required pages must stay within the build directory.')
 
-    @app.get('/{path:path}', include_in_schema=False)
+    @app.api_route('/{path:path}', methods=['GET', 'HEAD'], include_in_schema=False)
     def frontend(path: str) -> FileResponse:
         if path == 'api' or path.startswith('api/'):
             raise HTTPException(404)

@@ -1,8 +1,9 @@
 import { readdir, readFile, stat, writeFile } from 'node:fs/promises';
 import { extname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { brotliCompressSync, constants, gzipSync } from 'node:zlib';
 
-const directory = new URL('../dist/', import.meta.url);
+const directory = fileURLToPath(new URL('../dist/', import.meta.url));
 const supported = new Set(['.html', '.js', '.mjs', '.css', '.svg', '.json', '.xml', '.txt']);
 
 async function compressTree(path) {
@@ -28,5 +29,5 @@ async function compressTree(path) {
   return count;
 }
 
-const total = await compressTree(directory.pathname);
+const total = await compressTree(directory);
 console.log('Precompressed ' + total + ' text resources for Brotli/Gzip static delivery.');

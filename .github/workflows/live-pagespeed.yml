@@ -18,11 +18,37 @@ jobs:
       - uses: actions/checkout@v4
       - name: Query site headers and Google PageSpeed Insights
         run: python3 .github/scripts/live_pagespeed_audit.py
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+      - name: Run Lighthouse locally on the live site (not Google PSI)
+        run: |
+          set -euo pipefail
+          npx --yes lighthouse@12 https://kpdesk.ru/ \
+            --chrome-flags="--headless --no-sandbox --disable-dev-shm-usage" \
+            --only-categories=performance,accessibility,best-practices,seo \
+            --output=json --output-path=./lighthouse-mobile.json --quiet
+          npx --yes lighthouse@12 https://kpdesk.ru/ \
+            --preset=desktop \
+            --chrome-flags="--headless --no-sandbox --disable-dev-shm-usage" \
+            --only-categories=performance,accessibility,best-practices,seo \
+            --output=json --output-path=./lighthouse-desktop.json --quiet
+          node -e '
+          const fs = require("fs");
+          for (const device of ["mobile", "desktop"]) {
+            const data = JSON.parse(fs.readFileSync("lighthouse-" + device + ".json"));
+            const scores = Object.fromEntries(Object.entries(data.categories).map(([k,v]) => [k, Math.round(v.score * 100)]));
+            const audits = ["first-contentful-paint", "largest-contentful-paint", "speed-index", "total-blocking-time", "cumulative-layout-shift", "render-blocking-resources", "unused-javascript", "unused-css-rules", "uses-long-cache-ttl", "lcp-discovery-insight", "cache-insight", "font-display-insight", "network-dependency-tree-insight"];
+            const details = Object.fromEntries(audits.filter(x => data.audits[x]).map(x => [x, {value: data.audits[x].displayValue, score: data.audits[x].score, savingsMs: data.audits[x].details?.overallSavingsMs}]));
+            console.log("Local Lighthouse", device, JSON.stringify({scores, details, warnings: data.runWarnings, error: data.runtimeError}));
+          }'
       - name: Store results when available
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: pagespeed-summary-${{ github.run_id }}
-          path: pagespeed-*.json
+          path: |
+            pagespeed-*.json
+            lighthouse-*.json
           if-no-files-found: ignore
           retention-days: 14

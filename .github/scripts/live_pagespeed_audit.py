@@ -84,13 +84,22 @@ def wait_for_production_release() -> bool:
         return True
     for attempt in range(32):
         try:
-            request = Request(BASE + "assets/hero/01_hero_main.avif", method="HEAD")
+            # This release ships a new, small variant absent from the previous
+            # deployment. Do not mistake an old cached image for a fresh build.
+            resource = "assets/hero/01_hero_main-480w.avif"
+            request = Request(BASE + resource, method="HEAD")
             with urlopen(request, timeout=12) as response:
                 cache = response.headers.get("Cache-Control", "")
-                if response.status == 200 and "max-age=2592000" in cache:
-                    print(f"Detected live optimized deployment after {attempt} checks.", flush=True)
-                    return True
-                print(f"Live release not ready yet: {response.status} cache={cache!r}", flush=True)
+                size = response.headers.get("Content-Length", "")
+                if (response.status == 200 and response.headers.get("Content-Type") == "image/avif"
+                        and size == "20006" and "max-age=2592000" in cache):
+                    with urlopen(Request(BASE, headers={"Cache-Control": "no-cache"}),
+                                 timeout=12) as home:
+                        html = home.read(100000).decode("utf-8", errors="replace")
+                        if "01_hero_main-480w.avif 480w" in html:
+                            print(f"Detected deployed responsive-AVIF release after {attempt} checks.", flush=True)
+                            return True
+                print(f"Live release not ready yet: {response.status} size={size!r} cache={cache!r}", flush=True)
         except (HTTPError, URLError, TimeoutError) as exc:
             print(f"Live release not ready yet: {type(exc).__name__}: {exc}", flush=True)
         time.sleep(15)
@@ -101,7 +110,7 @@ def wait_for_production_release() -> bool:
 if __name__ == "__main__":
     if not wait_for_production_release():
         sys.exit(2)
-    for resource in ("", "app", "assets/hero/01_hero_main.avif", "fonts/inter/inter-cyrillic-wght-normal.woff2"):
+    for resource in ("", "app", "assets/hero/01_hero_main.avif", "assets/hero/01_hero_main-480w.avif", "fonts/inter/inter-cyrillic-wght-normal.woff2"):
         fetch_headers(resource)
     ok = [google_pagespeed(strategy) for strategy in ("mobile", "desktop")]
     if not all(ok):

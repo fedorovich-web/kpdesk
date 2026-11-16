@@ -1,0 +1,46 @@
+name: Temporary browser preview smoke
+on:
+  push:
+    branches: [fix/kpdesk-public-route-chunks-20261116]
+permissions:
+  contents: read
+jobs:
+  preview-lighthouse:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Build frontend with split CSS and JS
+        working-directory: frontend
+        run: npm ci && npm run build
+      - name: Audit rendered public homepage in Chromium
+        run: |
+          cd frontend
+          npx vite preview --host 127.0.0.1 --port 4173 > /tmp/kpdesk-vite-preview.log 2>&1 &
+          for i in $(seq 1 40); do
+            if curl --fail --silent http://127.0.0.1:4173/ > /dev/null; then break; fi
+            sleep 1
+          done
+          npx --yes lighthouse@12 http://127.0.0.1:4173/ --chrome-flags="--headless --no-sandbox --disable-dev-shm-usage" --only-categories=performance,accessibility,best-practices,seo --output=json --output-path=./preview-lighthouse.json --quiet
+          node -e '
+          const data=require("./preview-lighthouse.json");
+          const scores=Object.fromEntries(Object.entries(data.categories).map(([key,value])=>[key,Math.round(value.score*100)]));
+          const errors=data.audits["errors-in-console"]?.details?.items||[];
+          const text=data.audits["largest-contentful-paint"]?.displayValue;
+          console.log(JSON.stringify({scores,LCP:text,errors,network:data.audits["network-requests"]?.details?.items?.map(r=>r.url)?.filter(x=>x.includes("assets/index-"))}));
+          if(errors.length) process.exit(1);
+          if(scores.accessibility < 95 || scores.seo < 95) process.exit(1);
+          '
+      - name: Upload Lighthouse preview
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: public-preview-lighthouse
+          path: frontend/preview-lighthouse.json
+          if-no-files-found: ignore
+          retention-days: 4

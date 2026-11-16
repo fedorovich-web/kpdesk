@@ -4,9 +4,8 @@ from pathlib import Path
 from types import SimpleNamespace
 from typing import cast
 
-from sqlalchemy.engine import Connection
-
 import pytest
+from sqlalchemy.engine import Connection
 
 from kpdesk.billing.schema import BILLING_TABLES, create_billing_schema
 

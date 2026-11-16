@@ -3,7 +3,7 @@ import { ArrowRight, Check, MoreHorizontal } from 'lucide-react';
 import { applyDocumentSeo, publicSections, publicSeo } from '../seo';
 import { homeFaqs } from '../content/faq';
 import { PublicHeader, PublicFooter } from './PublicChrome';
-import { designAssets } from '../design-assets';
+import { designAssets, publicIconSrcSet } from '../design-assets';
 import { PublicPricingCards } from './PublicPricingCards';
 import { launchPlans, rubles } from '../content/pricing';
 import { FaqAccordion } from './FaqAccordion';
@@ -41,6 +41,8 @@ export function PublicHome() {
           </ul>
         </div>
         <img className="public-hero-art" src={designAssets.publicHero}
+          srcSet="/assets/hero/01_hero_main-480w.avif 480w, /assets/hero/01_hero_main-800w.avif 800w, /assets/hero/01_hero_main.avif 1448w"
+          sizes="(max-width: 850px) 90vw, 55vw"
           alt="Иллюстрация редактора заявки и коммерческого предложения KPDesk"
           width={1448} height={1086} decoding="async"/>
       </section>
@@ -49,7 +51,7 @@ export function PublicHome() {
         <h2 className="sr-only">Преимущества KPDesk</h2>
         {advantages.map(({ icon, title, text }) =>
           <article className="public-advantage" key={title}>
-            <span className="public-icon"><img src={icon} alt="" width={48} height={48} loading="lazy"/></span>
+            <span className="public-icon"><img src={icon} srcSet={publicIconSrcSet(icon)} sizes="48px" alt="" width={48} height={48} loading="lazy"/></span>
             <div><h3>{title}</h3><p>{text}</p></div>
           </article>)}
       </section>
@@ -81,6 +83,8 @@ export function PublicHome() {
             </li>)}
         </ol>
         <img className="public-how-illustration" src={designAssets.offerStack}
+          srcSet="/assets/hero/12_hero_offer_stack-480w.avif 480w, /assets/hero/12_hero_offer_stack-800w.avif 800w, /assets/hero/12_hero_offer_stack.avif 1672w"
+          sizes="(max-width: 850px) 90vw, 70vw"
           alt="Иллюстрация документов коммерческого предложения"
           width={1672} height={941} loading="lazy"/>
       </section>

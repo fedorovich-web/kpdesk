@@ -1,6 +1,6 @@
 import React from 'react';
 import { createRoot, hydrateRoot } from 'react-dom/client';
-import './styles.css';
+import './public-styles.css';
 
 // Private session/workspace code is never needed for public route hydration.
 const AccountAccess = React.lazy(async () => ({

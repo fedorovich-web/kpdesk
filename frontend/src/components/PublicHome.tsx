@@ -66,7 +66,7 @@ export function PublicHome() {
               designAssets.icon.settings, designAssets.icon.team,
             ][index];
             return <article className="public-feature-card" key={heading}>
-              {icon && <span className="public-icon"><img src={icon} alt="" width={48} height={48} loading="lazy"/></span>}
+              {icon && <span className="public-icon"><img src={icon} srcSet={publicIconSrcSet(icon)} sizes="48px" alt="" width={48} height={48} loading="lazy"/></span>}
               <h3>{heading}</h3><p>{body}</p>
             </article>;
           })}

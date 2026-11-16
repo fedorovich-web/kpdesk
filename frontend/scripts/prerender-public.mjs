@@ -33,6 +33,17 @@ const vite = await createServer({
 try {
   const { metadata } = await vite.ssrLoadModule('/src/seo.ts');
   const template = await readFile(join(dist, 'index.html'), 'utf8');
+  const manifest = JSON.parse(await readFile(join(dist, '.vite/manifest.json'), 'utf8'));
+  const appBundle = manifest['index.html']?.file;
+  const liteBundle = manifest['src/public-lite.ts']?.file;
+  if (typeof appBundle !== 'string' || typeof liteBundle !== 'string'
+    || !/^assets\/[A-Za-z0-9_-]+\.js$/.test(appBundle)
+    || !/^assets\/[A-Za-z0-9_-]+\.js$/.test(liteBundle)
+    || !template.includes('src="/' + appBundle + '"')) {
+    throw new Error('Vite did not emit both required entrypoints.');
+  }
+  const lightweightHomeTemplate = template.replace('src="/' + appBundle + '"',
+    'src="/' + liteBundle + '"');
   for (const route of routes) {
     const module = await vite.ssrLoadModule(route.module);
     const Component = module[route.exportName];
@@ -46,7 +57,9 @@ try {
     const item = metadata[route.seo];
     const canonical = domain + route.path;
     const robots = route.seo === 'privacy' ? 'noindex,follow' : 'index,follow';
-    let html = template;
+    // The homepage has only links, native FAQ details and a mobile menu.
+    // Use its dedicated lightweight enhancement instead of loading React DOM.
+    let html = route.path === '/' ? lightweightHomeTemplate : template;
     html = changeTag(html, /<title>[^<]*<\/title>/, '<title>' + escapeHtml(item.title) + '</title>', 'title');
     html = changeTag(html, /<meta name="description"[^>]*\/>/,
       '<meta name="description" content="' + escapeHtml(item.description) + '"/>', 'description');

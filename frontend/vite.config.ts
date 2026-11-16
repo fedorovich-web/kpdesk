@@ -66,6 +66,15 @@ const publicHtmlPreview: Plugin = {
 
 export default defineConfig({
   plugins: [react(), publicHtmlPreview],
+  build: {
+    manifest: true,
+    rollupOptions: {
+      input: {
+        app: resolve(import.meta.dirname, 'index.html'),
+        publicLite: resolve(import.meta.dirname, 'src/public-lite.ts'),
+      },
+    },
+  },
   server: {
     host: '127.0.0.1',
     port: 5173,

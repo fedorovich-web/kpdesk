@@ -29,6 +29,15 @@ assert.match(faq, /Что делать, если сервис не подобр�
 assert.match(faq, /Оно не вызывает внешний ИИ/);
 assert.match(faq, /Если в карточке КП доступен раздел «Ссылка для клиента»/);
 const home = await readFile(join(dist, 'index.html'), 'utf8');
+const manifest = JSON.parse(await readFile(join(dist, '.vite/manifest.json'), 'utf8'));
+const homeEntry = manifest['src/public-lite.ts']?.file;
+const reactEntry = manifest['index.html']?.file;
+assert.ok(typeof homeEntry === 'string' && typeof reactEntry === 'string',
+  'Vite must emit both lightweight public and React application entrypoints');
+assert.ok(home.includes('src="/' + homeEntry + '"'), 'homepage must use lightweight entrypoint');
+assert.ok(!home.includes('src="/' + reactEntry + '"'), 'homepage must not load React');
+assert.ok((await readFile(join(dist, 'pricing/index.html'), 'utf8')).includes('src="/' + reactEntry + '"'),
+  'interactive pricing FAQ must keep React hydration');
 assert.match(home, /ИИ-генератор коммерческих предложений с подбором товаров/);
 assert.match(home, /Генерация текста КП/);
 const features = await readFile(join(dist, 'features', 'index.html'), 'utf8');

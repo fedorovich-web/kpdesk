@@ -143,3 +143,22 @@ it('keeps expired documents readable and blocks switching an active plan', async
   const plans = screen.getByRole('list', { name: 'Тарифы организации' });
   expect(within(plans).getAllByRole('listitem')).toHaveLength(3);
 });
+
+it('identifies a temporary legacy access without inventing an invoice or subscription', async () => {
+  vi.mocked(billingApi.summary).mockResolvedValue({
+    ...summary, subscription: null, grace_ends_at: '2099-12-31T00:00:00Z', orders: [],
+  });
+  mount();
+  expect(await screen.findByText(/Льготный доступ до/)).toHaveTextContent('Оплаченных счетов нет');
+  expect(screen.getByText('Бесплатный переходный период')).toBeInTheDocument();
+  expect(screen.queryByText('Доступ оплачен')).not.toBeInTheDocument();
+});
+
+it('never treats an expired grace as active access', async () => {
+  vi.mocked(billingApi.summary).mockResolvedValue({
+    ...summary, subscription: null, grace_ends_at: '2020-01-01T00:00:00Z',
+  });
+  mount();
+  await screen.findByText('Оплаченного периода пока нет.');
+  expect(screen.queryByText(/Льготный доступ до/)).not.toBeInTheDocument();
+});

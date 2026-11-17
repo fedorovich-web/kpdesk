@@ -19,12 +19,14 @@ _PUBLIC_STATIC_CACHE = 'public, max-age=2592000, stale-while-revalidate=86400'
 _FINGERPRINTED_CACHE = 'public, max-age=31536000, immutable'
 
 
-REQUIRED_SCHEMA = '0042_openrouter_budget'
+REQUIRED_SCHEMA = '0042_openrouter_budget'
+
 BILLING_SCHEMA = '0048_lava_billing'
 YANDEX_SCHEMA = '0049_yandex_id'
+GRACE_SCHEMA = '0050_billing_grace'
 _RELEASES = (REQUIRED_SCHEMA, '0043_proposal_shares', '0044_universal_products',
              '0045_registry_retirement', '0046_provider_authority',
-             '0047_auth_reset_serialization', BILLING_SCHEMA, YANDEX_SCHEMA)
+             '0047_auth_reset_serialization', BILLING_SCHEMA, YANDEX_SCHEMA, GRACE_SCHEMA)
 
 
 def _at_least(revision: object, minimum: str) -> bool:
@@ -109,6 +111,10 @@ def verify_release_schema(engine: Engine, *, check_billing_activation: bool = Tr
                 raise RuntimeError('Production database schema is not ready; Yandex ID gateway is incomplete.')
         elif yandex is not None and yandex.enabled:
             raise RuntimeError('Production Yandex ID schema is not ready; reviewed migration 0049 is required.')
+        if _at_least(result[1], GRACE_SCHEMA):
+            from kpdesk.billing.grace import grace_available
+            if not grace_available(connection):
+                raise RuntimeError('Production database schema is not ready; billing grace gateway is incomplete.')
     if (result[1] not in _RELEASES
             or (result[0], *result[2:]) != ('kpdesk_tenant_runtime', True, True, True)):
         raise RuntimeError('Production database schema is not ready; reviewed migrations must be applied separately.')

@@ -40,6 +40,10 @@ UPGRADES = {
         "0048_lava_billing", "kpdesk_yandex_id_0049_approved",
         "kpdesk_yandex_id_0049_working_database_approved",
     ),
+    "0050_billing_grace": Upgrade(
+        "0049_yandex_id", "kpdesk_billing_grace_0050_approved",
+        "kpdesk_billing_grace_0050_working_database_approved",
+    ),
 }
 
 

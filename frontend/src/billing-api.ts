@@ -11,6 +11,7 @@ export type BillingOrder = {
 export type BillingSummary = {
   available: boolean; enabled: boolean; plans: BillingPlan[];
   subscription: { plan_id: BillingPlanId; starts_at: string; ends_at: string } | null;
+  grace_ends_at?: string | null;
   usage: { new_quotes: number; catalog_items: number; members: number };
   orders: BillingOrder[];
 };

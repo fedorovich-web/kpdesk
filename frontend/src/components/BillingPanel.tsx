@@ -126,6 +126,9 @@ function BillingScope({ organization, csrf, attempts }: Props & { attempts: Map<
   const connected = summary?.enabled && summary.available;
   const subscription = summary?.subscription;
   const activeSubscription = subscription && new Date(subscription.ends_at).getTime() > Date.now();
+  const graceEndsAt = summary?.grace_ends_at ?? null;
+  const activeGrace = !activeSubscription && !!graceEndsAt
+    && new Date(graceEndsAt).getTime() > Date.now();
   const currentPlan = summary?.plans.find(plan => plan.id === subscription?.plan_id);
   const blocked = pending || loading || uncertain || !!summary?.orders.some(unresolved);
 
@@ -137,10 +140,11 @@ function BillingScope({ organization, csrf, attempts }: Props & { attempts: Map<
     {summary && <>
       {!connected && <p role="status">Оплата пока не подключена</p>}
       {subscription ? <p>{activeSubscription ? 'Доступ оплачен' : 'Срок доступа истёк'}: {currentPlan?.name ?? subscription.plan_id}. До {date(subscription.ends_at)}.</p>
-        : <p>Оплаченного периода пока нет.</p>}
+        : activeGrace && graceEndsAt ? <p>Льготный доступ до {date(graceEndsAt)}. Оплаченных счетов нет.</p>
+          : <p>Оплаченного периода пока нет.</p>}
       <p>Существующие КП и скачивание PDF остаются доступны после окончания оплаченного периода.</p>
       <dl className="billing-usage" aria-label="Использование организации">
-        <div><dt>Новые КП: {summary.usage.new_quotes}{currentPlan ? ` / ${currentPlan.new_quotes}` : ''}</dt><dd>За оплаченный период</dd></div>
+        <div><dt>Новые КП: {summary.usage.new_quotes}{currentPlan ? ` / ${currentPlan.new_quotes}` : ''}</dt><dd>{activeGrace ? 'Бесплатный переходный период' : 'За оплаченный период'}</dd></div>
         <div><dt>Товары каталога: {summary.usage.catalog_items}{currentPlan ? ` / ${currentPlan.catalog_items}` : ''}</dt><dd>В организации</dd></div>
         <div><dt>Участники: {summary.usage.members}{currentPlan ? ` / ${currentPlan.people_limit}` : ''}</dt><dd>В организации</dd></div>
       </dl>

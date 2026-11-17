@@ -96,6 +96,7 @@ class BillingSummary(BaseModel):
     enabled: bool
     plans: list[BillingPlan]
     subscription: Subscription | None
+    grace_ends_at: datetime | None = None
     usage: Usage
     orders: list[BillingOrder]
 

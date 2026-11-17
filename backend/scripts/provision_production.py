@@ -20,7 +20,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.pool import NullPool
 
 TARGET = '0047_auth_reset_serialization'
-VERIFIED_REVISIONS = {TARGET: 48, '0048_lava_billing': 56, '0049_yandex_id': 58}
+VERIFIED_REVISIONS = {TARGET: 48, '0048_lava_billing': 56, '0049_yandex_id': 58, '0050_billing_grace': 59}
 ACCOUNTS = {'kpdesk_auth_service': 'kpdesk_auth_runtime',
             'kpdesk_tenant_service': 'kpdesk_tenant_runtime'}
 OPERATIONS = Path('/app/operations')
@@ -101,16 +101,20 @@ def verify_database(connection: Connection) -> str:
     for row in roles:
         if tuple(row[1:]) != (row[0] in ACCOUNTS, False, False, False, False, False, False):
             raise ValueError('production_role_privileges_unsafe')
-    if revision in ('0048_lava_billing', '0049_yandex_id'):
+    if revision in ('0048_lava_billing', '0049_yandex_id', '0050_billing_grace'):
         from kpdesk.billing.schema import billing_available
 
         if not billing_available(connection):
             raise ValueError('production_billing_schema_incomplete')
-    if revision == '0049_yandex_id':
+    if revision in ('0049_yandex_id', '0050_billing_grace'):
         from kpdesk.yandex.schema import yandex_available
 
         if not yandex_available(connection):
             raise ValueError('production_yandex_schema_incomplete')
+    if revision == '0050_billing_grace':
+        from kpdesk.billing.grace import grace_available
+        if not grace_available(connection):
+            raise ValueError('production_billing_grace_schema_incomplete')
     return str(revision)
 
 

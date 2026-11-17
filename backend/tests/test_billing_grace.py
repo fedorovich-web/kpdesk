@@ -73,3 +73,11 @@ def test_grant_operator_no_credentials_or_organization_parameters_exposed() -> N
     assert "INSERT INTO public.billing_grace" in text
     assert "INSERT INTO public.billing_orders" not in text
     assert "INSERT INTO public.billing_grants" not in text
+
+
+def test_provisioner_image_includes_operator_but_application_image_does_not() -> None:
+    dockerfile=(Path(__file__).resolve().parents[2]/'Dockerfile').read_text(encoding='utf-8')
+    provisioner=dockerfile.split('FROM runtime AS provisioner',1)[1].split('FROM runtime AS application',1)[0]
+    application=dockerfile.split('FROM runtime AS application',1)[1]
+    assert 'backend/scripts/grant_billing_grace.py' in provisioner
+    assert 'backend/scripts/grant_billing_grace.py' not in application

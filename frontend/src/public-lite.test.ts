@@ -1,16 +1,18 @@
-import { afterEach, describe, expect, it } from 'vitest';
-import { fireEvent, screen } from '@testing-library/react';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { fireEvent, screen, waitFor } from '@testing-library/react';
 import { enhancePublicHome } from './public-lite';
 
 afterEach(() => {
   document.body.replaceChildren();
   document.body.style.overflow = '';
+  vi.restoreAllMocks();
 });
 
 function fixture() {
   document.body.innerHTML = `<div id="root" data-ssr-route="/">
     <header class="public-header">
       <a class="public-logo" href="/"><img src="/assets/logo.avif" alt="KPDesk"/></a>
+      <div class="public-header-actions"><a href="/auth/login">Войти</a></div>
       <nav class="public-nav">
         <a href="/features">Возможности</a>
         <a href="/pricing">Тарифы</a>
@@ -26,6 +28,27 @@ function fixture() {
 }
 
 describe('prerendered homepage progressive enhancement', () => {
+  it('shows the workspace link on both desktop and mobile for a live session', async () => {
+    const request = vi.spyOn(globalThis, 'fetch').mockResolvedValue({ status: 200 } as Response);
+    fixture();
+    await waitFor(() => {
+      expect(document.querySelector('.public-header-actions a')).toHaveAttribute('href', '/app');
+      expect(document.querySelector('.public-header-actions a')).toHaveTextContent('Личный кабинет');
+      expect(document.querySelector('.mobile-drawer-links a[href="/app"]')).toHaveTextContent('Личный кабинет');
+    });
+    expect(request).toHaveBeenCalledWith('/api/session/me', expect.objectContaining({
+      method: 'GET', cache: 'no-store', credentials: 'same-origin',
+    }));
+  });
+
+  it('preserves anonymous navigation on expired sessions and network failures', async () => {
+    const request = vi.spyOn(globalThis, 'fetch').mockResolvedValue({ status: 401 } as Response);
+    fixture();
+    await waitFor(() => expect(request).toHaveBeenCalledOnce());
+    expect(document.querySelector('.public-header-actions a')).toHaveAttribute('href', '/auth/login');
+    expect(document.querySelector('.mobile-drawer-links a[href="/auth/login"]')).toHaveTextContent('Войти');
+  });
+
   it('makes FAQ a native exclusive group without React or forced scrolling', () => {
     fixture();
     const details = document.querySelectorAll<HTMLDetailsElement>('.public-faq-list details');

@@ -1,7 +1,9 @@
+import { hasActivePublicSession } from './public-session';
+
 /**
  * Minimal progressive enhancement for the prerendered homepage.
  * The SEO copy, links and FAQ answers are already complete HTML. Only the
- * mobile drawer and exclusive accordion need a small amount of client JS.
+ * mobile drawer, exclusive accordion and authenticated header links need a small amount of client JS.
  * All private, demo and search-enabled FAQ routes retain React hydration.
  */
 export function enhancePublicHome(doc: Document = document): void {
@@ -98,6 +100,19 @@ export function enhancePublicHome(doc: Document = document): void {
   drawer.append(footer);
   layer.append(overlay, drawer);
   doc.body.append(layer);
+
+  // Keep the pre-rendered public HTML static; update only auth links after paint.
+  void hasActivePublicSession().then(authenticated => {
+    if (!authenticated) return;
+    for (const link of doc.querySelectorAll<HTMLAnchorElement>(
+      '.public-header-actions a[href="/auth/login"], .mobile-drawer-links a[href="/auth/login"]',
+    )) {
+      link.setAttribute('href', '/app');
+      const label = link.querySelector('span');
+      if (label) label.textContent = 'Личный кабинет';
+      else link.textContent = 'Личный кабинет';
+    }
+  });
 
   let open = false;
   let previousOverflow = '';

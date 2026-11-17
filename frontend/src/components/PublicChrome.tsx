@@ -1,8 +1,16 @@
+import { useEffect, useState } from 'react';
 import { ArrowRight } from 'lucide-react';
 import { designAssets } from '../design-assets';
 import { MobileNavigation } from './MobileNavigation';
+import { hasActivePublicSession } from '../public-session';
 
 export function PublicHeader() {
+  const [authenticated, setAuthenticated] = useState(false);
+  useEffect(() => {
+    let active = true;
+    void hasActivePublicSession().then(value => { if (active) setAuthenticated(value); });
+    return () => { active = false; };
+  }, []);
   return <header className="public-header">
     <a className="public-logo" href="/" aria-label="KPDesk — главная">
       <img src={designAssets.logo} alt="KPDesk" width={203} height={52}/>
@@ -15,7 +23,8 @@ export function PublicHeader() {
       <a href="/faq" aria-current={window.location.pathname === '/faq' ? 'page' : undefined}>Вопросы и ответы</a>
     </nav>
     <div className="public-header-actions">
-      <a className="button button-white" href="/auth/login">Войти</a>
+      <a className="button button-white" href={authenticated ? "/app" : "/auth/login"}>
+        {authenticated ? "Личный кабинет" : "Войти"}</a>
       <a className="button button-primary public-header-cta" href="/app">
         Создать КП <ArrowRight size={18} aria-hidden="true"/>
       </a>
@@ -27,7 +36,8 @@ export function PublicHeader() {
       { href: '/pricing', label: 'Тарифы', current: window.location.pathname === '/pricing' },
       { href: '/faq', label: 'Вопросы и ответы', current: window.location.pathname === '/faq' },
       { href: '/demo', label: 'Посмотреть демо', current: false },
-      { href: '/auth/login', label: 'Войти', current: window.location.pathname === '/auth/login' },
+      { href: authenticated ? '/app' : '/auth/login', label: authenticated ? 'Личный кабинет' : 'Войти',
+        current: !authenticated && window.location.pathname === '/auth/login' },
     ]} action={{ href: '/app', label: 'Создать КП' }}/>
   </header>;
 }

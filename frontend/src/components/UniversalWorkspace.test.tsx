@@ -342,13 +342,23 @@ describe('universal workspace', () => {
     expect(screen.queryByDisplayValue('Чужой текст')).not.toBeInTheDocument();
   });
   it('requires explicit ratings, reviewed and training consent before storing feedback', async () => {
-    const fetcher = setup(path => path.endsWith('/feedback') ? reply({ id: 'feedback-one', curation_status: 'pending_review' }, 201) : undefined);
+    let resolveHistory!: (response: Response) => void;
+    const history = new Promise<Response>(resolve => { resolveHistory = resolve; });
+    const fetcher = setup(path => {
+      if (path.endsWith('/feedback?offset=0')) return history;
+      if (path.endsWith('/feedback')) return reply({ id: 'feedback-one', curation_status: 'pending_review' }, 201);
+      return undefined;
+    });
     render(<UniversalWorkspace {...props}/>); await extract(); await select();
     fireEvent.click(screen.getByRole('button', { name: 'Сохранить КП' }));
     const submit = await screen.findByRole('button', { name: 'Сохранить оценку подбора' });
+    const rating = screen.getByLabelText('Оценка товара позиции 1');
     expect(submit).toBeDisabled();
+    expect(rating).toBeDisabled();
     expect(screen.getByLabelText(/Разрешаю использовать эти оценки/)).not.toBeChecked();
-    fireEvent.change(screen.getByLabelText('Оценка товара позиции 1'), { target: { value: 'positive' } });
+    await act(async () => resolveHistory(reply({ items: [], next_offset: null })));
+    expect(rating).toBeEnabled();
+    fireEvent.change(rating, { target: { value: 'positive' } });
     fireEvent.click(screen.getByLabelText('Проверил оценку подбора'));
     expect(submit).toBeDisabled();
     fireEvent.click(screen.getByLabelText(/Разрешаю использовать эти оценки/)); fireEvent.click(submit);

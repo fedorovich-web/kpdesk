@@ -150,6 +150,7 @@
     "0047_auth_reset_serialization.py": "0fd40fca0ab8d27f8461ad915dae83e23b4558affc86e6cf2ae05c048de796ed",
     "0048_lava_billing.py": "9af2e80f5efaac0739d6ec8051de9dc756af3c9de3789cc1b0e024ad23284a49",
     "0049_yandex_id.py": "7d7d16ae22a94f9bbb986fe646630429daf735cdd7f239d744001c1adf98b553",
-    "0050_billing_grace.py": "75829342a35fe604fbbb8d0832acdb6cf0bcf09231bc0b71eb1eddcf2f6c261d"
+    "0050_billing_grace.py": "75829342a35fe604fbbb8d0832acdb6cf0bcf09231bc0b71eb1eddcf2f6c261d",
+    "0051_service_admin.py": "bfabb7284e6a62045001f99a4b283db35522f261193eaada0940c2e23fc544bb"
   }
 }

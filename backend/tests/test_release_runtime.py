@@ -78,7 +78,7 @@ def test_production_serves_built_frontend_without_spa_fallback_for_api(tmp_path:
 def test_frontend_cache_lifetimes_keep_private_data_uncached(tmp_path: Path) -> None:
     files = (
         'index.html', '404.html', 'app/index.html', 'auth/login/index.html',
-        'proposal/index.html', 'features/index.html',
+        'proposal/index.html', 'features/index.html', 'admin/index.html',
         'assets/index-AbCd1234.js', 'assets/index-AbCd1234.css',
         'assets/hero/01_hero_main.avif', 'fonts/inter/inter-cyrillic.woff2',
         'robots.txt',
@@ -100,10 +100,12 @@ def test_frontend_cache_lifetimes_keep_private_data_uncached(tmp_path: Path) -> 
         for path in ('/', '/features', '/features/'):
             assert client.get(path).headers['cache-control'] == html
         assert client.get('/robots.txt').headers['cache-control'] == 'public, max-age=3600'
-        for path in ('/app', '/auth/login', '/proposal', '/proposal/index.html'):
+        for path in ('/app', '/auth/login', '/proposal', '/proposal/index.html', '/admin', '/admin/'):
             response = client.get(path)
             assert response.headers['cache-control'] == 'no-store'
             assert 'noindex' in response.headers['x-robots-tag']
+        assert client.get('/admin').text == 'admin/index.html'
+        assert client.get('/admin/unrecognized').status_code == 404
         for path in ('/', '/features', '/assets/index-AbCd1234.js',
                      '/fonts/inter/inter-cyrillic.woff2', '/app'):
             head = client.head(path)

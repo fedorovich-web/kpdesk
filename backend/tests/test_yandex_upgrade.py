@@ -1,4 +1,4 @@
-"""Offline fail-closed operator tests for the single Yandex 0049 upgrade."""
+"""Offline fail-closed tests for the explicit production upgrade operator."""
 from __future__ import annotations
 
 from unittest.mock import Mock
@@ -10,20 +10,24 @@ from alembic.config import Config
 from scripts import upgrade_yandex as operator
 
 
-def test_yandex_operator_cannot_select_any_other_migration() -> None:
-    assert set(operator.UPGRADES) == {"0049_yandex_id"}
-    assert operator.UPGRADES["0049_yandex_id"].previous == "0048_lava_billing"
+def test_operator_can_only_select_reviewed_migrations_with_exact_predecessors() -> None:
+    assert {target: upgrade.previous for target, upgrade in operator.UPGRADES.items()} == {
+        "0049_yandex_id": "0048_lava_billing",
+        "0050_billing_grace": "0049_yandex_id",
+        "0051_service_admin": "0050_billing_grace",
+    }
     with pytest.raises(ValueError, match="unknown"):
         operator.checked_plan("0050_service_admin")
     with pytest.raises(ValueError, match="unknown"):
         operator.run("0050_service_admin", apply=True)
 
 
-def test_yandex_operator_does_not_connect_without_maintenance_backup_approval() -> None:
+@pytest.mark.parametrize("target", ("0049_yandex_id", "0050_billing_grace", "0051_service_admin"))
+def test_operator_does_not_connect_without_maintenance_backup_approval(target: str) -> None:
     with pytest.raises(ValueError, match="confirmation"):
-        operator.run("0049_yandex_id", apply=True)
+        operator.run(target, apply=True)
     with pytest.raises(ValueError, match="confirmation"):
-        operator.run("0049_yandex_id", apply=True, maintenance=True)
+        operator.run(target, apply=True, maintenance=True)
 
 
 class Connection:

@@ -32,12 +32,16 @@ for (const [path, heading, indexable] of pageCases) {
   assert.ok(titleOf(html)?.includes('KPDesk'), path + ': title');
   console.log('HTTP public PASS', path, titleOf(html));
 }
-for (const path of ['/app', '/auth/login', '/app/quotes/review', '/app/unlisted-route']) {
+for (const path of ['/app', '/auth/login', '/app/quotes/review', '/app/unlisted-route', '/admin', '/admin/']) {
   const response = await fetch(new URL(path, origin), { signal: AbortSignal.timeout(5000) });
   assert.equal(response.status, 200, path + ': status');
   const html = await response.text();
   assert.ok(html.includes('name="robots" content="noindex,nofollow"'), path + ': noindex');
   assert.ok(!html.includes('data-ssr-route='), path + ': public prerender leaked');
+  if (path.startsWith('/admin')) {
+    assert.equal(response.headers.get('cache-control'), 'no-store');
+    assert.ok(html.includes('Кабинет владельца — KPDesk'), path + ': owner shell');
+  }
   console.log('HTTP private PASS', path);
 }
 

@@ -109,7 +109,9 @@ def create_app(
                 response.headers['Strict-Transport-Security'] = 'max-age=31536000'
         parts = request.url.path.split('/')
         if (request.url.path.startswith('/api/session/yandex/')
-                or request.url.path == '/api/session/providers'):
+                or request.url.path == '/api/session/providers'
+                or request.url.path == '/api/admin'
+                or request.url.path.startswith('/api/admin/')):
             response.headers.update({'Cache-Control': 'no-store', 'X-Robots-Tag': 'noindex, nofollow'})
         if request.url.path.startswith('/api/billing/') or (
             request.url.path.startswith('/api/session/organizations/') and 'billing' in parts
@@ -170,6 +172,7 @@ def create_app(
         from kpdesk.api.billing_routes import router as billing_router
         from kpdesk.api.member_routes import router as member_router
         from kpdesk.api.proposal_share_routes import router as proposal_share_router
+        from kpdesk.api.service_admin_routes import router as service_admin_router
         from kpdesk.api.tenant_candidate_adjudication_routes import (
             router as tenant_candidate_adjudication_router,
         )
@@ -238,6 +241,7 @@ def create_app(
         app.include_router(account_router)
         app.include_router(billing_router)
         app.include_router(yandex_router)
+        app.include_router(service_admin_router)
         app.include_router(member_router)
         app.include_router(tenant_extract_router)
         app.include_router(tenant_matching_router)

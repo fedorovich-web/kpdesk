@@ -6,6 +6,9 @@ import './public-styles.css';
 const AccountAccess = React.lazy(async () => ({
   default: (await import('./components/AccountAccess')).AccountAccess,
 }));
+const ServiceAdmin = React.lazy(async () => ({
+  default: (await import('./components/ServiceAdmin')).ServiceAdmin,
+}));
 const SharedProposalPage = React.lazy(async () => ({
   default: (await import('./components/SharedProposalPage')).SharedProposalPage,
 }));
@@ -30,7 +33,7 @@ async function loadPublicPage(path: string): Promise<PublicPageComponent | null>
   if (path === '/pricing') return (await import('./components/PricingPage')).PricingPage;
   if (path === '/privacy') return (await import('./components/PrivacyPage')).PrivacyPage;
   if (path === '/demo' || path.startsWith('/demo/') || path === '/proposal'
-    || path.startsWith('/auth/') || path === '/app' || path.startsWith('/app/')) {
+    || path.startsWith('/auth/') || path === '/app' || path.startsWith('/app/') || path === '/admin') {
     return null;
   }
   return (await import('./components/NotFoundPage')).NotFoundPage;
@@ -45,6 +48,9 @@ function RootRoute({ DemoApp, PublicPage }: {
   if (path === '/demo' || path.startsWith('/demo/')) return DemoApp ? <DemoApp /> : null;
   if (path === '/proposal') return <React.Suspense fallback={<main role="status">Открываем КП…</main>}>
     <SharedProposalPage/>
+  </React.Suspense>;
+  if (path === '/admin') return <React.Suspense fallback={<main role="status">Загрузка кабинета владельца…</main>}>
+    <ServiceAdmin/>
   </React.Suspense>;
   if (path.startsWith('/auth/') || path === '/app' || path.startsWith('/app/')) {
     return <React.Suspense fallback={<main role="status">Загрузка личного кабинета…</main>}>

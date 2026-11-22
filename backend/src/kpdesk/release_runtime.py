@@ -7,6 +7,8 @@ from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import FileResponse
 from sqlalchemy import Engine, text
 
+from kpdesk.db.service_admin_schema import ADMIN_REVISION
+
 # Vite emits eight-character fingerprints in built JS/CSS filenames.
 # Only fingerprinted URLs may be cached for a year without risking stale deploys.
 _FINGERPRINTED_ASSET = re.compile(r"^assets/(?:[^/]+/)*[^/]+-[A-Za-z0-9_-]{8}\.(?:js|css|mjs|woff2|avif|webp|png|svg)$")
@@ -26,7 +28,7 @@ YANDEX_SCHEMA = '0049_yandex_id'
 GRACE_SCHEMA = '0050_billing_grace'
 _RELEASES = (REQUIRED_SCHEMA, '0043_proposal_shares', '0044_universal_products',
              '0045_registry_retirement', '0046_provider_authority',
-             '0047_auth_reset_serialization', BILLING_SCHEMA, YANDEX_SCHEMA, GRACE_SCHEMA)
+             '0047_auth_reset_serialization', BILLING_SCHEMA, YANDEX_SCHEMA, GRACE_SCHEMA, ADMIN_REVISION)
 
 
 def _at_least(revision: object, minimum: str) -> bool:
@@ -115,6 +117,11 @@ def verify_release_schema(engine: Engine, *, check_billing_activation: bool = Tr
             from kpdesk.billing.grace import grace_available
             if not grace_available(connection):
                 raise RuntimeError('Production database schema is not ready; billing grace gateway is incomplete.')
+        if _at_least(result[1], ADMIN_REVISION):
+            from kpdesk.db.service_admin_schema import service_admin_available
+
+            if not service_admin_available(connection):
+                raise RuntimeError('Production database schema is not ready; service owner gateway is incomplete.')
     if (result[1] not in _RELEASES
             or (result[0], *result[2:]) != ('kpdesk_tenant_runtime', True, True, True)):
         raise RuntimeError('Production database schema is not ready; reviewed migrations must be applied separately.')
@@ -165,11 +172,15 @@ def mount_built_frontend(app: FastAPI, directory: str) -> None:
         # Precompressed files are implementation details, never public URLs.
         if normalized.endswith(('.br', '.gz')):
             raise HTTPException(404)
-        private = normalized in ('app', 'auth', 'proposal') or normalized.startswith(('app/', 'auth/', 'proposal/'))
+        private = normalized in ('app', 'auth', 'proposal', 'admin') or normalized.startswith(
+            ('app/', 'auth/', 'proposal/', 'admin/')
+        )
         if not normalized:
             file = safe_file('index.html')
         elif normalized == 'proposal' or normalized.startswith('proposal/'):
             file = safe_file('proposal/index.html')
+        elif normalized == 'admin' or normalized.startswith('admin/'):
+            file = safe_file('admin/index.html') if normalized == 'admin' else None
         elif private:
             file = safe_file('app/index.html' if normalized == 'app' or normalized.startswith('app/') else 'auth/login/index.html')
         else:

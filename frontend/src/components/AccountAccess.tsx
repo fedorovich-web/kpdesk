@@ -8,6 +8,7 @@ import { WorkspaceNavigation } from './WorkspaceNavigation';
 import { BillingPanel } from './BillingPanel';
 import { YandexConnection, YandexLogin } from './YandexAccess';
 import { consumeYandexError } from '../yandex-api';
+import { serviceAdminApi } from '../service-admin-api';
 import { sessionApi, SessionApiError } from '../tenant-session';
 import type { ActiveTenantCatalog, CatalogPreflight, TenantOrganization } from '../tenant-session';
 
@@ -71,6 +72,7 @@ export function AccountAccess() {
   fileRef.current = file;
   const [pending, setPending] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
+  const [adminCsrf, setAdminCsrf] = useState<string | null>(null);
   const [notice, setNotice] = useState('');
   const [error, setError] = useState('');
   const [oauthFeedback, setOauthFeedback] = useState('');
@@ -80,6 +82,16 @@ export function AccountAccess() {
   const selectedOrganization = organizations.find(org => org.id === selectedId);
 
   useEffect(() => { setOauthFeedback(consumeYandexError()); }, []);
+  useEffect(() => {
+    if (!secure || mode !== 'organizations' || !csrf || loggingOut) return;
+    const controller = new AbortController();
+    void serviceAdminApi.capability(controller.signal).then(({ allowed }) => {
+      if (!controller.signal.aborted) setAdminCsrf(allowed ? csrf : null);
+    }).catch(() => {
+      if (!controller.signal.aborted) setAdminCsrf(null);
+    });
+    return () => controller.abort();
+  }, [secure, mode, csrf, loggingOut]);
   useEffect(() => {
     // Verification secrets do not remain in history, bookmarks or copied URLs.
     if (token && (window.location.pathname === paths['verify-email']
@@ -199,6 +211,10 @@ export function AccountAccess() {
       } else if (mode === 'login') {
         const issued = await sessionApi.login(email, password);
         if (!current()) return;
+        if (yandexNextPath === '/admin') {
+          window.location.assign('/admin');
+          return;
+        }
         setCsrf(issued.csrf_token);
         const visible = await sessionApi.organizations();
         if (!current()) return;
@@ -444,6 +460,7 @@ export function AccountAccess() {
           </button>}
           {csrf && <button className="text-button workspace-logout" type="button"
             disabled={pending} onClick={() => void logout()}>Выйти</button>}
+          {csrf && csrf === adminCsrf && !loggingOut && <a className="text-button" href="/admin">Кабинет владельца</a>}
           </div>
           <YandexConnection secure={secure} csrfToken={loggingOut ? null : csrf}
             onSessionExpired={invalidateSession}/>

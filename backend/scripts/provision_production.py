@@ -20,7 +20,10 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.pool import NullPool
 
 TARGET = '0047_auth_reset_serialization'
-VERIFIED_REVISIONS = {TARGET: 48, '0048_lava_billing': 56, '0049_yandex_id': 58, '0050_billing_grace': 59}
+VERIFIED_REVISIONS = {
+    TARGET: 48, '0048_lava_billing': 56, '0049_yandex_id': 58,
+    '0050_billing_grace': 59, '0051_service_admin': 60,
+}
 ACCOUNTS = {'kpdesk_auth_service': 'kpdesk_auth_runtime',
             'kpdesk_tenant_service': 'kpdesk_tenant_runtime'}
 OPERATIONS = Path('/app/operations')
@@ -101,20 +104,25 @@ def verify_database(connection: Connection) -> str:
     for row in roles:
         if tuple(row[1:]) != (row[0] in ACCOUNTS, False, False, False, False, False, False):
             raise ValueError('production_role_privileges_unsafe')
-    if revision in ('0048_lava_billing', '0049_yandex_id', '0050_billing_grace'):
+    if revision != TARGET:
         from kpdesk.billing.schema import billing_available
 
         if not billing_available(connection):
             raise ValueError('production_billing_schema_incomplete')
-    if revision in ('0049_yandex_id', '0050_billing_grace'):
+    if revision in ('0049_yandex_id', '0050_billing_grace', '0051_service_admin'):
         from kpdesk.yandex.schema import yandex_available
 
         if not yandex_available(connection):
             raise ValueError('production_yandex_schema_incomplete')
-    if revision == '0050_billing_grace':
+    if revision in ('0050_billing_grace', '0051_service_admin'):
         from kpdesk.billing.grace import grace_available
         if not grace_available(connection):
             raise ValueError('production_billing_grace_schema_incomplete')
+    if revision == '0051_service_admin':
+        from kpdesk.db.service_admin_schema import service_admin_available
+
+        if not service_admin_available(connection):
+            raise ValueError('production_service_admin_schema_incomplete')
     return str(revision)
 
 

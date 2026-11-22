@@ -1,4 +1,4 @@
-"""Reviewed, operator-only 0048->0049 Yandex ID upgrade.
+"""Reviewed operator-only upgrades for Yandex ID, billing grace and service admin.
 
 Read-only preflight by default. No app startup may apply a migration, and
 no existing instance may be reset or recreated. Requires an independently
@@ -43,6 +43,10 @@ UPGRADES = {
     "0050_billing_grace": Upgrade(
         "0049_yandex_id", "kpdesk_billing_grace_0050_approved",
         "kpdesk_billing_grace_0050_working_database_approved",
+    ),
+    "0051_service_admin": Upgrade(
+        "0050_billing_grace", "kpdesk_service_admin_0051_approved",
+        "kpdesk_service_admin_0051_working_database_approved",
     ),
 }
 

@@ -41,6 +41,10 @@ const publicHtmlPreview: Plugin = {
         request.url = path + '/index.html' + parsed.search;
       } else if (path.startsWith('/demo/')) {
         request.url = '/demo/index.html' + parsed.search;
+      } else if (path === '/admin') {
+        request.url = '/admin/index.html' + parsed.search;
+        response.setHeader('Cache-Control', 'no-store');
+        response.setHeader('X-Robots-Tag', 'noindex, nofollow');
       } else if (path === '/proposal') {
         request.url = '/proposal/index.html' + parsed.search;
         response.setHeader('Cache-Control', 'no-store');

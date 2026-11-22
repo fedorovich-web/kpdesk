@@ -48,7 +48,7 @@ def run(*, apply: bool = False, confirm_sole_organization: bool = False,
             else:
                 conn.exec_driver_sql("SET TRANSACTION READ ONLY")
             revision = verify_target(conn, nonce)
-            if revision != GRACE_REVISION or not grace_available(conn):
+            if revision not in (GRACE_REVISION, '0051_service_admin') or not grace_available(conn):
                 raise ValueError("grace_schema_revision_required")
             count = conn.scalar(text("SELECT count(*) FROM public.organizations"))
             active = conn.scalar(text("""SELECT count(*) FROM public.billing_grants
@@ -71,7 +71,7 @@ def run(*, apply: bool = False, confirm_sole_organization: bool = False,
             if len(issued) != 1 or conn.scalar(text("SELECT count(*) FROM public.billing_grace")) != 1:
                 raise ValueError("grace_operator_postcondition_failed")
         return {"status": "passed", "mode": "grant_legacy_grace",
-                "duration_days": days, "revision": GRACE_REVISION,
+                "duration_days": days, "revision": revision,
                 "backup_sha256": backup_hash}
     finally:
         engine.dispose()

@@ -142,6 +142,11 @@ try {
     await mkdir(resolve(file, '..'), { recursive: true });
     await writeFile(file, shell);
   }
+  const adminShell = changeTag(changeTag(shell, /<title>[^<]*<\/title>/,
+    '<title>Кабинет владельца — KPDesk</title>', 'admin title'), /<meta name="description"[^>]*\/>/,
+    '<meta name="description" content="Кабинет владельца KPDesk."/>', 'admin description');
+  await mkdir(join(dist, 'admin'), { recursive: true });
+  await writeFile(join(dist, 'admin/index.html'), adminShell);
   let proposalShell = changeTag(shell, /<title>[^<]*<\/title>/,
     '<title>Коммерческое предложение — KPDesk</title>', 'proposal title');
   proposalShell = changeTag(proposalShell, /<meta name="description"[^>]*\/>/,
@@ -156,7 +161,7 @@ try {
     + '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
     + siteRoutes + '\n</urlset>\n');
   await writeFile(join(dist, 'robots.txt'),
-    'User-agent: *\nDisallow: /app\nDisallow: /auth\nDisallow: /proposal\n'
+    'User-agent: *\nDisallow: /app\nDisallow: /auth\nDisallow: /proposal\nDisallow: /admin\n'
     + 'Sitemap: ' + domain + '/sitemap.xml\n');
 } finally {
   delete globalThis.window;

@@ -53,7 +53,7 @@ for (const route of ['/', '/pricing']) {
   assert.match(html, /Оплата пока не подключена/);
 }
 
-for (const route of ['/app', '/app/quotes/review', '/auth/login', '/auth/register']) {
+for (const route of ['/app', '/app/quotes/review', '/auth/login', '/auth/register', '/admin']) {
   const html = await readFile(join(dist, route.slice(1), 'index.html'), 'utf8');
   assert.match(html, /<meta name="robots" content="noindex,nofollow"\/>/);
   assert.doesNotMatch(html, /data-ssr-route=/);
@@ -76,6 +76,7 @@ assert.ok(!sitemap.includes('/privacy'));
 assert.ok(!sitemap.includes('/auth'));
 const robots = await readFile(join(dist, 'robots.txt'), 'utf8');
 assert.ok(robots.includes('Disallow: /app'));
+assert.ok(robots.includes('Disallow: /admin'));
 assert.ok(robots.includes('Disallow: /auth'));
 console.log('public prerender SEO verification: PASS (' + publicRoutes.length
   + ' indexable public pages, isolated private shells)');

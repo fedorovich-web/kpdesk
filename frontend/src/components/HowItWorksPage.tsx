@@ -9,7 +9,7 @@ export function HowItWorksPage() {
   useEffect(() => applyDocumentSeo('how'), []);
   return <MarketingPage>
     <MarketingHero
-      title="Как создать КП из заявки и прайса"
+      title="Как собрать КП из заявки и прайса"
       description="Для первого КП подготовьте прайс в CSV или XLSX, текст заявки и реквизиты компании. Ниже пять шагов от загрузки данных до проверки предложения и скачивания PDF."
       image={designAssets.processHero}
       imageAlt="Иллюстрация пяти этапов подготовки коммерческого предложения"
@@ -19,7 +19,7 @@ export function HowItWorksPage() {
     <section className="marketing-step-ribbon" aria-label="Пять шагов">
       {processSteps.map(({ title }, index) => <div className="marketing-ribbon-step" key={title}>
         <span className="marketing-step-number">{index + 1}</span>
-        <h2>{title}</h2>
+        <strong>{title}</strong>
         <p>{[
           'Сохраните товары и цены для подбора.',
           'Проверьте требования, которые выделил ИИ.',
@@ -30,7 +30,7 @@ export function HowItWorksPage() {
       </div>)}
     </section>
 
-    <MarketingSection id="process" heading="Пять шагов от прайса до утверждённого КП">
+    <MarketingSection id="process" heading="Пять шагов от загрузки прайса до готового PDF">
       <ol className="marketing-step-details">{processSteps.map(({ title, text }, index) =>
         <li key={title} className="marketing-step-detail">
           <div className="marketing-step-title"><span className="marketing-step-number">{index + 1}</span><h3>{title}</h3></div>
@@ -41,7 +41,7 @@ export function HowItWorksPage() {
         </li>)}</ol>
     </MarketingSection>
 
-    <MarketingSection heading="Меньше переносов между прайсом и документом" modifier="marketing-benefits-section">
+    <MarketingSection heading="Что проверить и сохранить перед отправкой КП" modifier="marketing-benefits-section">
       <div className="marketing-benefits">{processBenefits.map(({ title, text, icon }) =>
         <article key={title}>
           <img src={icon} alt="" width={50} height={50} loading="lazy"/>
@@ -49,7 +49,7 @@ export function HowItWorksPage() {
         </article>)}</div>
     </MarketingSection>
     <section className="marketing-question-row">
-      <div><h2>Готовите первое предложение?</h2><p>В справке разобраны формат прайса, работа с заявкой, генерация текста и утверждение PDF.</p></div>
+      <div><h2>Справка по прайсу, ИИ и PDF</h2><p>В справке разобраны формат прайса, работа с заявкой, генерация текста и утверждение PDF.</p></div>
       <a href="/faq" className="button button-white">Открыть справку <ArrowRight size={17} aria-hidden="true"/></a>
     </section>
     <MarketingCta title="Создайте своё первое КП"

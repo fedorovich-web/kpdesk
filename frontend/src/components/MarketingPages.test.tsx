@@ -19,8 +19,8 @@ describe('public feature and pricing pages', () => {
     setupHead();
     render(<FeaturesPage />);
     expect(screen.getAllByRole('heading', { level: 1 })).toHaveLength(1);
-    expect(document.title).toBe('Подбор товаров, расчёт и оформление КП — KPDesk');
-    expect(screen.getByRole('heading', { name: 'Что можно сделать в KPDesk' })).toBeInTheDocument();
+    expect(document.title).toBe('ИИ для создания КП, подбор товаров и расчёт — KPDesk');
+    expect(screen.getByRole('heading', { name: 'Что умеет KPDesk при подготовке КП' })).toBeInTheDocument();
     expect(screen.getByText(/Добавьте сотрудников и назначьте им права на работу с прайсами/)).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'ИИ пишет текст КП' })).toBeInTheDocument();
     expect(screen.getByText(/KPDesk предложит позиции из каталога по требованиям заявки/)).toBeInTheDocument();
@@ -33,7 +33,8 @@ describe('public feature and pricing pages', () => {
     setupHead();
     render(<HowItWorksPage />);
     expect(screen.getAllByRole('heading', { level: 1 })).toHaveLength(1);
-    expect(screen.getByRole('heading', { name: 'Пять шагов от прайса до утверждённого КП' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Пять шагов от загрузки прайса до готового PDF' })).toBeInTheDocument();
+    expect(screen.getAllByRole('heading', { name: 'Загрузите прайс' })).toHaveLength(1);
     expect(document.querySelectorAll('.marketing-step-details > li')).toHaveLength(5);
     expect(screen.getByText(/KPDesk предложит товары из каталога. Сравните их с заявкой клиента и подтвердите выбор/)).toBeInTheDocument();
     expect(screen.getByText(/ИИ подготовит текст по этим данным и выбранным товарам/)).toBeInTheDocument();
@@ -60,7 +61,7 @@ describe('public feature and pricing pages', () => {
     setupHead();
     render(<PricingPage />);
     expect(screen.getAllByRole('heading', { level: 1 })).toHaveLength(1);
-    expect(screen.getByRole('heading', { name: 'Выберите тариф для своей команды' }))
+    expect(screen.getByRole('heading', { name: 'Три тарифа для команд разного размера' }))
       .toBeInTheDocument();
     for (const price of ['299 ₽', '499 ₽', '990 ₽']) expect(screen.getAllByText(price).length).toBeGreaterThan(0);
     expect(screen.getByRole('table', { name: 'Сравнение тарифов KPDesk' })).toBeInTheDocument();

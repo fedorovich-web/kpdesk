@@ -16,14 +16,14 @@ export function IntegrationsPage() {
   useEffect(() => applyDocumentSeo('integrations'), []);
   return <MarketingPage>
     <MarketingHero
-      title="Как загрузить прайс для подбора и расчёта КП"
+      title="Импорт прайсов Excel и CSV для расчёта КП"
       description="Импортируйте товары, цены и характеристики из CSV или Excel (.xlsx). Начните со своей таблицы или подготовьте выгрузку из 1С, CRM или Google Sheets."
       image={designAssets.integrationsHero}
       imageAlt="Иллюстрация источников товарных данных для подготовки прайса"
       anchor="#integrations-list" secondaryLabel="Способы загрузки"
       highlights={['Прайсы CSV и XLSX', 'Импорт выгрузок из 1С', 'Каталог для новых КП'] }
     />
-    <MarketingSection id="integrations-list" heading="Перенесите товары из своей таблицы или выгрузки">
+    <MarketingSection id="integrations-list" heading="Откуда можно загрузить товары и цены">
       <div className="marketing-integration-grid">
         {integrationCards.map(({ name, text, state, icon }) => <article key={name}>
           <img className="marketing-integration-icon" src={icon} srcSet={publicIconSrcSet(icon)} sizes="48px" alt="" width={48} height={48} loading="eager" decoding="async" fetchPriority="low"/>
@@ -32,12 +32,12 @@ export function IntegrationsPage() {
         </article>)}
       </div>
     </MarketingSection>
-    <MarketingSection heading="Что прайс даёт при подготовке КП" modifier="marketing-task-section">
+    <MarketingSection heading="Как каталог используется в новых КП" modifier="marketing-task-section">
       <div className="marketing-task-grid">{tasks.map(({ title, text, icon }) =>
         <article key={title}><img src={icon} srcSet={publicIconSrcSet(icon)} sizes="48px" alt="" width={48} height={48} loading="eager" decoding="async" fetchPriority="low"/>
           <h3>{title}</h3><p>{text}</p></article>)}</div>
     </MarketingSection>
-    <MarketingSection id="api" heading="Что должно быть в прайсе" modifier="marketing-api-section">
+    <MarketingSection id="api" heading="Четыре обязательных столбца прайса" modifier="marketing-api-section">
       <div className="marketing-api-grid">
         <div><p>В таблице нужны артикул, название, цена в рублях и единица продажи. В шаблоне это столбцы sku, name, price_rub и sale_unit. Дополнительные столбцы можно использовать для характеристик. Если источник данных — 1С или CRM, подготовьте и загрузите файл в этом формате.</p>
           <a href="/faq" className="button button-primary">Вопросы о прайсах <ArrowRight size={17} aria-hidden="true"/></a></div>
@@ -53,7 +53,7 @@ export function IntegrationsPage() {
         </ul>
       </div>
     </MarketingSection>
-    <MarketingCta title="Превратите свой прайс в готовое КП"
+    <MarketingCta title="Загрузите прайс для первого КП"
       description="Загрузите товары и цены, добавьте заявку клиента и подготовьте предложение по своему каталогу."/>
   </MarketingPage>;
 }

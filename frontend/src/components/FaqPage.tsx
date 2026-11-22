@@ -33,7 +33,7 @@ export function FaqPage() {
     <main>
       <section className="faq-hero" aria-labelledby="faq-title">
         <div>
-          <h1 id="faq-title">Вопросы о прайсах, подготовке КП и оплате</h1>
+          <h1 id="faq-title">Справка KPDesk по подготовке КП</h1>
           <p>Найдите ответ по этапу работы. Как подготовить прайс, выбрать товар при неполной заявке, проверить PDF или продлить тариф для команды.</p>
           <div className="public-hero-cta">
             <a className="button button-primary" href="/demo">Попробовать демо <ArrowRight size={18} aria-hidden="true"/></a>
@@ -100,13 +100,13 @@ export function FaqPage() {
       </section>
 
       <section className="faq-help-cta public-section">
-        <div className="faq-help-copy"><img src={designAssets.icon.faq} width={64} height={64} alt="" loading="lazy"/><div><h2>Не нашли ответ на свой вопрос?</h2>
+        <div className="faq-help-copy"><img src={designAssets.icon.faq} width={64} height={64} alt="" loading="lazy"/><div><h2>Поддержка KPDesk</h2>
           <p>Напишите на <a href="mailto:support@kpdesk.ru">support@kpdesk.ru</a> и расскажите, на каком шаге нужна помощь.</p>
         </div></div>
         <a href="mailto:support@kpdesk.ru" className="button button-primary">Связаться с поддержкой <ArrowRight size={18} aria-hidden="true"/></a>
       </section>
       <section className="public-section faq-resources">
-        <h2>С чего начать</h2>
+        <h2>Инструкция, демо и возможности KPDesk</h2>
         <div className="faq-resource-grid">
           {[
             { title: 'Как создать КП', text: 'Прайс, разбор заявки, подбор и генерация текста', href: '/how-it-works', icon: designAssets.icon.documentInfo },
@@ -119,7 +119,7 @@ export function FaqPage() {
           </a>)}
         </div>
       </section>
-      <MarketingCta title="Переходите к своему первому КП"
+      <MarketingCta title="Подготовьте КП по своему прайсу"
         description="Добавьте прайс и заявку клиента, проверьте подбор и подготовьте предложение в PDF."/>
     </main>
     <PublicFooter />

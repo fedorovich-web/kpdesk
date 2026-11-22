@@ -5,8 +5,8 @@ import { PublicHome } from './PublicHome';
 describe('public landing for B2B suppliers', () => {
   it('places complete pricing and expanded FAQ in separate consecutive sections', () => {
     render(<PublicHome />);
-    const pricing = screen.getByRole('region', { name: 'Тарифы для вашей команды' });
-    const faq = screen.getByRole('region', { name: 'Вопросы о работе с KPDesk' });
+    const pricing = screen.getByRole('region', { name: 'Тарифы на 30 дней для вашей команды' });
+    const faq = screen.getByRole('region', { name: 'Частые вопросы о прайсах и подготовке КП' });
     expect(pricing.parentElement).toBe(faq.parentElement);
     expect(pricing.nextElementSibling).toBe(faq);
     expect(within(pricing).getAllByRole('article')).toHaveLength(3);
@@ -20,13 +20,13 @@ describe('public landing for B2B suppliers', () => {
     render(<PublicHome />);
     expect(screen.getAllByRole('heading', { level: 1 })).toHaveLength(1);
     expect(screen.getByRole('heading', { level: 1 }))
-      .toHaveTextContent('Коммерческие предложения по заявке и вашему прайсу');
-    expect(within(screen.getByRole('region', { name: 'Коммерческие предложения по заявке и вашему прайсу' }))
+      .toHaveTextContent('ИИ-генератор КП по заявке и прайсу');
+    expect(within(screen.getByRole('region', { name: 'ИИ-генератор КП по заявке и прайсу' }))
       .getByText(/Вставьте заявку клиента и загрузите прайс/))
       .toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: 'От требований клиента до готового PDF' }))
+    expect(screen.getByRole('heading', { name: 'Разбор заявки, подбор товаров и расчёт КП' }))
       .toBeInTheDocument();
-    expect(screen.getByText(/Тарифы для вашей команды/))
+    expect(screen.getByText(/Тарифы на 30 дней для вашей команды/))
       .toBeInTheDocument();
     for (const price of ['299 ₽', '499 ₽', '990 ₽']) expect(screen.getByText(price)).toBeInTheDocument();
   });
@@ -46,7 +46,7 @@ describe('public landing for B2B suppliers', () => {
     expect(screen.getByRole('heading', { name: 'Генерация текста КП' })).toBeInTheDocument();
     expect(screen.queryByText(/Для своих прайсов, генерации текста и сохранения КП нужен настроенный кабинет компании/))
       .not.toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: 'Подготовьте КП для своего клиента' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Соберите КП по своей заявке' })).toBeInTheDocument();
     for (const link of screen.getAllByRole('link', { name: 'Открыть кабинет' })) {
       expect(link).toHaveAttribute('href', '/app');
     }

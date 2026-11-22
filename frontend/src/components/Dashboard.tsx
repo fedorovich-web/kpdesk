@@ -19,7 +19,7 @@ export function Dashboard({ catalog, draft, connectionError, onNavigate, isDemo 
   return <>
     <section className="welcome" aria-labelledby="dashboard-title">
       <div className="welcome-copy">
-        <h1 id="dashboard-title">Подготовьте предложение клиенту</h1>
+        <h1 id="dashboard-title">{isDemo ? 'Демо KPDesk — от заявки до КП' : 'Подготовьте предложение клиенту'}</h1>
         <p>{isDemo ? 'Познакомьтесь с подготовкой КП: откройте учебный прайс, проверьте заявку и посмотрите документ.' : 'Загрузите прайс, добавьте заявку клиента и проверьте товары для коммерческого предложения.'}</p>
         <p>{isDemo ? 'Учебная работа хранится в этой вкладке и сбрасывается после обновления страницы.' : 'Продолжите работу с текущим прайсом и черновиком. Сохранённые КП можно открыть в личном кабинете.'}</p>
       </div>

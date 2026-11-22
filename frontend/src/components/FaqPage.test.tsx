@@ -50,7 +50,7 @@ describe('public FAQ screen', () => {
     document.head.innerHTML = '<meta name="description"><meta name="robots">';
     render(<FaqPage />);
     expect(screen.getByRole('heading', { level: 1 }))
-      .toHaveTextContent('Вопросы о прайсах, подготовке КП и оплате');
+      .toHaveTextContent('Справка KPDesk по подготовке КП');
     expect(screen.getByRole('button', { name: 'Все вопросы' }))
       .toHaveAttribute('aria-pressed', 'true');
     expect(screen.getByRole('heading', { name: 'Тарифы и оплата' })).toBeInTheDocument();

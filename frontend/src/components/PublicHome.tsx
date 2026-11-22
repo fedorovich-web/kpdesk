@@ -48,7 +48,7 @@ export function PublicHome() {
       </section>
 
       <section className="public-advantages" aria-label="Подготовка коммерческого предложения">
-        <h2 className="sr-only">Преимущества KPDesk</h2>
+        <h2 className="sr-only">Что получает отдел продаж</h2>
         {advantages.map(({ icon, title, text }) =>
           <article className="public-advantage" key={title}>
             <span className="public-icon"><img src={icon} srcSet={publicIconSrcSet(icon)} sizes="48px" alt="" width={48} height={48} loading="lazy"/></span>
@@ -74,7 +74,7 @@ export function PublicHome() {
       </section>
 
       <section className="public-section public-how-section" id="how">
-        <h2>Как создать первое КП</h2>
+        <h2>Как собрать первое КП</h2>
         <ol className="public-step-grid">
           {steps.map(({title,body}, index) =>
             <li className="public-step" key={title}>
@@ -90,7 +90,7 @@ export function PublicHome() {
       </section>
 
       <section className="public-section" id="integrations">
-        <h2>Загрузите прайс для подбора и расчёта КП</h2>
+        <h2>Прайсы Excel, CSV и выгрузки из 1С</h2>
         <p className="public-section-lead">Названия, характеристики и цены берутся из вашего каталога. Загрузите CSV или Excel (.xlsx) в формате KPDesk; для данных из 1С или CRM подготовьте совместимую выгрузку. Используйте каталог в следующих предложениях и обновляйте его при смене цен.</p>
         <div className="public-integration-grid">
           {[
@@ -108,20 +108,20 @@ export function PublicHome() {
       </section>
 
       <section className="public-section public-pricing-section" id="pricing" aria-labelledby="home-pricing-title">
-        <h2 id="home-pricing-title">Тарифы для вашей команды</h2>
+        <h2 id="home-pricing-title">Тарифы на 30 дней для вашей команды</h2>
         <p>От {rubles(launchPlans[0].priceRub)} за 30 дней для всей организации. <a href="/pricing">Сравнить тарифы</a>.</p>
         <PublicPricingCards />
       </section>
 
       <section className="public-section public-faq-section" id="faq" aria-labelledby="home-faq-title">
-        <h2 id="home-faq-title">Вопросы о работе с KPDesk</h2>
+        <h2 id="home-faq-title">Частые вопросы о прайсах и подготовке КП</h2>
         <p className="public-section-lead">Как подготовить прайс, проверить подбор и текст ИИ, утвердить предложение и скачать PDF.</p>
         <FaqAccordion items={homeFaqs} className="public-faq-list" itemClassName="public-faq-item" />
         <p className="public-faq-more"><a href="/faq" className="public-faq-more-link">Все вопросы и ответы</a></p>
       </section>
 
       <section className="public-end-cta">
-        <div><h2>Подготовьте КП для своего клиента</h2>
+        <div><h2>Соберите КП по своей заявке</h2>
           <p>Загрузите прайс и заявку, проверьте товары и суммы — сохраните предложение в PDF.</p></div>
         <div className="marketing-cta-next"><div className="marketing-cta-actions">
           <a href="/app" className="button button-white">Открыть кабинет <ArrowRight size={18} aria-hidden="true"/></a>

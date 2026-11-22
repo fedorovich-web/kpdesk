@@ -7,7 +7,7 @@ import { PricingPage } from './PricingPage';
 describe('public marketing regressions', () => {
   it('reuses the homepage FAQ cards on pricing without forcing scroll', () => {
     render(<PricingPage />);
-    const heading = screen.getByRole('heading', { name: 'Вопросы о стоимости' });
+    const heading = screen.getByRole('heading', { name: 'Оплата, лимиты и продление тарифа' });
     const section = heading.closest('section');
     expect(section).toHaveClass('marketing-price-faq');
     const list = section?.querySelector('.public-faq-list');
@@ -33,7 +33,7 @@ describe('public marketing regressions', () => {
 
   it('requests integrated artwork early and uses smaller responsive variants', () => {
     render(<IntegrationsPage />);
-    const heading = screen.getByRole('heading', { name: 'Что должно быть в прайсе' });
+    const heading = screen.getByRole('heading', { name: 'Четыре обязательных столбца прайса' });
     const section = heading.closest('section');
     expect(section).toHaveClass('marketing-api-section');
     const grid = section?.querySelector('.marketing-api-grid');

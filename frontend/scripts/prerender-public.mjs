@@ -36,6 +36,7 @@ try {
   const manifest = JSON.parse(await readFile(join(dist, '.vite/manifest.json'), 'utf8'));
   const appBundle = manifest['index.html']?.file;
   const liteBundle = manifest['src/public-lite.ts']?.file;
+  const demoStyles = manifest['src/App.tsx']?.css;
   if (typeof appBundle !== 'string' || typeof liteBundle !== 'string'
     || !/^assets\/[A-Za-z0-9_-]+\.js$/.test(appBundle)
     || !/^assets\/[A-Za-z0-9_-]+\.js$/.test(liteBundle)
@@ -44,6 +45,11 @@ try {
   }
   const lightweightHomeTemplate = template.replace('src="/' + appBundle + '"',
     'src="/' + liteBundle + '"');
+  if (!demoStyles?.length || !demoStyles.every(file => /^assets\/[A-Za-z0-9_-]+\.css$/.test(file))) {
+    throw new Error('Vite did not emit the demo layout styles.');
+  }
+  const demoTemplate = template.replace('</head>', demoStyles
+    .map(file => '<link rel="stylesheet" crossorigin href="/' + file + '">').join('\n') + '\n</head>');
   for (const route of routes) {
     const module = await vite.ssrLoadModule(route.module);
     const Component = module[route.exportName];
@@ -59,7 +65,8 @@ try {
     const robots = route.seo === 'privacy' ? 'noindex,follow' : 'index,follow';
     // The homepage has only links, native FAQ details and a mobile menu.
     // Use its dedicated lightweight enhancement instead of loading React DOM.
-    let html = route.path === '/' ? lightweightHomeTemplate : template;
+    let html = route.path === '/' ? lightweightHomeTemplate
+      : route.path === '/demo' ? demoTemplate : template;
     html = changeTag(html, /<title>[^<]*<\/title>/, '<title>' + escapeHtml(item.title) + '</title>', 'title');
     html = changeTag(html, /<meta name="description"[^>]*\/>/,
       '<meta name="description" content="' + escapeHtml(item.description) + '"/>', 'description');

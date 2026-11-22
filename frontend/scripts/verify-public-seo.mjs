@@ -45,7 +45,12 @@ assert.ok(home.includes('src="/' + homeEntry + '"'), 'homepage must use lightwei
 assert.ok(!home.includes('src="/' + reactEntry + '"'), 'homepage must not load React');
 assert.ok((await readFile(join(dist, 'pricing/index.html'), 'utf8')).includes('src="/' + reactEntry + '"'),
   'interactive pricing FAQ must keep React hydration');
-assert.match(home, /Коммерческие предложения по заявке и вашему прайсу/);
+const demo = await readFile(join(dist, 'demo/index.html'), 'utf8');
+for (const file of manifest['src/App.tsx'].css) {
+  assert.ok(demo.includes('href="/' + file + '"'), 'demo SSR needs workspace styles before hydration');
+  assert.ok(!home.includes('href="/' + file + '"'), 'homepage must not load workspace styles');
+}
+assert.match(home, /<h1[^>]*>ИИ-генератор КП по заявке и прайсу<\/h1>/);
 assert.match(home, /Генерация текста КП/);
 const features = await readFile(join(dist, 'features', 'index.html'), 'utf8');
 assert.match(features, /ИИ пишет текст КП/);

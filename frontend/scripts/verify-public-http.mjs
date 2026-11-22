@@ -2,15 +2,15 @@ import assert from 'node:assert/strict';
 
 const origin = process.env.KPDESK_SMOKE_ORIGIN ?? 'http://127.0.0.1:4179';
 const pageCases = [
-  ['/', 'Коммерческие предложения по заявке и вашему прайсу', true],
-  ['/features', 'Подбор товаров, расчёт и оформление КП', true],
-  ['/features/', 'Подбор товаров, расчёт и оформление КП', true],
-  ['/how-it-works', 'Как создать КП из заявки и прайса', true],
-  ['/integrations', 'Как загрузить прайс для подбора и расчёта КП', true],
-  ['/pricing', 'Тарифы KPDesk', true],
-  ['/demo', 'Подготовьте предложение клиенту', true],
-  ['/faq', 'Вопросы о прайсах, подготовке КП и оплате', true],
-  ['/faq/', 'Вопросы о прайсах, подготовке КП и оплате', true],
+  ['/', 'ИИ-генератор КП по заявке и прайсу', true],
+  ['/features', 'ИИ для разбора заявок и подготовки КП', true],
+  ['/features/', 'ИИ для разбора заявок и подготовки КП', true],
+  ['/how-it-works', 'Как собрать КП из заявки и прайса', true],
+  ['/integrations', 'Импорт прайсов Excel и CSV для расчёта КП', true],
+  ['/pricing', 'Тарифы KPDesk на 30 дней', true],
+  ['/demo', 'Демо KPDesk — от заявки до КП', true],
+  ['/faq', 'Справка KPDesk по подготовке КП', true],
+  ['/faq/', 'Справка KPDesk по подготовке КП', true],
   ['/privacy', 'Политика конфиденциальности', false],
 ];
 const titleOf = html => /<title>([^<]+)<\/title>/.exec(html)?.[1];

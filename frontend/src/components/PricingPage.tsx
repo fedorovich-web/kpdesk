@@ -27,18 +27,18 @@ export function PricingPage() {
   useEffect(() => applyDocumentSeo('pricing'), []);
   return <MarketingPage modifier="pricing-page">
     <MarketingHero
-      title="Тарифы KPDesk"
+      title="Тарифы KPDesk на 30 дней"
       description={`От ${rubles(launchPlans[0].priceRub)} за 30 дней для всей организации. Выберите тариф по размеру команды, каталога и числу новых КП. Оплата разовая, без автосписаний.`}
       image={designAssets.pricingHero}
       imageAlt="Иллюстрация работы с коммерческими предложениями"
       anchor="#pricing-plans" secondaryLabel="Сравнить тарифы"
       highlights={['Цена за организацию', 'Без автосписаний', 'Демо без регистрации']}
     />
-    <MarketingSection id="pricing-plans" heading="Выберите тариф для своей команды" modifier="pricing-plans-section">
+    <MarketingSection id="pricing-plans" heading="Три тарифа для команд разного размера" modifier="pricing-plans-section">
       <p className="pricing-lead">Проверьте, сколько сотрудников будут готовить КП и сколько товаров в вашем прайсе. Для разбора заявок и генерации текста действует отдельный лимит ИИ.</p>
       <PublicPricingCards/>
     </MarketingSection>
-    <MarketingSection heading="Сравнение тарифов" modifier="pricing-comparison-section">
+    <MarketingSection heading="Сравните лимиты сотрудников, товаров и КП" modifier="pricing-comparison-section">
       <p className="pricing-table-hint" id="pricing-table-help">Лимиты указаны для всей организации. На узком экране прокрутите таблицу вправо.</p>
       <section className="pricing-table-scroll" aria-label="Таблица условий тарифов" aria-describedby="pricing-table-help" tabIndex={0}>
         <table className="pricing-table" aria-label="Сравнение тарифов KPDesk">
@@ -58,10 +58,10 @@ export function PricingPage() {
         </article>)}
       </div>
     </MarketingSection>
-    <MarketingSection heading="Вопросы о стоимости" modifier="marketing-price-faq">
+    <MarketingSection heading="Оплата, лимиты и продление тарифа" modifier="marketing-price-faq">
       <FaqAccordion items={pricingFaqs} className="public-faq-list" itemClassName="public-faq-item" />
     </MarketingSection>
-    <MarketingCta title="Откройте тарифы своей организации"
+    <MarketingCta title="Выберите тариф в кабинете компании"
       description="В кабинете видны срок доступа, использование лимитов и история оплаты. Руководитель компании может выбрать или продлить тариф."/>
   </MarketingPage>;
 }

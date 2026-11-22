@@ -19,11 +19,7 @@ function fixture() {
       </nav>
       <button type="button" class="mobile-menu-toggle" aria-label="Открыть меню"
         aria-controls="_R_2_" aria-expanded="false">Меню</button>
-    </header>
-    <div class="public-faq-list">
-      <details><summary>Первый вопрос</summary><p>Первый ответ</p></details>
-      <details><summary>Второй вопрос</summary><p>Второй ответ</p></details>
-    </div></div>`;
+    </header></div>`;
   enhancePublicHome();
 }
 
@@ -47,19 +43,6 @@ describe('prerendered homepage progressive enhancement', () => {
     await waitFor(() => expect(request).toHaveBeenCalledOnce());
     expect(document.querySelector('.public-header-actions a')).toHaveAttribute('href', '/auth/login');
     expect(document.querySelector('.mobile-drawer-links a[href="/auth/login"]')).toHaveTextContent('Войти');
-  });
-
-  it('makes FAQ a native exclusive group without React or forced scrolling', () => {
-    fixture();
-    const details = document.querySelectorAll<HTMLDetailsElement>('.public-faq-list details');
-    expect(details).toHaveLength(2);
-    expect(details[0]).toHaveAttribute('name', 'kpdesk-home-faq');
-    expect(details[1]).toHaveAttribute('name', 'kpdesk-home-faq');
-    const summary = details[0]!.querySelector('summary')!;
-    fireEvent.click(summary);
-    expect(details[0]).toHaveAttribute('open');
-    fireEvent.click(summary);
-    expect(details[0]).not.toHaveAttribute('open');
   });
 
   it('preserves the menu semantics, locks scrolling and closes on Escape', () => {

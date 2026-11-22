@@ -59,7 +59,7 @@ export function PricingPage() {
       </div>
     </MarketingSection>
     <MarketingSection heading="Оплата, лимиты и продление тарифа" modifier="marketing-price-faq">
-      <FaqAccordion items={pricingFaqs} className="public-faq-list" itemClassName="public-faq-item" />
+      <FaqAccordion items={pricingFaqs} name="kpdesk-pricing-faq" className="public-faq-list" itemClassName="public-faq-item" />
     </MarketingSection>
     <MarketingCta title="Выберите тариф в кабинете компании"
       description="В кабинете видны срок доступа, использование лимитов и история оплаты. Руководитель компании может выбрать или продлить тариф."/>

@@ -36,6 +36,12 @@ assert.match(faq, /Что делать, если сервис не подобр�
 assert.match(faq, /Оно не вызывает внешний ИИ/);
 assert.match(faq, /Если в карточке КП доступен раздел «Ссылка для клиента»/);
 const home = await readFile(join(dist, 'index.html'), 'utf8');
+const pricing = await readFile(join(dist, 'pricing/index.html'), 'utf8');
+for (const [html, name] of [[home, 'kpdesk-home-faq'], [pricing, 'kpdesk-pricing-faq'], [faq, 'kpdesk-help-faq']]) {
+  const questions = html.match(/<details\b[^>]*>/g) ?? [];
+  assert.ok(questions.length > 1 && questions.every(tag => tag.includes('name="' + name + '"')),
+    name + ' must be exclusive in initial HTML');
+}
 const manifest = JSON.parse(await readFile(join(dist, '.vite/manifest.json'), 'utf8'));
 const homeEntry = manifest['src/public-lite.ts']?.file;
 const reactEntry = manifest['index.html']?.file;
@@ -43,7 +49,7 @@ assert.ok(typeof homeEntry === 'string' && typeof reactEntry === 'string',
   'Vite must emit both lightweight public and React application entrypoints');
 assert.ok(home.includes('src="/' + homeEntry + '"'), 'homepage must use lightweight entrypoint');
 assert.ok(!home.includes('src="/' + reactEntry + '"'), 'homepage must not load React');
-assert.ok((await readFile(join(dist, 'pricing/index.html'), 'utf8')).includes('src="/' + reactEntry + '"'),
+assert.ok(pricing.includes('src="/' + reactEntry + '"'),
   'interactive pricing FAQ must keep React hydration');
 const demo = await readFile(join(dist, 'demo/index.html'), 'utf8');
 for (const file of manifest['src/App.tsx'].css) {

@@ -37,6 +37,7 @@ describe('public landing for B2B suppliers', () => {
     expect(summary.tagName).toBe('SUMMARY');
     const container = summary.closest('details');
     expect(container).not.toBeNull();
+    expect(container).toHaveAttribute('name', 'kpdesk-home-faq');
     expect(container).toHaveTextContent(/Проверьте требования, которые выделил ИИ/);
     expect(container).toHaveTextContent(/утвердите КП/);
   });

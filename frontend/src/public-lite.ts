@@ -3,15 +3,10 @@ import { hasActivePublicSession } from './public-session';
 /**
  * Minimal progressive enhancement for the prerendered homepage.
  * The SEO copy, links and FAQ answers are already complete HTML. Only the
- * mobile drawer, exclusive accordion and authenticated header links need a small amount of client JS.
+ * mobile drawer and authenticated header links need a small amount of client JS.
  * All private, demo and search-enabled FAQ routes retain React hydration.
  */
 export function enhancePublicHome(doc: Document = document): void {
-  const questions = Array.from(doc.querySelectorAll<HTMLDetailsElement>('.public-faq-list details'));
-  // Native exclusive <details> is supported by modern browsers and preserves
-  // keyboard operation without any forced scrollBy/scrollIntoView calls.
-  for (const question of questions) question.setAttribute('name', 'kpdesk-home-faq');
-
   const trigger = doc.querySelector<HTMLButtonElement>('.public-header .mobile-menu-toggle');
   const logo = doc.querySelector<HTMLImageElement>('.public-header .public-logo img');
   const nav = doc.querySelector<HTMLElement>('.public-header .public-nav');

@@ -5,15 +5,13 @@ import { faqGroups } from '../content/faq';
 import { applyDocumentSeo } from '../seo';
 import { PublicFooter, PublicHeader } from './PublicChrome';
 import { MarketingCta } from './MarketingShared';
-import { FaqItem, useFaqAccordion } from './FaqAccordion';
+import { FaqItem } from './FaqAccordion';
 
 export function FaqPage() {
   const [search, setSearch] = useState('');
   const [submittedSearch, setSubmittedSearch] = useState('');
   const [category, setCategory] = useState('all');
   const [expandedGroups, setExpandedGroups] = useState<string[]>([]);
-  const accordion = useFaqAccordion();
-
   useEffect(() => applyDocumentSeo('faq'), []);
 
   const results = useMemo(() => faqGroups
@@ -86,7 +84,7 @@ export function FaqPage() {
               </button>
             </div>
             <div className="faq-questions" id={'faq-group-' + group.id}>
-              {group.items.map((item, index) => <FaqItem key={item.q} item={item} accordion={accordion}
+              {group.items.map((item, index) => <FaqItem key={item.q} item={item} name="kpdesk-help-faq"
                 hidden={index >= 3 && !submittedSearch && category === 'all' && !expandedGroups.includes(group.id)}/>)}
             </div>
           </section>)}

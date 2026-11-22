@@ -116,7 +116,7 @@ export function PublicHome() {
       <section className="public-section public-faq-section" id="faq" aria-labelledby="home-faq-title">
         <h2 id="home-faq-title">Частые вопросы о прайсах и подготовке КП</h2>
         <p className="public-section-lead">Как подготовить прайс, проверить подбор и текст ИИ, утвердить предложение и скачать PDF.</p>
-        <FaqAccordion items={homeFaqs} className="public-faq-list" itemClassName="public-faq-item" />
+        <FaqAccordion items={homeFaqs} name="kpdesk-home-faq" className="public-faq-list" itemClassName="public-faq-item" />
         <p className="public-faq-more"><a href="/faq" className="public-faq-more-link">Все вопросы и ответы</a></p>
       </section>
 

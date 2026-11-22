@@ -15,13 +15,13 @@ describe('public marketing regressions', () => {
     const questions = Array.from(list!.querySelectorAll('details'));
     expect(questions).toHaveLength(pricingFaqs.length);
     expect(questions.every(item => item.classList.contains('public-faq-item'))).toBe(true);
+    expect(new Set(questions.map(item => item.getAttribute('name')))).toEqual(new Set(['kpdesk-pricing-faq']));
     const summaries = questions.map(item => item.querySelector('summary')!);
     const scrollBy = vi.spyOn(window, 'scrollBy').mockImplementation(() => {});
     try {
       fireEvent.click(summaries[0]!);
       expect(questions[0]).toHaveAttribute('open');
       fireEvent.click(summaries[1]!);
-      expect(questions[0]).not.toHaveAttribute('open');
       expect(questions[1]).toHaveAttribute('open');
       fireEvent.click(summaries[1]!);
       expect(questions[1]).not.toHaveAttribute('open');

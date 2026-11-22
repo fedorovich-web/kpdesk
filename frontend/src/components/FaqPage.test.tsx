@@ -12,21 +12,19 @@ describe('public FAQ screen', () => {
     const firstAnswer = firstDetails.querySelector('p')!;
     const nextAnswer = nextDetails.querySelector('p')!;
 
-    expect(firstAnswer).not.toBeVisible();
-    fireEvent.click(first);
-    expect(firstAnswer).toBeVisible();
-    fireEvent.click(next);
-    expect(nextAnswer).toBeVisible();
-    expect(firstAnswer).not.toBeVisible();
-    expect(document.querySelectorAll('.faq-questions details[open]')).toHaveLength(1);
-    fireEvent.click(next);
-    expect(nextAnswer).not.toBeVisible();
-    fireEvent.click(first);
-    expect(firstAnswer).toBeVisible();
-    expect(nextAnswer).not.toBeVisible();
+    const groups = new Set(Array.from(document.querySelectorAll('.faq-questions details'),
+      item => item.getAttribute('name')));
+    expect(groups).toEqual(new Set(['kpdesk-help-faq']));
+    for (const [question, answer] of [[first, firstAnswer], [next, nextAnswer]] as const) {
+      expect(answer).not.toBeVisible();
+      fireEvent.click(question);
+      expect(answer).toBeVisible();
+      fireEvent.click(question);
+      expect(answer).not.toBeVisible();
+    }
   });
 
-  it('does not force page scrolling while switching open answers', () => {
+  it('does not force page scrolling when an answer opens or closes', () => {
     render(<FaqPage />);
     const first = screen.getByText('Как создать коммерческое предложение по заявке?');
     const next = screen.getByText('Как скачать коммерческое предложение в PDF?');
@@ -34,9 +32,10 @@ describe('public FAQ screen', () => {
     try {
       fireEvent.click(first);
       expect(first.closest('details')).toHaveAttribute('open');
+      fireEvent.click(first);
+      expect(first.closest('details')).not.toHaveAttribute('open');
       fireEvent.click(next);
       expect(next.closest('details')).toHaveAttribute('open');
-      expect(first.closest('details')).not.toHaveAttribute('open');
       fireEvent.click(next);
       expect(next.closest('details')).not.toHaveAttribute('open');
       expect(scroll).not.toHaveBeenCalled();

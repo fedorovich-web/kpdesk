@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 import { FeaturesPage } from './FeaturesPage';
 import { HowItWorksPage } from './HowItWorksPage';
@@ -15,18 +15,18 @@ function setupHead() {
 }
 
 describe('public feature and pricing pages', () => {
-  it('separates verified features from integration and ML work in progress', () => {
+  it('describes supported features and links to the relevant public instructions', () => {
     setupHead();
     render(<FeaturesPage />);
     expect(screen.getAllByRole('heading', { level: 1 })).toHaveLength(1);
-    expect(document.title).toMatch(/Автоматический подбор товаров и ИИ-генерация текста КП/);
-    expect(screen.getByRole('heading', { name: 'Что KPDesk берёт на себя при подготовке КП' })).toBeInTheDocument();
+    expect(document.title).toBe('Подбор товаров, расчёт и оформление КП — KPDesk');
+    expect(screen.getByRole('heading', { name: 'Что можно сделать в KPDesk' })).toBeInTheDocument();
     expect(screen.getByText(/Добавьте сотрудников и назначьте им права на работу с прайсами/)).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'ИИ пишет текст КП' })).toBeInTheDocument();
     expect(screen.getByText(/KPDesk предложит позиции из каталога по требованиям заявки/)).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Добавить заявку' })).toHaveAttribute('href', '/app#workspace-request');
-    expect(screen.getByRole('link', { name: 'Загрузить прайс' })).toHaveAttribute('href', '/app#workspace-catalog');
-    expect(screen.getByRole('link', { name: 'Открыть свои КП' })).toHaveAttribute('href', '/app#workspace-quotes');
+    expect(screen.getByRole('link', { name: 'Посмотреть этапы работы' })).toHaveAttribute('href', '/how-it-works#process');
+    expect(screen.getByRole('link', { name: 'Что должно быть в прайсе' })).toHaveAttribute('href', '/integrations#api');
+    expect(screen.getByRole('link', { name: 'Попробовать подбор' })).toHaveAttribute('href', '/demo');
     expect(screen.queryByText('В разработке')).not.toBeInTheDocument();
   });
   it('shows actual five steps rather than unverified automatic delivery', () => {
@@ -38,28 +38,36 @@ describe('public feature and pricing pages', () => {
     expect(screen.getByText(/KPDesk предложит товары из каталога. Сравните их с заявкой клиента и подтвердите выбор/)).toBeInTheDocument();
     expect(screen.getByText(/ИИ подготовит текст по этим данным и выбранным товарам/)).toBeInTheDocument();
   });
-  it('keeps connected formats and CRM plans clearly distinguishable', () => {
+  it('describes 1С and CRM as file imports and lists required catalog columns', () => {
     setupHead();
     render(<IntegrationsPage />);
     expect(screen.getAllByRole('heading', { level: 1 })).toHaveLength(1);
     expect(screen.getByText(/Подготовьте названия, артикулы, единицы, цены и характеристики в столбцах прайса KPDesk/))
       .toBeInTheDocument();
     expect(screen.getByText('Импорт файла')).toBeInTheDocument();
-    expect(screen.getByText(/прямая синхронизация с этими системами пока не подключена/))
+    for (const heading of ['Товары из Битрикс24', 'Товары из amoCRM']) {
+      const card = screen.getByRole('heading', { name: heading }).closest('article')!;
+      expect(within(card).getByText('Через CSV или XLSX')).toBeInTheDocument();
+    }
+    expect(screen.getByText(/sku, name, price_rub и sale_unit/))
       .toBeInTheDocument();
     expect(screen.queryByText(/Service Account|сервисный аккаунт|Контрактные тесты адаптеров/))
       .not.toBeInTheDocument();
-    expect(document.title).toMatch(/выгрузки из 1С/);
+    expect(document.head.querySelector('meta[name="description"]')).toHaveAttribute('content', expect.stringContaining('выгрузку из 1С'));
     expect(document.title).not.toMatch(/интеграции с 1С/);
   });
-  it('shows the authorized launch prices and comparison without pretending checkout is connected', () => {
+  it('shows the 30-day prices, comparison and payment instructions for the organization', () => {
     setupHead();
     render(<PricingPage />);
     expect(screen.getAllByRole('heading', { level: 1 })).toHaveLength(1);
     expect(screen.getByRole('heading', { name: 'Выберите тариф для своей команды' }))
       .toBeInTheDocument();
     for (const price of ['299 ₽', '499 ₽', '990 ₽']) expect(screen.getAllByText(price).length).toBeGreaterThan(0);
-    expect(screen.getByRole('table', { name: 'Сравнение планируемых тарифов KPDesk' })).toBeInTheDocument();
+    expect(screen.getByRole('table', { name: 'Сравнение тарифов KPDesk' })).toBeInTheDocument();
+    expect(screen.getByText(/оплачивает счёт через Lava.top. Оплата разовая, без автосписаний/)).toBeInTheDocument();
+    for (const link of screen.getAllByRole('link', { name: 'Выбрать в кабинете' })) {
+      expect(link).toHaveAttribute('href', '/app');
+    }
     expect(screen.queryByRole('button', { name: /ежемесячно|ежегодно|оплатить/i }))
       .not.toBeInTheDocument();
     expect(screen.queryByText(/Планируемые условия запуска|Приём оплаты и включение тарифов готовятся/i))

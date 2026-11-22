@@ -50,7 +50,7 @@ describe('public FAQ screen', () => {
     document.head.innerHTML = '<meta name="description"><meta name="robots">';
     render(<FaqPage />);
     expect(screen.getByRole('heading', { level: 1 }))
-      .toHaveTextContent('Вопросы и ответы о KPDesk');
+      .toHaveTextContent('Вопросы о прайсах, подготовке КП и оплате');
     expect(screen.getByRole('button', { name: 'Все вопросы' }))
       .toHaveAttribute('aria-pressed', 'true');
     expect(screen.getByRole('heading', { name: 'Тарифы и оплата' })).toBeInTheDocument();
@@ -79,7 +79,7 @@ describe('public FAQ screen', () => {
     expect(screen.getByText(/«Отозвать ссылку»/)).toBeInTheDocument();
     expect(screen.getByText(/Отправка писем из KPDesk и аналитика просмотров в кабинете не подключены/))
       .toBeInTheDocument();
-    for (const link of screen.getAllByRole('link', { name: 'Посмотреть демо' })) {
+    for (const link of screen.getAllByRole('link', { name: 'Попробовать демо' })) {
       expect(link).toHaveAttribute('href', '/demo');
     }
   });

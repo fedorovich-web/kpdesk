@@ -33,10 +33,10 @@ export function FaqPage() {
     <main>
       <section className="faq-hero" aria-labelledby="faq-title">
         <div>
-          <h1 id="faq-title">Вопросы и ответы о KPDesk</h1>
-          <p>Как загрузить прайс, получить подбор товаров и сгенерировать текст КП. Что проверить перед утверждением и скачиванием PDF. Здесь же — тарифы, доступ команды и обработка данных.</p>
+          <h1 id="faq-title">Вопросы о прайсах, подготовке КП и оплате</h1>
+          <p>Найдите ответ по этапу работы. Как подготовить прайс, выбрать товар при неполной заявке, проверить PDF или продлить тариф для команды.</p>
           <div className="public-hero-cta">
-            <a className="button button-primary" href="/demo">Посмотреть демо <ArrowRight size={18} aria-hidden="true"/></a>
+            <a className="button button-primary" href="/demo">Попробовать демо <ArrowRight size={18} aria-hidden="true"/></a>
             <a className="button button-white" href="#faq-search">Найти ответ</a>
           </div>
           <ul className="public-proof">

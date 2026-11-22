@@ -7,6 +7,8 @@ const dist = resolve(import.meta.dirname, '..', 'dist');
 const publicRoutes = [
   '/', '/features', '/how-it-works', '/integrations', '/pricing', '/faq', '/demo',
 ];
+const titles = new Set();
+const descriptions = new Set();
 for (const route of publicRoutes) {
   const file = route === '/' ? join(dist, 'index.html')
     : join(dist, route.slice(1), 'index.html');
@@ -19,7 +21,12 @@ for (const route of publicRoutes) {
     route + ' contains internal roadmap language');
   assert.ok(html.includes('href="https://kpdesk.ru' + route + '"'), route + ' canonical');
   assert.ok(html.includes('data-ssr-route="' + route + '"'), route + ' prerendered');
-  assert.ok(html.includes('<meta name="description" content="'), route + ' description');
+  const title = /<title>([^<]+)<\/title>/.exec(html)?.[1];
+  const description = /<meta name="description" content="([^"]+)"\/>/.exec(html)?.[1];
+  assert.ok(title && !titles.has(title), route + ' unique title');
+  assert.ok(description && !descriptions.has(description), route + ' unique description');
+  titles.add(title);
+  descriptions.add(description);
   assert.ok(html.includes('<meta property="og:description" content="'), route + ' og description');
 }
 const faq = await readFile(join(dist, 'faq', 'index.html'), 'utf8');
@@ -38,7 +45,7 @@ assert.ok(home.includes('src="/' + homeEntry + '"'), 'homepage must use lightwei
 assert.ok(!home.includes('src="/' + reactEntry + '"'), 'homepage must not load React');
 assert.ok((await readFile(join(dist, 'pricing/index.html'), 'utf8')).includes('src="/' + reactEntry + '"'),
   'interactive pricing FAQ must keep React hydration');
-assert.match(home, /ИИ-генератор коммерческих предложений с подбором товаров/);
+assert.match(home, /Коммерческие предложения по заявке и вашему прайсу/);
 assert.match(home, /Генерация текста КП/);
 const features = await readFile(join(dist, 'features', 'index.html'), 'utf8');
 assert.match(features, /ИИ пишет текст КП/);
@@ -50,7 +57,8 @@ for (const route of ['/', '/pricing']) {
   assert.deepEqual(prices, launchPlans.map(plan => rubles(plan.priceRub)), route + ' approved launch prices');
   assert.doesNotMatch(html, /Планируемые условия запуска|Приём оплаты и включение тарифов готовятся/);
   assert.doesNotMatch(html, /дешевле всех/iu);
-  assert.match(html, /Оплата пока не подключена/);
+  assert.match(html, /за 30 дней/);
+  assert.doesNotMatch(html, /Оплата пока не подключена|планируемая цена/);
 }
 
 for (const route of ['/app', '/app/quotes/review', '/auth/login', '/auth/register', '/admin']) {

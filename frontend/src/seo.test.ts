@@ -18,11 +18,11 @@ describe('verified B2B RFQ search metadata', () => {
     }
   });
   it('names the supplier task rather than unsupported performance claims', () => {
-    expect(publicSeo.title).toMatch(/ИИ-генератор коммерческих предложений с подбором товаров/);
-    expect(publicSeo.description).toMatch(/прайса/);
+    expect(publicSeo.title).toMatch(/ИИ-генератор коммерческих предложений из прайса/);
+    expect(publicSeo.description).toMatch(/прайс/);
     expect(publicSeo.description).toMatch(/скачайте PDF/);
     expect(publicSeo.description).not.toMatch(/запланирован|в разработке|следующий этап/i);
-    expect(publicSeo.h1).toMatch(/ИИ-генератор коммерческих предложений с подбором товаров/);
+    expect(publicSeo.h1).toMatch(/Коммерческие предложения по заявке и вашему прайсу/);
     expect(publicSeo.lead).toContain('прайс');
     expect(publicSeo.lead).toContain('заявку клиента');
     expect(publicSeo.description).not.toMatch(/гарант|конверси|в \d+ раз|99,\d+%/i);
@@ -43,14 +43,15 @@ describe('verified B2B RFQ search metadata', () => {
     expect(document.querySelector('link[rel="canonical"]')).toBeNull();
   });
   it('does not turn file imports or the browser demo into unsupported services', () => {
-    expect(metadata.integrations.title).toContain('выгрузки из 1С');
+    expect(metadata.integrations.description).toContain('выгрузку из 1С');
     expect(metadata.integrations.title).not.toMatch(/интеграции с 1С|API/);
     expect(metadata.demo.description).toContain('не вызывает внешний ИИ');
-    expect(publicSeo.description).toContain('Утвердите КП');
-    expect(publicSeo.lead).toContain('сгенерирует текст КП');
-    expect(metadata.features.description).toContain('ИИ разбирает заявку и генерирует текст КП');
-    expect(metadata.features.description).toContain('KPDesk предлагает товары из вашего прайса и считает стоимость');
-    expect(metadata.pricing.description).toContain('Оплата пока не подключена');
+    expect(publicSeo.description).toContain('проверьте сумму');
+    expect(publicSeo.lead).toContain('ИИ поможет разобрать требования');
+    expect(metadata.features.description).toContain('сравните варианты');
+    expect(metadata.features.description).toContain('текстом, подготовленным ИИ');
+    expect(metadata.pricing.description).toMatch(/299 ₽.*499 ₽.*990 ₽.*за 30 дней для организации/);
+    expect(metadata.pricing.description).not.toMatch(/пока не подключена|автопродлен/i);
   });
   it('keeps route titles and descriptions synchronized with Open Graph metadata', () => {
     document.head.innerHTML = '<meta name="description"><meta name="robots"><meta property="og:title"><meta property="og:description">';

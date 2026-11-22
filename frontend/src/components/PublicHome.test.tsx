@@ -20,11 +20,11 @@ describe('public landing for B2B suppliers', () => {
     render(<PublicHome />);
     expect(screen.getAllByRole('heading', { level: 1 })).toHaveLength(1);
     expect(screen.getByRole('heading', { level: 1 }))
-      .toHaveTextContent('ИИ-генератор коммерческих предложений с подбором товаров');
-    expect(within(screen.getByRole('region', { name: 'ИИ-генератор коммерческих предложений с подбором товаров' }))
-      .getByText(/Загрузите прайс и добавьте заявку клиента/))
+      .toHaveTextContent('Коммерческие предложения по заявке и вашему прайсу');
+    expect(within(screen.getByRole('region', { name: 'Коммерческие предложения по заявке и вашему прайсу' }))
+      .getByText(/Вставьте заявку клиента и загрузите прайс/))
       .toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: 'От заявки до текста КП и расчёта стоимости' }))
+    expect(screen.getByRole('heading', { name: 'От требований клиента до готового PDF' }))
       .toBeInTheDocument();
     expect(screen.getByText(/Тарифы для вашей команды/))
       .toBeInTheDocument();
@@ -37,7 +37,7 @@ describe('public landing for B2B suppliers', () => {
     expect(summary.tagName).toBe('SUMMARY');
     const container = summary.closest('details');
     expect(container).not.toBeNull();
-    expect(container).toHaveTextContent(/Проверьте товары, текст и условия/);
+    expect(container).toHaveTextContent(/Проверьте требования, которые выделил ИИ/);
     expect(container).toHaveTextContent(/утвердите КП/);
   });
 
@@ -47,13 +47,13 @@ describe('public landing for B2B suppliers', () => {
     expect(screen.queryByText(/Для своих прайсов, генерации текста и сохранения КП нужен настроенный кабинет компании/))
       .not.toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Подготовьте КП для своего клиента' })).toBeInTheDocument();
-    for (const link of screen.getAllByRole('link', { name: 'Создать КП' })) {
+    for (const link of screen.getAllByRole('link', { name: 'Открыть кабинет' })) {
       expect(link).toHaveAttribute('href', '/app');
     }
-    for (const link of screen.getAllByRole('link', { name: 'Посмотреть демо' })) {
+    for (const link of screen.getAllByRole('link', { name: 'Попробовать демо' })) {
       expect(link).toHaveAttribute('href', '/demo');
     }
-    for (const link of screen.getAllByRole('link', { name: 'Начать работу' })) {
+    for (const link of screen.getAllByRole('link', { name: 'Выбрать в кабинете' })) {
       expect(link).toHaveAttribute('href', '/app');
     }
     expect(screen.queryByText('PDF-черновик КП')).not.toBeInTheDocument();

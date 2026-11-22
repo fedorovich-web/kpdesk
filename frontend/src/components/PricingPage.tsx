@@ -17,7 +17,7 @@ const included = [
 ] as const;
 const comparison = [
   { label: 'Сотрудники в организации', values: launchPlans.map(plan => String(plan.peopleLimit)) },
-  { label: 'Новые КП за месяц', values: launchPlans.map(plan => count(plan.newQuotes)) },
+  { label: 'Новые КП за 30 дней', values: launchPlans.map(plan => count(plan.newQuotes)) },
   { label: 'Товары в каталоге', values: launchPlans.map(plan => count(plan.catalogItems)) },
   ...['Прайс CSV/XLSX', 'Подбор товаров и расчёт', 'Реквизиты и логотип',
     'Варианты предложения и PDF', 'История и утверждение КП'].map(label => ({ label, values: null })),
@@ -28,20 +28,20 @@ export function PricingPage() {
   return <MarketingPage modifier="pricing-page">
     <MarketingHero
       title="Тарифы KPDesk"
-      description={`К запуску подписок — от ${rubles(launchPlans[0].priceRub)} в месяц за организацию. Подбор товаров, расчёт, генерация текста и PDF предусмотрены в каждом тарифе. Сравните число сотрудников, товаров и новых КП. Оплата пока не подключена.`}
+      description={`От ${rubles(launchPlans[0].priceRub)} за 30 дней для всей организации. Выберите тариф по размеру команды, каталога и числу новых КП. Оплата разовая, без автосписаний.`}
       image={designAssets.pricingHero}
       imageAlt="Иллюстрация работы с коммерческими предложениями"
       anchor="#pricing-plans" secondaryLabel="Сравнить тарифы"
-      highlights={['Цена за организацию', 'Основные функции в каждом тарифе', 'Демо без карты']}
+      highlights={['Цена за организацию', 'Без автосписаний', 'Демо без регистрации']}
     />
     <MarketingSection id="pricing-plans" heading="Выберите тариф для своей команды" modifier="pricing-plans-section">
-      <p className="pricing-lead">Оцените размер каталога, число сотрудников и сколько новых предложений команда готовит за месяц. Обращения к ИИ ограничены отдельно от числа новых КП.</p>
+      <p className="pricing-lead">Проверьте, сколько сотрудников будут готовить КП и сколько товаров в вашем прайсе. Для разбора заявок и генерации текста действует отдельный лимит ИИ.</p>
       <PublicPricingCards/>
     </MarketingSection>
     <MarketingSection heading="Сравнение тарифов" modifier="pricing-comparison-section">
-      <p className="pricing-table-hint" id="pricing-table-help">Лимиты ниже начнут применяться после запуска подписок. На узком экране таблицу можно прокрутить вправо.</p>
+      <p className="pricing-table-hint" id="pricing-table-help">Лимиты указаны для всей организации. На узком экране прокрутите таблицу вправо.</p>
       <section className="pricing-table-scroll" aria-label="Таблица условий тарифов" aria-describedby="pricing-table-help" tabIndex={0}>
-        <table className="pricing-table" aria-label="Сравнение планируемых тарифов KPDesk">
+        <table className="pricing-table" aria-label="Сравнение тарифов KPDesk">
           <thead><tr><th scope="col">Возможности</th>{launchPlans.map(plan => <th scope="col" key={plan.id}>{plan.name}</th>)}</tr></thead>
           <tbody>{comparison.map(row => <tr key={row.label}><th scope="row">{row.label}</th>
             {launchPlans.map((plan,index) => <td key={plan.id}>{row.values ? row.values[index]
@@ -61,7 +61,7 @@ export function PricingPage() {
     <MarketingSection heading="Вопросы о стоимости" modifier="marketing-price-faq">
       <FaqAccordion items={pricingFaqs} className="public-faq-list" itemClassName="public-faq-item" />
     </MarketingSection>
-    <MarketingCta title="Начните готовить КП в одном кабинете"
-      description="Соберите товары, расчёт и текст предложения в одном документе. Сохраните проверенное КП в PDF для клиента."/>
+    <MarketingCta title="Откройте тарифы своей организации"
+      description="В кабинете видны срок доступа, использование лимитов и история оплаты. Руководитель компании может выбрать или продлить тариф."/>
   </MarketingPage>;
 }

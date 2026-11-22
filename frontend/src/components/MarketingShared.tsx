@@ -19,7 +19,7 @@ export function MarketingHero({
       <h1>{title}</h1>
       <p>{description}</p>
       <div className="public-hero-cta">
-        <a href="/demo" className="button button-primary">Посмотреть демо <ArrowRight size={18} aria-hidden="true"/></a>
+        <a href="/demo" className="button button-primary">Попробовать демо <ArrowRight size={18} aria-hidden="true"/></a>
         <a href={anchor} className="button button-white">{secondaryLabel}</a>
       </div>
       <ul className="public-proof">{highlights.map((item) => <li key={item}>
@@ -33,8 +33,8 @@ export function MarketingCta({ title, description }: { title: string; descriptio
   return <section className="marketing-cta" aria-label="Работа с KPDesk">
     <div><h2>{title}</h2><p>{description}</p></div>
     <div className="marketing-cta-next"><div className="marketing-cta-actions">
-      <a className="button button-white" href="/app">Создать КП <ArrowRight size={17} aria-hidden="true"/></a>
-      <a className="button button-outline-light" href="/demo">Посмотреть демо</a>
+      <a className="button button-white" href="/app">Открыть кабинет <ArrowRight size={17} aria-hidden="true"/></a>
+      <a className="button button-outline-light" href="/demo">Попробовать демо</a>
     </div><ul className="public-cta-proof">
       <li><CheckCircle2 size={15} aria-hidden="true"/>Ваш прайс</li>
       <li><CheckCircle2 size={15} aria-hidden="true"/>Расчёт стоимости</li>

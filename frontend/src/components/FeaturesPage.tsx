@@ -11,26 +11,26 @@ const featureIllustrations = [
   designAssets.benefitsHero,
 ] as const;
 const featureActions = [
-  { href: '/app#workspace-request', label: 'Добавить заявку' },
-  { href: '/app#workspace-catalog', label: 'Загрузить прайс' },
-  { href: '/app#workspace-quote-editor', label: 'Подобрать товары' },
-  { href: '/app#workspace-quotes', label: 'Подготовить текст КП' },
-  { href: '/app#workspace-quotes', label: 'Добавить варианты КП' },
-  { href: '/app#workspace-quotes', label: 'Открыть свои КП' },
+  { href: '/how-it-works#process', label: 'Посмотреть этапы работы' },
+  { href: '/integrations#api', label: 'Что должно быть в прайсе' },
+  { href: '/demo', label: 'Попробовать подбор' },
+  { href: '/faq#faq-group-templates', label: 'Вопросы о тексте КП' },
+  { href: '/faq#faq-group-templates', label: 'Вопросы о вариантах КП' },
+  { href: '/app', label: 'Открыть кабинет' },
 ] as const;
 
 export function FeaturesPage() {
   useEffect(() => applyDocumentSeo('features'), []);
   return <MarketingPage>
     <MarketingHero
-      title="ИИ-генерация текста КП и подбор товаров"
-      description="Соберите предложение из письма клиента и своего прайса. ИИ разберёт заявку и подготовит текст, KPDesk предложит товары и рассчитает сумму. Проверьте результат и скачайте КП с реквизитами и логотипом компании."
+      title="Подбор товаров, расчёт и оформление КП"
+      description="Выберите товары из своего прайса и сравните их с требованиями клиента. Проверьте стоимость и подготовленный ИИ текст. Оформите PDF с реквизитами, логотипом и несколькими вариантами предложения."
       image={designAssets.featuresHero}
       imageAlt="Иллюстрация подготовки коммерческого предложения в KPDesk"
       anchor="#capabilities" secondaryLabel="Посмотреть возможности"
-      highlights={['Автоматический подбор', 'Генерация текста КП', 'PDF после утверждения']}
+      highlights={['Подбор по требованиям', 'Расчёт по вашему прайсу', 'PDF после утверждения']}
     />
-    <MarketingSection id="capabilities" heading="Что KPDesk берёт на себя при подготовке КП">
+    <MarketingSection id="capabilities" heading="Что можно сделать в KPDesk">
       <div className="marketing-capabilities">
         {featureTiles.map((tile) => <article className="marketing-capability" key={tile.title}>
           <img src={tile.icon} alt="" loading="lazy" width={48} height={48}/>
@@ -40,7 +40,7 @@ export function FeaturesPage() {
       </div>
     </MarketingSection>
 
-    <MarketingSection heading="Как ваши данные становятся предложением для клиента" modifier="marketing-details-section">
+    <MarketingSection heading="Как работать с заявкой, товарами и документом" modifier="marketing-details-section">
       <div className="marketing-detail-grid">
         {featureDetails.map(({ title, description, icon }, index) => <article className="marketing-detail" key={title}>
           <div className="marketing-detail-visual">

@@ -10,11 +10,11 @@ export function HowItWorksPage() {
   return <MarketingPage>
     <MarketingHero
       title="Как создать КП из заявки и прайса"
-      description="Загрузите товары и цены, вставьте заявку клиента. ИИ разберёт требования, KPDesk предложит товары и рассчитает стоимость. Затем сгенерируйте текст, проверьте предложение и скачайте PDF после утверждения."
+      description="Для первого КП подготовьте прайс в CSV или XLSX, текст заявки и реквизиты компании. Ниже пять шагов от загрузки данных до проверки предложения и скачивания PDF."
       image={designAssets.processHero}
       imageAlt="Иллюстрация пяти этапов подготовки коммерческого предложения"
       anchor="#process" secondaryLabel="Посмотреть этапы"
-      highlights={['Разбор заявки с ИИ', 'Подбор из вашего прайса', 'Текст и расчёт в PDF']}
+      highlights={['Прайс CSV или XLSX', 'Проверка требований и товаров', 'Предпросмотр перед скачиванием']}
     />
     <section className="marketing-step-ribbon" aria-label="Пять шагов">
       {processSteps.map(({ title }, index) => <div className="marketing-ribbon-step" key={title}>
@@ -37,7 +37,7 @@ export function HowItWorksPage() {
           <p>{text}</p>
           <div className="marketing-step-art"><img
             src={'/assets/reference/' + ['process-request', 'process-template', 'process-products', 'process-review', 'process-pdf'][index] + '.webp'}
-            width={182} height={186} alt="Иллюстрация этапа из утверждённого макета" loading="lazy"/></div>
+            width={182} height={186} alt="" loading="lazy"/></div>
         </li>)}</ol>
     </MarketingSection>
 

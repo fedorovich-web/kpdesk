@@ -26,7 +26,9 @@ export function IntegrationsPage() {
     <MarketingSection id="integrations-list" heading="Откуда можно загрузить товары и цены">
       <div className="marketing-integration-grid">
         {integrationCards.map(({ name, text, state, icon }) => <article key={name}>
-          <img className="marketing-integration-icon" src={icon} srcSet={publicIconSrcSet(icon)} sizes="48px" alt="" width={48} height={48} loading="eager" decoding="async" fetchPriority="low"/>
+          <img className="marketing-integration-icon" src={icon}
+            srcSet={icon.endsWith('.avif') ? publicIconSrcSet(icon) : undefined} sizes="48px"
+            alt="" width={48} height={48} loading="eager" decoding="async" fetchPriority="low"/>
           <h3>{name}</h3><p>{text}</p>
           <span className="marketing-status">{state}</span>
         </article>)}
@@ -39,12 +41,14 @@ export function IntegrationsPage() {
     </MarketingSection>
     <MarketingSection id="api" heading="Четыре обязательных столбца прайса" modifier="marketing-api-section">
       <div className="marketing-api-grid">
-        <div><p>В таблице нужны артикул, название, цена в рублях и единица продажи. В шаблоне это столбцы sku, name, price_rub и sale_unit. Дополнительные столбцы можно использовать для характеристик. Если источник данных — 1С или CRM, подготовьте и загрузите файл в этом формате.</p>
+        <div><p>Добавьте в прайс артикул, название, цену в рублях и единицу продажи. В шаблоне это столбцы <code>sku</code>, <code>name</code>, <code>price_rub</code> и <code>sale_unit</code>. Характеристики можно вынести в отдельные столбцы.</p>
           <a href="/faq" className="button button-primary">Вопросы о прайсах <ArrowRight size={17} aria-hidden="true"/></a></div>
-        <img src={designAssets.integrationScheme} alt="Иллюстрация работы с товарными данными в KPDesk"
-          width={1448} height={1086} loading="eager" decoding="async" fetchPriority="low"
-          srcSet="/assets/hero/07_hero_integrations_scheme-640w.avif 640w, /assets/hero/07_hero_integrations_scheme-960w.avif 960w, /assets/hero/07_hero_integrations_scheme.avif 1448w"
-          sizes="(max-width: 600px) calc(100vw - 40px), (max-width: 1200px) 50vw, 33vw"/>
+        <figure className="marketing-api-diagram">
+          <img src={designAssets.integrationScheme} alt="Иллюстрация работы с товарными данными в KPDesk"
+            width={1448} height={1086} loading="eager" decoding="async" fetchPriority="low"
+            srcSet="/assets/hero/07_hero_integrations_scheme-640w.avif 640w, /assets/hero/07_hero_integrations_scheme-960w.avif 960w, /assets/hero/07_hero_integrations_scheme.avif 1448w"
+            sizes="(max-width: 470px) calc(100vw - 72px), (max-width: 600px) 410px, (max-width: 900px) 46vw, (max-width: 1300px) 34vw, 410px"/>
+        </figure>
         <ul className="marketing-api-checks">
           <li><CheckCircle2 aria-hidden="true"/>Импорт CSV и XLSX</li>
           <li><CheckCircle2 aria-hidden="true"/>Подготовка столбцов таблицы</li>

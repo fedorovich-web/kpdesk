@@ -79,8 +79,13 @@
 .marketing-step-title { display: flex; align-items: center; gap: var(--space-3); }
 .marketing-step-title h3 { margin: 0; font-size: var(--text-base); }
 .marketing-step-detail > p { color: var(--color-muted); }
-.marketing-step-art { margin-block-start: auto; display: grid; place-items: center; border-radius: var(--radius-input); overflow: hidden; }
-.marketing-step-art img { display: block; inline-size: 100%; block-size: auto; max-inline-size: 100%; }
+.marketing-step-art { margin-block-start: auto; padding: var(--space-3); background: var(--color-surface-alt); border: var(--border-width) solid var(--color-border-soft); border-radius: var(--radius-input); }
+.marketing-step-preview-title { display: flex; align-items: center; gap: var(--space-2); font-size: var(--text-base); line-height: var(--line-snug); }
+.marketing-step-preview-title img { display: block; flex: none; }
+.marketing-step-art dl { display: grid; gap: var(--space-1); margin: var(--space-2) 0 0; font-size: var(--text-base); }
+.marketing-step-art dl > div { display: flex; flex-wrap: wrap; justify-content: space-between; gap: var(--space-1) var(--space-2); padding: var(--space-1) var(--space-2); background: var(--color-surface); border-radius: var(--radius-input); }
+.marketing-step-art dt { color: var(--color-text-mid); }
+.marketing-step-art dd { margin: 0; color: var(--color-heading); font-weight: var(--weight-medium); }
 .marketing-benefits { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: var(--content-group-gap); }
 .marketing-benefits article { min-inline-size: 0; display: flex; align-items: start; gap: var(--space-4); background: var(--color-surface); border: var(--border-width) solid var(--color-border-soft); padding: var(--content-card-padding); border-radius: var(--radius-card); }
 .marketing-benefits img { flex: none; inline-size: var(--space-16); block-size: var(--space-16); padding: var(--space-3); object-fit: contain; background: var(--color-accent-pale); border-radius: 50%; }
@@ -98,13 +103,20 @@
 .marketing-integration-grid h3 { font-size: var(--text-base); }
 .marketing-integration-grid p { color: var(--color-muted); }
 .marketing-integration-icon { display: block; inline-size: var(--space-12); block-size: var(--space-12); object-fit: contain; }
+.marketing-integration-icon[src$="/amocrm-display.svg"] { inline-size: min(80px, 100%); }
 .marketing-task-section { background: var(--gradient-tip); border-radius: var(--radius-card); }
 .marketing-task-grid { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: var(--content-group-gap); }
 .marketing-task-grid article { padding: var(--content-card-padding); }
 .marketing-task-grid h3 { margin-block: var(--space-5) var(--space-4); }
 .marketing-task-grid p { color: var(--color-muted); }
-.marketing-api-grid { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1.2fr) minmax(0,.9fr); gap: var(--space-5); align-items: start; }
-.marketing-api-grid > img { display: block; inline-size: 100%; block-size: auto; object-fit: contain; }
+.marketing-api-section > h2 { margin-block-end: var(--space-3); }
+.marketing-api-grid { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1.2fr) minmax(0,.9fr); gap: var(--space-5); align-items: center; }
+.marketing-api-diagram { display: grid; inline-size: min(100%, 410px); justify-self: center; margin: 0; }
+.marketing-api-diagram img {
+  display: block; inline-size: 100%; block-size: auto; object-fit: contain;
+  /* The approved 1448px-wide canvas has roughly 211px above the diagram and 185px below. */
+  margin-block: -14.5% -12.7%;
+}
 .marketing-api-grid > div p { color: var(--color-muted); margin-block-end: var(--space-5); }
 .marketing-api-checks { display: grid; gap: var(--space-3); margin: 0; padding: var(--space-5); list-style: none; background: var(--color-accent-pale); border-radius: var(--radius-card); }
 .marketing-api-checks li { display: flex; align-items: flex-start; gap: var(--space-2); }
@@ -115,10 +127,16 @@
   .marketing-capabilities { grid-template-columns: repeat(3,minmax(0,1fr)); }
   .marketing-integration-grid { grid-template-columns: repeat(4,minmax(0,1fr)); }
   .marketing-step-details { grid-template-columns: repeat(5,minmax(0,1fr)); }
-  .marketing-api-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
+}
+@media (width >= 1100px) {
+  .marketing-integration-grid { grid-template-columns: repeat(8,minmax(0,1fr)); gap: var(--space-3); }
+  .marketing-integration-grid article { padding: var(--space-3); }
+  .marketing-integration-grid p, .marketing-integration-grid .marketing-status { font-size: var(--text-base); }
+}
+@media (width <= 900px) {
+  .marketing-benefits, .marketing-api-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
   .marketing-api-checks { grid-column: 1 / -1; }
 }
-@media (width <= 900px) { .marketing-benefits { grid-template-columns: repeat(2,minmax(0,1fr)); } }
 @media (width <= 850px) {
   .marketing-hero { grid-template-columns: minmax(0,1fr); }
   .marketing-hero > img { max-inline-size: var(--layout-hero-public-art-mobile); margin-inline: auto; }

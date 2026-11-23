@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 
 const origin = process.env.KPDESK_SMOKE_ORIGIN ?? 'http://127.0.0.1:4179';
 const pageCases = [
-  ['/', 'ИИ-генератор КП по заявке и прайсу', true],
+  ['/', 'Создавайте коммерческие предложения с ИИ', true],
   ['/features', 'ИИ для разбора заявок и подготовки КП', true],
   ['/features/', 'ИИ для разбора заявок и подготовки КП', true],
   ['/how-it-works', 'Как собрать КП из заявки и прайса', true],

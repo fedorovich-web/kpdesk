@@ -20,8 +20,8 @@ describe('public landing for B2B suppliers', () => {
     render(<PublicHome />);
     expect(screen.getAllByRole('heading', { level: 1 })).toHaveLength(1);
     expect(screen.getByRole('heading', { level: 1 }))
-      .toHaveTextContent('ИИ-генератор КП по заявке и прайсу');
-    expect(within(screen.getByRole('region', { name: 'ИИ-генератор КП по заявке и прайсу' }))
+      .toHaveTextContent('Создавайте коммерческие предложения с ИИ');
+    expect(within(screen.getByRole('region', { name: 'Создавайте коммерческие предложения с ИИ' }))
       .getByText(/Вставьте заявку клиента и загрузите прайс/))
       .toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Разбор заявки, подбор товаров и расчёт КП' }))

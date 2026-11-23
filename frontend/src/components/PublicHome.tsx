@@ -28,7 +28,8 @@ export function PublicHome() {
     <main>
       <section className="public-hero" aria-labelledby="public-h1">
         <div className="public-hero-copy">
-          <h1 id="public-h1">{publicSeo.h1}</h1>
+          <h1 id="public-h1"><span>{publicSeo.headingLines[0]}</span>{' '}
+            <span>{publicSeo.headingLines[1]}</span>{' '}<span>{publicSeo.headingLines[2]}</span></h1>
           <p>{publicSeo.lead}</p>
           <div className="public-hero-cta">
             <a className="button button-primary" href="/demo">Попробовать демо <ArrowRight size={18} aria-hidden="true"/></a>

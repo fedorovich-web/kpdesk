@@ -43,15 +43,14 @@ describe('public feature and pricing pages', () => {
     setupHead();
     render(<IntegrationsPage />);
     expect(screen.getAllByRole('heading', { level: 1 })).toHaveLength(1);
-    expect(screen.getByText(/Подготовьте названия, артикулы, единицы, цены и характеристики в столбцах прайса KPDesk/))
-      .toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Excel' })).toBeInTheDocument();
     expect(screen.getByText('Импорт файла')).toBeInTheDocument();
-    for (const heading of ['Товары из Битрикс24', 'Товары из amoCRM']) {
+    for (const heading of ['Битрикс24', 'amoCRM']) {
       const card = screen.getByRole('heading', { name: heading }).closest('article')!;
       expect(within(card).getByText('Через CSV или XLSX')).toBeInTheDocument();
     }
-    expect(screen.getByText(/sku, name, price_rub и sale_unit/))
-      .toBeInTheDocument();
+    const columns = screen.getByRole('heading', { name: 'Четыре обязательных столбца прайса' }).closest('section');
+    expect(columns).toHaveTextContent('sku, name, price_rub и sale_unit');
     expect(screen.queryByText(/Service Account|сервисный аккаунт|Контрактные тесты адаптеров/))
       .not.toBeInTheDocument();
     expect(document.head.querySelector('meta[name="description"]')).toHaveAttribute('content', expect.stringContaining('выгрузку из 1С'));

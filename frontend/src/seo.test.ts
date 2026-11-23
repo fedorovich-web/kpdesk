@@ -18,11 +18,11 @@ describe('verified B2B RFQ search metadata', () => {
     }
   });
   it('names the supplier task rather than unsupported performance claims', () => {
-    expect(publicSeo.title).toMatch(/ИИ-генератор коммерческих предложений из прайса/);
+    expect(publicSeo.title).toMatch(/Генератор коммерческих предложений с ИИ/);
     expect(publicSeo.description).toMatch(/прайс/);
     expect(publicSeo.description).toMatch(/скачайте PDF/);
     expect(publicSeo.description).not.toMatch(/запланирован|в разработке|следующий этап/i);
-    expect(publicSeo.h1).toMatch(/ИИ-генератор КП по заявке и прайсу/);
+    expect(publicSeo.headingLines.join(' ')).toBe('Создавайте коммерческие предложения с ИИ');
     expect(publicSeo.lead).toContain('прайс');
     expect(publicSeo.lead).toContain('заявку клиента');
     expect(publicSeo.description).not.toMatch(/гарант|конверси|в \d+ раз|99,\d+%/i);
@@ -47,7 +47,7 @@ describe('verified B2B RFQ search metadata', () => {
     expect(metadata.integrations.title).not.toMatch(/интеграции с 1С|API/);
     expect(metadata.demo.description).toContain('не вызывает внешний ИИ');
     expect(publicSeo.description).toContain('проверьте сумму');
-    expect(publicSeo.lead).toContain('ИИ разберёт требования и подготовит текст');
+    expect(publicSeo.lead).toContain('ИИ подготовит текст');
     expect(metadata.features.description).toContain('сравните варианты');
     expect(metadata.features.description).toContain('текстом, подготовленным ИИ');
     expect(metadata.pricing.description).toMatch(/299 ₽.*499 ₽.*990 ₽.*за 30 дней для организации/);

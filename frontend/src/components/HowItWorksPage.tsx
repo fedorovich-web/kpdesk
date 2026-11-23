@@ -31,13 +31,17 @@ export function HowItWorksPage() {
     </section>
 
     <MarketingSection id="process" heading="Пять шагов от загрузки прайса до готового PDF">
-      <ol className="marketing-step-details">{processSteps.map(({ title, text }, index) =>
+      <ol className="marketing-step-details">{processSteps.map(({ title, text, icon, preview }, index) =>
         <li key={title} className="marketing-step-detail">
           <div className="marketing-step-title"><span className="marketing-step-number">{index + 1}</span><h3>{title}</h3></div>
           <p>{text}</p>
-          <div className="marketing-step-art"><img
-            src={'/assets/reference/' + ['process-request', 'process-template', 'process-products', 'process-review', 'process-pdf'][index] + '.webp'}
-            width={182} height={186} alt="" loading="lazy"/></div>
+          <div className="marketing-step-art" aria-hidden="true">
+            <div className="marketing-step-preview-title">
+              <img src={icon} alt="" width={24} height={24} loading="lazy"/>
+              <strong>{preview.title}</strong>
+            </div>
+            <dl>{preview.rows.map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}</dl>
+          </div>
         </li>)}</ol>
     </MarketingSection>
 

@@ -1,3 +1,5 @@
+import { sessionApi } from './tenant-session';
+
 export type Amount = { currency: string; count: number; amount_minor: string };
 export type Overview = {
   as_of: string;
@@ -24,6 +26,7 @@ export type AdminRows = {
   users: {
     id: string; email: string; status: string; created_at: string;
     email_verified_at: string | null; organizations_count: number;
+    can_manage: boolean | null; is_blocked: boolean;
   };
   organizations: {
     id: string; name: string; status: string; created_at: string;
@@ -40,10 +43,18 @@ export type AdminRows = {
 };
 export type ListSection = keyof AdminRows;
 export type Page<T> = { total: number; items: T[] };
+export type ModerationAction = 'block' | 'unblock' | 'revoke_sessions';
+type ModerationResult = Pick<AdminRows['users'], 'id' | 'status' | 'is_blocked'> & { sessions_revoked: number };
 
 export class AdminReadError extends Error {
   constructor(readonly status: number) {
     super('Не удалось загрузить данные кабинета.');
+  }
+}
+
+export class AdminActionError extends Error {
+  constructor(readonly status: number, readonly code: string | null) {
+    super('Не удалось выполнить действие.');
   }
 }
 
@@ -61,5 +72,24 @@ export const serviceAdminApi = {
   list: <Section extends ListSection>(section: Section, page: number, query: string, signal: AbortSignal) => {
     const params = new URLSearchParams({ page: String(page), q: query });
     return read<Page<AdminRows[Section]>>(section + '?' + params, signal);
+  },
+  async userAction(userId: string, action: ModerationAction): Promise<ModerationResult> {
+    const { csrf_token } = await sessionApi.resume();
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 15_000);
+    try {
+      const response = await fetch(`/api/admin/users/${encodeURIComponent(userId)}/actions`, {
+        method: 'POST', credentials: 'same-origin', cache: 'no-store', redirect: 'error', signal: controller.signal,
+        headers: { Accept: 'application/json', 'Content-Type': 'application/json', 'X-CSRF-Token': csrf_token },
+        body: JSON.stringify({ action }),
+      });
+      if (!response.ok) {
+        const error: { code?: unknown } | null = await response.json().catch(() => null);
+        throw new AdminActionError(response.status, typeof error?.code === 'string' ? error.code : null);
+      }
+      return await response.json() as ModerationResult;
+    } finally {
+      clearTimeout(timeout);
+    }
   },
 };

@@ -3,6 +3,7 @@ from sqlalchemy import Connection, text
 
 ADMIN_REVISION = '0051_service_admin'
 SIGNATURE = 'public.kpdesk_service_admin_read(text,text,integer,text,integer)'
+_USER_DETAILS = "'email_verified_at', u.email_verified_at, 'organizations_count',"
 
 _TABLE = """
 CREATE TABLE public.service_admin_grants (
@@ -115,7 +116,7 @@ BEGIN
             SELECT p.id, p.stamp, CASE p_section
                 WHEN 'users' THEN (SELECT jsonb_build_object(
                     'id', u.id, 'email', u.email, 'status', u.status, 'created_at', u.created_at,
-                    'email_verified_at', u.email_verified_at, 'organizations_count',
+                    {_USER_DETAILS}
                     (SELECT count(*) FROM public.organization_memberships m WHERE m.user_id=u.id AND m.status='active'))
                     FROM public.users u WHERE u.id=p.id::uuid)
                 WHEN 'organizations' THEN (SELECT jsonb_build_object(
@@ -166,6 +167,17 @@ def create_service_admin_schema(connection: Connection) -> None:
         f'GRANT EXECUTE ON FUNCTION {SIGNATURE} TO kpdesk_tenant_runtime',
     ):
         connection.execute(text(statement))
+
+
+def add_user_management_projection(connection: Connection) -> None:
+    if _GATEWAY.count(_USER_DETAILS) != 1:
+        raise RuntimeError('Unexpected service owner user projection')
+    gateway = _GATEWAY.replace('CREATE FUNCTION', 'CREATE OR REPLACE FUNCTION', 1)
+    connection.execute(text(gateway.replace(_USER_DETAILS, """
+                    'can_manage', NOT EXISTS (SELECT 1 FROM public.service_admin_grants g
+                        WHERE g.user_id=u.id AND g.revoked_at IS NULL),
+                    'is_blocked', u.service_admin_previous_status IS NOT NULL,
+                    """ + _USER_DETAILS, 1)))
 
 
 def service_admin_available(connection: Connection) -> bool:

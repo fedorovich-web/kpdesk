@@ -1,10 +1,10 @@
-"""Read-only, same-session API for the service owner."""
+"""Same-session API for the service owner."""
 from datetime import datetime
 from typing import Annotated, Literal
 from uuid import UUID
 
-from fastapi import APIRouter, Cookie, Depends, Query
-from pydantic import BaseModel, Field, ValidationError
+from fastapi import APIRouter, Cookie, Depends, Header, Query
+from pydantic import BaseModel, ConfigDict, Field, ValidationError
 from sqlalchemy import Engine, text
 from sqlalchemy.exc import SQLAlchemyError
 
@@ -12,6 +12,7 @@ from kpdesk.api.errors import ApiError
 from kpdesk.api.tenant_session_routes import SESSION_COOKIE, get_unreleased_catalog_engine
 from kpdesk.db.auth_sessions import SessionDenied, _token_digest
 from kpdesk.db.service_admin_schema import service_admin_available
+from kpdesk.db.service_admin_users import MODERATION_SIGNATURE, service_admin_users_available
 
 router = APIRouter(prefix='/api/admin', include_in_schema=False)
 TenantEngine = Annotated[Engine, Depends(get_unreleased_catalog_engine)]
@@ -20,6 +21,7 @@ Section = Literal['capability', 'overview', 'users', 'organizations', 'payments'
 Days = Literal['7', '30', '90']
 Count = Annotated[int, Field(ge=0)]
 MinorUnits = Annotated[str, Field(pattern=r'^\d+$')]
+Moderation = Literal['block', 'unblock', 'revoke_sessions']
 
 
 class Capability(BaseModel):
@@ -65,6 +67,20 @@ class UserRow(BaseModel):
     created_at: datetime
     email_verified_at: datetime | None
     organizations_count: Count
+    can_manage: bool | None = None
+    is_blocked: bool = False
+
+
+class UserAction(BaseModel):
+    model_config = ConfigDict(extra='forbid')
+    action: Moderation
+
+
+class UserActionResult(BaseModel):
+    id: UUID
+    status: Literal['active', 'pending', 'disabled']
+    is_blocked: bool
+    sessions_revoked: Count
 
 
 class OrganizationRow(BaseModel):
@@ -169,6 +185,50 @@ Paging = Annotated[PageQuery, Query()]
 @router.get('/users')
 def users(engine: TenantEngine, paging: Paging, cookie: SessionCookie = None) -> Page[UserRow]:
     return _response(Page[UserRow], engine, cookie, 'users', query=paging.q.strip().lower(), page=paging.page)
+
+
+def moderate_user(engine: Engine, digest: str, csrf_digest: str, user_id: UUID, action: Moderation) -> object:
+    with engine.begin() as connection:
+        connection.exec_driver_sql("SET LOCAL statement_timeout='5s'")
+        if not service_admin_users_available(connection):
+            raise unavailable()
+        return connection.scalar(text(f"""
+            SELECT {MODERATION_SIGNATURE.split('(')[0]}(:digest,:csrf,:user_id,:action)
+        """), {'digest': digest, 'csrf': csrf_digest, 'user_id': user_id, 'action': action})
+
+
+@router.post('/users/{user_id}/actions')
+def user_action(
+    engine: TenantEngine, user_id: UUID, body: UserAction,
+    cookie: SessionCookie = None, csrf: Annotated[str | None, Header(alias='X-CSRF-Token')] = None,
+) -> UserActionResult:
+    errors = {
+        'invalid_session': (401, 'invalid_session', 'Войдите в KPDesk.'),
+        'invalid_csrf': (403, 'invalid_csrf', 'Обновите страницу и повторите действие.'),
+        'forbidden': (403, 'service_admin_forbidden', 'Этот кабинет доступен владельцу KPDesk.'),
+        'protected': (403, 'service_admin_protected_user', 'Аккаунт владельца защищён от этого действия.'),
+        'missing': (404, 'service_admin_user_missing', 'Аккаунт не найден.'),
+        'conflict': (409, 'service_admin_user_conflict', 'Состояние аккаунта изменилось. Обновите список.'),
+    }
+    try:
+        digest = _token_digest(cookie or '')
+    except SessionDenied:
+        raise ApiError(*errors['invalid_session']) from None
+    try:
+        csrf_digest = _token_digest(csrf or '')
+    except SessionDenied:
+        raise ApiError(*errors['invalid_csrf']) from None
+    try:
+        result = moderate_user(engine, digest, csrf_digest, user_id, body.action)
+        if isinstance(result, dict):
+            access = result.get('access')
+            if access == 'allowed':
+                return UserActionResult.model_validate(result.get('data'))
+            if isinstance(access, str) and access in errors:
+                raise ApiError(*errors[access])
+        raise unavailable()
+    except (SQLAlchemyError, ValidationError):
+        raise unavailable() from None
 
 
 @router.get('/organizations')

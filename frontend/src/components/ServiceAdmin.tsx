@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
+import type { ReactNode } from 'react';
 import { Activity, Building2, ChevronLeft, ChevronRight, CircleDollarSign, CreditCard,
   LayoutDashboard, ReceiptText, Search, Users } from 'lucide-react';
 import { designAssets } from '../design-assets';
-import { AdminReadError, serviceAdminApi } from '../service-admin-api';
-import type { AdminRows, Amount, ListSection, Overview, Page } from '../service-admin-api';
+import { AdminActionError, AdminReadError, serviceAdminApi } from '../service-admin-api';
+import type { AdminRows, Amount, ListSection, ModerationAction, Overview, Page } from '../service-admin-api';
+import { SessionApiError } from '../tenant-session';
 import '../styles/service-admin.css';
 
 const sections = [
@@ -23,6 +25,11 @@ const statuses: Record<string, string> = {
   active: 'Активен', pending: 'Ожидает', disabled: 'Отключён', suspended: 'Приостановлена',
   legacy_locked: 'Ограничена', creating: 'Создаётся', ambiguous: 'Требует проверки',
   failed: 'Ошибка', paid: 'Оплачен', refunded: 'Возврат', chargeback: 'Спор по оплате',
+};
+const moderationCopy = {
+  block: { label: 'Заблокировать', confirm: 'Все активные сеансы завершатся, вход будет закрыт.' },
+  unblock: { label: 'Разблокировать', confirm: 'Аккаунт вернётся к состоянию до блокировки.' },
+  revoke_sessions: { label: 'Завершить сеансы', confirm: 'Пользователю потребуется войти заново.' },
 };
 
 function money(amount: string, currency: string) {
@@ -94,12 +101,15 @@ function Summary({ data, open }: { data: Overview; open: (section: Section) => v
   </>;
 }
 
-function tableRows(section: ListSection, page: Page<AdminRows[ListSection]>) {
+function tableRows(
+  section: ListSection, page: Page<AdminRows[ListSection]>, actions: (user: AdminRows['users']) => ReactNode,
+): { headings: string[]; rows: [string, ...ReactNode[]][] } {
   switch (section) {
     case 'users': return {
-      headings: ['Почта', 'Статус', 'Регистрация', 'Подтверждение', 'Организации'],
+      headings: ['Почта', 'Статус', 'Регистрация', 'Подтверждение', 'Организации', 'Действия'],
       rows: (page.items as AdminRows['users'][]).map(u => [u.id,
-        u.email, statuses[u.status] ?? u.status, date(u.created_at), date(u.email_verified_at), numbers.format(u.organizations_count)]),
+        u.email, u.is_blocked ? 'Заблокирован' : statuses[u.status] ?? u.status, date(u.created_at),
+        date(u.email_verified_at), numbers.format(u.organizations_count), actions(u)]),
     };
     case 'organizations': return {
       headings: ['Компания', 'Статус', 'Создана', 'Участники', 'КП', 'Тариф', 'Оплачено до'],
@@ -133,6 +143,8 @@ export function ServiceAdmin() {
   const [refresh, setRefresh] = useState(0);
   const [hasAccess, setHasAccess] = useState(false);
   const [result, setResult] = useState<ReadResult | null>(null);
+  const [moderating, setModerating] = useState(false);
+  const [actionNotice, setActionNotice] = useState<{ message: string; error?: boolean } | null>(null);
   const key = JSON.stringify([section, days, query, page, refresh]);
   const current = result?.key === key ? result : null;
   const status = current && 'error' in current ? current.error : null;
@@ -172,12 +184,59 @@ export function ServiceAdmin() {
     setSearch('');
     setQuery('');
     setPage(1);
+    setActionNotice(null);
+  }
+
+  async function moderate(user: AdminRows['users'], action: ModerationAction) {
+    const { label, confirm } = moderationCopy[action];
+    if (moderating || !window.confirm(`${label} аккаунт ${user.email}? ${confirm}`)) return;
+    setModerating(true);
+    setActionNotice(null);
+    try {
+      const update = await serviceAdminApi.userAction(user.id, action);
+      setResult(previous => {
+        if (previous?.key !== key || !('data' in previous) || !('items' in previous.data)) return previous;
+        return { ...previous, data: { ...previous.data, items: previous.data.items.map(row =>
+          'email' in row && row.id === update.id ? { ...row, status: update.status, is_blocked: update.is_blocked } : row,
+        ) } };
+      });
+      const revoked = `Завершено сеансов: ${numbers.format(update.sessions_revoked)}.`;
+      setActionNotice({ message: action === 'unblock' ? 'Аккаунт разблокирован.'
+        : action === 'block' ? `Аккаунт заблокирован. ${revoked}` : revoked });
+    } catch (error: unknown) {
+      if ((error instanceof AdminActionError || error instanceof SessionApiError) && error.status === 401) {
+        setHasAccess(false);
+        setResult({ key, error: 401 });
+      } else if (error instanceof AdminActionError && error.code === 'service_admin_forbidden') {
+        setHasAccess(false);
+        setResult({ key, error: 403 });
+      } else {
+        const message = error instanceof AdminActionError && error.status === 409
+          ? 'Состояние аккаунта изменилось. Обновите список.'
+          : 'Не удалось выполнить действие. Обновите список перед повтором.';
+        setActionNotice({ message, error: true });
+      }
+    } finally {
+      setModerating(false);
+    }
+  }
+
+  function userActions(user: AdminRows['users']) {
+    if (user.can_manage === false) return <span className="service-admin-muted">Защищённый аккаунт</span>;
+    if (user.can_manage !== true) return '—';
+    const actions: ModerationAction[] = [];
+    if (user.is_blocked) actions.push('unblock');
+    else if (user.status === 'active' || user.status === 'pending') actions.push('block');
+    actions.push('revoke_sessions');
+    return <div className="service-admin-actions">{actions.map(action => <button type="button" key={action}
+      className="service-admin-button" aria-label={`${moderationCopy[action].label} — ${user.email}`}
+      disabled={moderating} onClick={() => void moderate(user, action)}>{moderationCopy[action].label}</button>)}</div>;
   }
 
   const label = sections.find(([id]) => id === section)?.[1];
   const data = current && 'data' in current ? current.data : null;
   const listing = data && 'items' in data ? data : null;
-  const table = listing && section !== 'overview' ? tableRows(section, listing) : null;
+  const table = listing && section !== 'overview' ? tableRows(section, listing, userActions) : null;
 
   return <div className="service-admin">
     <header className="service-admin-header"><div className="service-admin-container">
@@ -211,6 +270,14 @@ export function ServiceAdmin() {
       </div>}
       {data && 'as_of' in data && <Summary data={data} open={open}/>}
       {listing && table && <section className="service-admin-card" aria-label={label}>
+        {section === 'users' && moderating && <p role="status">Выполняем действие…</p>}
+        {section === 'users' && actionNotice && <div className="service-admin-action-notice">
+          <p role={actionNotice.error ? 'alert' : 'status'}>{actionNotice.message}</p>
+          {actionNotice.error && <button type="button" className="service-admin-button" onClick={() => {
+            setActionNotice(null);
+            setRefresh(value => value + 1);
+          }}>Обновить список</button>}
+        </div>}
         {table.rows.length ? <div className="service-admin-table-scroll" role="region" aria-label={`Таблица: ${label}`} tabIndex={0}>
           <table><thead><tr>{table.headings.map(heading => <th key={heading} scope="col">{heading}</th>)}</tr></thead>
             <tbody>{table.rows.map(([id, ...cells]) => <tr key={id}>

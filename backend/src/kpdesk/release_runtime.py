@@ -8,6 +8,7 @@ from fastapi.responses import FileResponse
 from sqlalchemy import Engine, text
 
 from kpdesk.db.service_admin_schema import ADMIN_REVISION
+from kpdesk.db.service_admin_users import MODERATION_REVISION
 
 # Vite emits eight-character fingerprints in built JS/CSS filenames.
 # Only fingerprinted URLs may be cached for a year without risking stale deploys.
@@ -28,7 +29,8 @@ YANDEX_SCHEMA = '0049_yandex_id'
 GRACE_SCHEMA = '0050_billing_grace'
 _RELEASES = (REQUIRED_SCHEMA, '0043_proposal_shares', '0044_universal_products',
              '0045_registry_retirement', '0046_provider_authority',
-             '0047_auth_reset_serialization', BILLING_SCHEMA, YANDEX_SCHEMA, GRACE_SCHEMA, ADMIN_REVISION)
+             '0047_auth_reset_serialization', BILLING_SCHEMA, YANDEX_SCHEMA, GRACE_SCHEMA, ADMIN_REVISION,
+             MODERATION_REVISION)
 
 
 def _at_least(revision: object, minimum: str) -> bool:
@@ -117,7 +119,12 @@ def verify_release_schema(engine: Engine, *, check_billing_activation: bool = Tr
             from kpdesk.billing.grace import grace_available
             if not grace_available(connection):
                 raise RuntimeError('Production database schema is not ready; billing grace gateway is incomplete.')
-        if _at_least(result[1], ADMIN_REVISION):
+        if _at_least(result[1], MODERATION_REVISION):
+            from kpdesk.db.service_admin_users import service_admin_users_available
+
+            if not service_admin_users_available(connection):
+                raise RuntimeError('Production database schema is not ready; user management gateway is incomplete.')
+        elif _at_least(result[1], ADMIN_REVISION):
             from kpdesk.db.service_admin_schema import service_admin_available
 
             if not service_admin_available(connection):

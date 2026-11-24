@@ -69,6 +69,11 @@
 .service-admin th, .service-admin td { padding: 12px; border-bottom: 1px solid var(--admin-border); text-align: start; overflow-wrap: anywhere; }
 .service-admin thead th { background: #f3f7f6; white-space: nowrap; }
 .service-admin tbody th { font-weight: 650; }
+.service-admin-actions, .service-admin-action-notice { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.service-admin-actions { min-width: 10rem; }
+.service-admin-actions .service-admin-button { white-space: nowrap; }
+.service-admin-action-notice { margin-block-end: 12px; }
+.service-admin-action-notice p { margin: 0; }
 .service-admin-pagination, .service-admin-pagination > div { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
 .service-admin-pagination { margin-top: 12px; color: var(--admin-muted); font-size: 13px; }
 .service-admin-visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }

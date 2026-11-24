@@ -8,7 +8,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 from sqlalchemy import create_engine, text
@@ -17,6 +17,8 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.pool import NullPool
 
 from kpdesk.billing.grace import grace_available
+from kpdesk.db.service_admin_schema import ADMIN_REVISION
+from kpdesk.db.service_admin_users import MODERATION_REVISION
 from scripts.upgrade_billing import verify_backup, verify_target
 
 GRACE_REVISION = "0050_billing_grace"
@@ -48,7 +50,7 @@ def run(*, apply: bool = False, confirm_sole_organization: bool = False,
             else:
                 conn.exec_driver_sql("SET TRANSACTION READ ONLY")
             revision = verify_target(conn, nonce)
-            if revision not in (GRACE_REVISION, '0051_service_admin') or not grace_available(conn):
+            if revision not in (GRACE_REVISION, ADMIN_REVISION, MODERATION_REVISION) or not grace_available(conn):
                 raise ValueError("grace_schema_revision_required")
             count = conn.scalar(text("SELECT count(*) FROM public.organizations"))
             active = conn.scalar(text("""SELECT count(*) FROM public.billing_grants
@@ -62,7 +64,7 @@ def run(*, apply: bool = False, confirm_sole_organization: bool = False,
                 return {"status": "passed", "mode": "preflight",
                         "revision": revision, "existing_organizations": count,
                         "database_writes": 0}
-            now = datetime.now(timezone.utc)
+            now = datetime.now(UTC)
             issued = conn.execute(text("""INSERT INTO public.billing_grace
                     (organization_id,starts_at,ends_at,reason,issued_by)
                     SELECT id,:starts,:ends,'legacy_launch_transition','kpdesk_operator'

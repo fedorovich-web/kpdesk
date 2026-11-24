@@ -23,6 +23,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.pool import NullPool
 
 from kpdesk.db.live_service_engines import _restricted_engine
+from kpdesk.db.service_admin_users import MODERATION_REVISION
 from kpdesk.release_runtime import verify_release_schema
 from scripts.provision_production import OPERATIONS, check_secrets, migration_plan
 from scripts.upgrade_billing import verify_backup, verify_target
@@ -47,6 +48,10 @@ UPGRADES = {
     "0051_service_admin": Upgrade(
         "0050_billing_grace", "kpdesk_service_admin_0051_approved",
         "kpdesk_service_admin_0051_working_database_approved",
+    ),
+    MODERATION_REVISION: Upgrade(
+        "0051_service_admin", "kpdesk_service_admin_users_0052_approved",
+        "kpdesk_service_admin_users_0052_working_database_approved",
     ),
 }
 

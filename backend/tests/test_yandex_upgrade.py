@@ -15,6 +15,7 @@ def test_operator_can_only_select_reviewed_migrations_with_exact_predecessors() 
         "0049_yandex_id": "0048_lava_billing",
         "0050_billing_grace": "0049_yandex_id",
         "0051_service_admin": "0050_billing_grace",
+        "0052_service_admin_users": "0051_service_admin",
     }
     with pytest.raises(ValueError, match="unknown"):
         operator.checked_plan("0050_service_admin")
@@ -22,7 +23,7 @@ def test_operator_can_only_select_reviewed_migrations_with_exact_predecessors() 
         operator.run("0050_service_admin", apply=True)
 
 
-@pytest.mark.parametrize("target", ("0049_yandex_id", "0050_billing_grace", "0051_service_admin"))
+@pytest.mark.parametrize("target", operator.UPGRADES)
 def test_operator_does_not_connect_without_maintenance_backup_approval(target: str) -> None:
     with pytest.raises(ValueError, match="confirmation"):
         operator.run(target, apply=True)
